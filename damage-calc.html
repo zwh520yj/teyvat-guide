@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Damage Calculator — Teyvat Guide</title>
+  <meta name="description" content="Calculate exact Genshin Impact damage output with buffs, resistances, and reaction multipliers. Supports Vaporize, Melt, Aggravate, Spread, and Hyperbloom.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Page Layout ── */
+    .calc-section {
+      position: relative;
+      z-index: 1;
+      padding: 2rem 2rem 4rem;
+    }
+    .calc-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    /* ── Panels ── */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+    .panel-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.6px;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .panel-title i {
+      color: var(--gold);
+      font-size: 1rem;
+    }
+
+    /* ── Form Controls ── */
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+    }
+    .form-label .val {
+      color: var(--gold-light);
+      font-weight: 700;
+      font-size: 0.78rem;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .form-select,
+    .form-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-select:focus,
+    .form-input:focus {
+      border-color: var(--gold);
+    }
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%23c9a96e'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .form-select option {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+    .form-input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    .form-input[type="number"]::-webkit-outer-spin-button,
+    .form-input[type="number"]::-webkit-inner-spin-button {
+      opacity: 1;
+      height: 28px;
+    }
+
+    /* ── Range Slider ── */
+    .range-wrap {
+      position: relative;
+    }
+    .range-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-subtle);
+      outline: none;
+      cursor: pointer;
+    }
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 2px solid var(--gold-light);
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(201,169,110,0.35);
+      transition: box-shadow 0.2s;
+    }
+    .range-slider::-webkit-slider-thumb:hover {
+      box-shadow: 0 0 20px rgba(201,169,110,0.55);
+    }
+    .range-slider::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 2px solid var(--gold-light);
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(201,169,110,0.35);
+    }
+
+    /* ── Two-Column inside panel ── */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* ── Character Select with Element ── */
+    .char-select-wrap {
+      position: relative;
+    }
+    .char-select-wrap .element-dot {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .char-select-wrap .form-select {
+      padding-left: 32px;
+    }
+
+    /* ── EM Bonus Info ── */
+    .em-info {
+      margin-top: 6px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .em-info span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .em-info .em-val {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    /* ── Section divider ── */
+    .section-divider {
+      border-top: 1px solid var(--border-subtle);
+      margin: 1.5rem 0 1.2rem;
+    }
+
+    /* ── Buff Toggles ── */
+    .buff-toggles {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .buff-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .buff-toggle:hover {
+      border-color: var(--border-active);
+      background: var(--bg-card-hover);
+    }
+    .buff-toggle.active {
+      border-color: var(--gold);
+      background: rgba(201,169,110,0.06);
+    }
+    .buff-toggle .buff-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .buff-toggle.active .buff-info {
+      color: var(--text-primary);
+    }
+    .buff-toggle .buff-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .buff-toggle .buff-value {
+      font-size: 0.75rem;
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+    .buff-switch {
+      width: 38px;
+      height: 22px;
+      border-radius: 11px;
+      background: var(--border-subtle);
+      position: relative;
+      transition: background 0.25s;
+      flex-shrink: 0;
+    }
+    .buff-switch::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: all 0.25s var(--ease-out);
+    }
+    .buff-toggle.active .buff-switch {
+      background: rgba(201,169,110,0.3);
+    }
+    .buff-toggle.active .buff-switch::after {
+      left: 19px;
+      background: var(--gold);
+    }
+
+    /* ── Result Cards ── */
+    .result-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+    .result-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.4rem;
+      transition: all 0.35s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      border-radius: 0 2px 2px 0;
+    }
+    .result-card.res-noncrit::before    { background: var(--text-muted); }
+    .result-card.res-crit::before       { background: var(--pyro); box-shadow: 0 0 10px var(--pyro-glow); }
+    .result-card.res-avg::before        { background: var(--electro); box-shadow: 0 0 10px var(--electro-glow); }
+    .result-card.res-reaction::before   { background: var(--success); box-shadow: 0 0 10px rgba(76,175,80,0.3); }
+    .result-card.res-hyperbloom::before { background: var(--dendro); box-shadow: 0 0 10px var(--dendro-glow); }
+
+    .result-card .res-label {
+      font-size: 0.73rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .result-card .res-value {
+      font-family: 'Cinzel', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      transition: color 0.3s;
+      line-height: 1.1;
+    }
+    .result-card.res-crit .res-value       { color: var(--pyro); }
+    .result-card.res-reaction .res-value   { color: var(--success); }
+    .result-card.res-hyperbloom .res-value { color: var(--dendro); }
+    .result-card .res-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Comparison cards (side-by-side inside a result) ── */
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.4rem;
+    }
+    .compare-col {
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+      padding: 0.8rem 1rem;
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+    }
+    .compare-col .compare-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .compare-col .compare-value {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .compare-col.buffed-col {
+      border-color: var(--border-gold);
+    }
+    .compare-col.buffed-col .compare-value {
+      color: var(--gold-light);
+    }
+    .compare-delta {
+      margin-top: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    /* ── Formula Reference ── */
+    .formula-ref {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+    .formula-ref summary {
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      user-select: none;
+    }
+    .formula-ref summary:hover {
+      color: var(--text-secondary);
+    }
+    .formula-steps {
+      margin-top: 0.8rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+    .formula-steps code {
+      background: rgba(201,169,110,0.08);
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 0.73rem;
+      color: var(--gold-light);
+    }
+
+    /* ── Detail stat row in results ── */
+    .def-res-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .def-res-row span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .def-res-row .dr-val {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .calc-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-row, .form-row-3 {
+        grid-template-columns: 1fr;
+      }
+      .compare-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .calc-section {
+        padding: 1rem 0.75rem 2.5rem;
+      }
+      .panel {
+        padding: 1.25rem;
+      }
+      .result-card .res-value {
+        font-size: 1.6rem;
+      }
+      .compare-col .compare-value {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ═══ NAVIGATION ═══ -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html" class="active"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero" style="min-height:34vh;padding-top:5rem;">
+    <div class="hero-content">
+      <span class="hero-badge">✦ Interactive Tool</span>
+      <h1>Damage Calculator</h1>
+      <p>Calculate exact damage output with the full Genshin Impact damage formula — buffs, enemy defense, resistances, and elemental reactions including Hyperbloom.</p>
+    </div>
+  </section>
+
+  <!-- ═══ CALCULATOR ═══ -->
+  <section class="calc-section">
+    <div class="calc-inner">
+      <div class="calc-grid">
+
+        <!-- ═══ LEFT PANEL: Inputs ═══ -->
+        <div class="panel" id="inputPanel">
+          <div class="panel-title">
+            <i class="fa-solid fa-sliders"></i> Combat Parameters
+          </div>
+
+          <!-- Character Presets -->
+          <div class="form-group">
+            <label class="form-label" for="charSelect">Character Preset</label>
+            <div class="char-select-wrap">
+              <span class="element-dot" id="elementDot" style="background:var(--gold);box-shadow:0 0 6px var(--gold-dim);"></span>
+              <select class="form-select" id="charSelect">
+                <option value="custom">Custom Character</option>
+                <option value="arlecchino"  data-element="pyro"    data-baseatk="342" data-totalatk="2200" data-em="80"  data-critrate="75"  data-critdmg="180" data-elemdmg="46.6" data-talent="180" data-reaction="vaporize" data-enemyres="10">Arlecchino (Pyro)</option>
+                <option value="neuvillette" data-element="hydro"   data-baseatk="362" data-totalatk="2400" data-em="60"  data-critrate="64"  data-critdmg="220" data-elemdmg="46.6" data-talent="160" data-reaction="vaporize" data-enemyres="10">Neuvillette (Hydro)</option>
+                <option value="raiden"      data-element="electro" data-baseatk="349" data-totalatk="2100" data-em="120" data-critrate="65"  data-critdmg="150" data-elemdmg="46.6" data-talent="200" data-reaction="aggravate" data-enemyres="10">Raiden Shogun (Electro)</option>
+                <option value="hutao"       data-element="pyro"    data-baseatk="325" data-totalatk="2800" data-em="180" data-critrate="70"  data-critdmg="200" data-elemdmg="46.6" data-talent="220" data-reaction="vaporize" data-enemyres="10">Hu Tao (Pyro)</option>
+                <option value="ayaka"       data-element="cryo"    data-baseatk="342" data-totalatk="2200" data-em="40"  data-critrate="40"  data-critdmg="250" data-elemdmg="61.6" data-talent="200" data-reaction="melt"     data-enemyres="10">Kamisato Ayaka (Cryo)</option>
+                <option value="nahida"      data-element="dendro"  data-baseatk="299" data-totalatk="1600" data-em="800" data-critrate="55"  data-critdmg="140" data-elemdmg="46.6" data-talent="180" data-reaction="spread"    data-enemyres="10">Nahida (Dendro)</option>
+                <option value="alhaitham"   data-element="dendro"  data-baseatk="318" data-totalatk="1800" data-em="350" data-critrate="70"  data-critdmg="180" data-elemdmg="46.6" data-talent="180" data-reaction="spread"    data-enemyres="10">Alhaitham (Dendro)</option>
+                <option value="furina"      data-element="hydro"   data-baseatk="338" data-totalatk="2000" data-em="80"  data-critrate="70"  data-critdmg="190" data-elemdmg="46.6" data-talent="160" data-reaction="vaporize" data-enemyres="10">Furina (Hydro)</option>
+                <option value="navia"       data-element="geo"     data-baseatk="352" data-totalatk="2500" data-em="40"  data-critrate="70"  data-critdmg="170" data-elemdmg="46.6" data-talent="210" data-reaction="none"     data-enemyres="10">Navia (Geo)</option>
+                <option value="raiden_hyper" data-element="electro" data-baseatk="349" data-totalatk="1900" data-em="900" data-critrate="50"  data-critdmg="120" data-elemdmg="0"    data-talent="0"   data-reaction="hyperbloom" data-enemyres="10">Raiden (Hyperbloom)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Character Level Slider -->
+          <div class="form-group">
+            <label class="form-label" for="charLevel">
+              Character Level <span class="val" id="charLevelVal">90</span>
+            </label>
+            <div class="range-wrap">
+              <input type="range" class="range-slider" id="charLevel" min="1" max="90" value="90" step="1">
+            </div>
+          </div>
+
+          <!-- Base ATK + Total ATK -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="baseATK">Base ATK</label>
+              <input type="number" class="form-input" id="baseATK" value="800" min="0" step="1" placeholder="Char + Weapon base">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="totalATK">Total ATK</label>
+              <input type="number" class="form-input" id="totalATK" value="2000" min="0" step="1" placeholder="With ATK% buffs">
+            </div>
+          </div>
+
+          <!-- Elemental Mastery + Talent -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="elemMastery">
+                Elemental Mastery <span class="val" id="emBonusVal"></span>
+              </label>
+              <input type="number" class="form-input" id="elemMastery" value="100" min="0" step="1" placeholder="0">
+              <div class="em-info" id="emInfo">
+                <span>Vape/Melt: <span class="em-val" id="emAmpVal">+0%</span></span>
+                <span>Additive: <span class="em-val" id="emAddVal">+0%</span></span>
+                <span>Hyperbloom: <span class="em-val" id="emHBVal">+0%</span></span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="talentMult">Talent Multiplier %</label>
+              <input type="number" class="form-input" id="talentMult" value="180" min="0" step="0.1" placeholder="e.g. 180">
+            </div>
+          </div>
+
+          <!-- CRIT Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="critRate">CRIT Rate %</label>
+              <input type="number" class="form-input" id="critRate" value="70" min="0" max="100" step="0.1" placeholder="0-100">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="critDMG">CRIT DMG %</label>
+              <input type="number" class="form-input" id="critDMG" value="160" min="0" step="0.1" placeholder="e.g. 160">
+            </div>
+          </div>
+
+          <!-- Elemental DMG Bonus -->
+          <div class="form-group">
+            <label class="form-label" for="elemDMG">Elemental DMG Bonus %</label>
+            <input type="number" class="form-input" id="elemDMG" value="46.6" min="0" step="0.1" placeholder="Goblet + buffs">
+          </div>
+
+          <div class="section-divider"></div>
+
+          <!-- Enemy Settings -->
+          <div class="form-group">
+            <label class="form-label" for="enemyLevel">
+              Enemy Level <span class="val" id="enemyLevelVal">90</span>
+            </label>
+            <div class="range-wrap">
+              <input type="range" class="range-slider" id="enemyLevel" min="1" max="100" value="90" step="1">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="enemyRES">Enemy RES %</label>
+              <input type="number" class="form-input" id="enemyRES" value="10" min="-100" max="200" step="0.1" placeholder="Default: 10">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reactionType">Reaction Type</label>
+              <select class="form-select" id="reactionType">
+                <option value="none">None</option>
+                <option value="vaporize">Vaporize (1.5x)</option>
+                <option value="melt">Melt (2.0x)</option>
+                <option value="aggravate">Aggravate (Additive)</option>
+                <option value="spread">Spread (Additive)</option>
+                <option value="hyperbloom">Hyperbloom (Transformative)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- DEF Shred -->
+          <div class="form-group">
+            <label class="form-label" for="defShred">
+              DEF Shred % <span class="val" id="defShredVal">0%</span>
+            </label>
+            <input type="number" class="form-input" id="defShred" value="0" min="0" max="100" step="0.1" placeholder="e.g. 30 (Lisa / Klee C2)">
+          </div>
+
+          <div class="section-divider"></div>
+
+          <!-- Buff Toggles -->
+          <div class="form-group">
+            <label class="form-label" style="margin-bottom:10px;">
+              Buff Comparisons
+              <span class="val" id="activeBuffCount">0 active</span>
+            </label>
+            <div class="buff-toggles">
+              <div class="buff-toggle" data-buff="bennett" id="buffBennett">
+                <div class="buff-info">
+                  <span class="buff-icon" style="background:var(--pyro);"><i class="fa-solid fa-fire"></i></span>
+                  Bennett Burst (ATK +800)
+                </div>
+                <span class="buff-value">+800 ATK</span>
+                <span class="buff-switch"></span>
+              </div>
+              <div class="buff-toggle" data-buff="kazuha" id="buffKazuha">
+                <div class="buff-info">
+                  <span class="buff-icon" style="background:var(--anemo);"><i class="fa-solid fa-wind"></i></span>
+                  Kazuha A4 (DMG +40%)
+                </div>
+                <span class="buff-value">+40% DMG</span>
+                <span class="buff-switch"></span>
+              </div>
+              <div class="buff-toggle" data-buff="furina" id="buffFurina">
+                <div class="buff-info">
+                  <span class="buff-icon" style="background:var(--hydro);"><i class="fa-solid fa-droplet"></i></span>
+                  Furina Fanfare (DMG +50%)
+                </div>
+                <span class="buff-value">+50% DMG</span>
+                <span class="buff-switch"></span>
+              </div>
+              <div class="buff-toggle" data-buff="sucrose" id="buffSucrose">
+                <div class="buff-info">
+                  <span class="buff-icon" style="background:var(--anemo);"><i class="fa-solid fa-wind"></i></span>
+                  Sucrose A4 (EM +200)
+                </div>
+                <span class="buff-value">+200 EM</span>
+                <span class="buff-switch"></span>
+              </div>
+              <div class="buff-toggle" data-buff="zhongli" id="buffZhongli">
+                <div class="buff-info">
+                  <span class="buff-icon" style="background:var(--geo);"><i class="fa-solid fa-mountain"></i></span>
+                  Zhongli Shield (RES shred -20%)
+                </div>
+                <span class="buff-value">-20% RES</span>
+                <span class="buff-switch"></span>
+              </div>
+            </div>
+            <div style="margin-top:6px;font-size:0.7rem;color:var(--text-muted);">
+              Toggle to compare base vs. buffed damage in results.
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ RIGHT PANEL: Results ═══ -->
+        <div class="panel" id="resultPanel">
+          <div class="panel-title">
+            <i class="fa-solid fa-chart-simple"></i> Damage Results
+          </div>
+
+          <!-- DEF & RES Summary -->
+          <div class="def-res-row">
+            <span>DEF Multiplier: <span class="dr-val" id="defMultDisplay">0.500</span></span>
+            <span>RES Multiplier: <span class="dr-val" id="resMultDisplay">0.900</span></span>
+            <span>DEF Shred Applied: <span class="dr-val" id="defShredDisplay">0%</span></span>
+            <span>Char Lv / Enemy Lv: <span class="dr-val" id="lvDisplay">90 / 90</span></span>
+          </div>
+
+          <!-- Main Result Cards -->
+          <div class="result-grid">
+            <!-- Non-CRIT DMG -->
+            <div class="result-card res-noncrit">
+              <div class="res-label"><i class="fa-solid fa-hand-fist"></i> Non-CRIT DMG</div>
+              <div class="res-value" id="resNonCrit">—</div>
+              <div class="res-sub">Raw hit &mdash; no critical, no reaction</div>
+              <div class="compare-row" id="compareNonCrit" style="display:none;">
+                <div class="compare-col"><div class="compare-label">Without Buffs</div><div class="compare-value" id="cmpBaseNonCrit">—</div></div>
+                <div class="compare-col buffed-col"><div class="compare-label">With Buffs</div><div class="compare-value" id="cmpBuffNonCrit">—</div></div>
+              </div>
+              <div class="compare-delta" id="deltaNonCrit" style="display:none;"></div>
+            </div>
+
+            <!-- CRIT DMG -->
+            <div class="result-card res-crit">
+              <div class="res-label"><i class="fa-solid fa-burst"></i> CRIT DMG</div>
+              <div class="res-value" id="resCrit">—</div>
+              <div class="res-sub">Critical hit &mdash; no reaction</div>
+              <div class="compare-row" id="compareCrit" style="display:none;">
+                <div class="compare-col"><div class="compare-label">Without Buffs</div><div class="compare-value" id="cmpBaseCrit">—</div></div>
+                <div class="compare-col buffed-col"><div class="compare-label">With Buffs</div><div class="compare-value" id="cmpBuffCrit">—</div></div>
+              </div>
+              <div class="compare-delta" id="deltaCrit" style="display:none;"></div>
+            </div>
+
+            <!-- Average DMG -->
+            <div class="result-card res-avg">
+              <div class="res-label"><i class="fa-solid fa-chart-line"></i> Average DMG</div>
+              <div class="res-value" id="resAvg">—</div>
+              <div class="res-sub">Expected damage accounting for CRIT Rate</div>
+              <div class="compare-row" id="compareAvg" style="display:none;">
+                <div class="compare-col"><div class="compare-label">Without Buffs</div><div class="compare-value" id="cmpBaseAvg">—</div></div>
+                <div class="compare-col buffed-col"><div class="compare-label">With Buffs</div><div class="compare-value" id="cmpBuffAvg">—</div></div>
+              </div>
+              <div class="compare-delta" id="deltaAvg" style="display:none;"></div>
+            </div>
+
+            <!-- Reaction DMG -->
+            <div class="result-card res-reaction" id="cardReaction">
+              <div class="res-label"><i class="fa-solid fa-flask"></i> Reaction DMG</div>
+              <div class="res-value" id="resReaction">—</div>
+              <div class="res-sub" id="resReactionSub">No reaction selected</div>
+              <div class="compare-row" id="compareReaction" style="display:none;">
+                <div class="compare-col"><div class="compare-label">Without Buffs</div><div class="compare-value" id="cmpBaseReaction">—</div></div>
+                <div class="compare-col buffed-col"><div class="compare-label">With Buffs</div><div class="compare-value" id="cmpBuffReaction">—</div></div>
+              </div>
+              <div class="compare-delta" id="deltaReaction" style="display:none;"></div>
+            </div>
+
+            <!-- Hyperbloom DMG (shown only when reaction == hyperbloom) -->
+            <div class="result-card res-hyperbloom" id="cardHyperbloom" style="display:none;">
+              <div class="res-label"><i class="fa-solid fa-seedling"></i> Hyperbloom DMG</div>
+              <div class="res-value" id="resHyperbloom">—</div>
+              <div class="res-sub">Transformative reaction &mdash; ignores ATK / CRIT / DMG%</div>
+              <div class="compare-row" id="compareHyperbloom" style="display:none;">
+                <div class="compare-col"><div class="compare-label">Without Buffs</div><div class="compare-value" id="cmpBaseHB">—</div></div>
+                <div class="compare-col buffed-col"><div class="compare-label">With Buffs</div><div class="compare-value" id="cmpBuffHB">—</div></div>
+              </div>
+              <div class="compare-delta" id="deltaHB" style="display:none;"></div>
+            </div>
+          </div>
+
+          <!-- Formula Reference -->
+          <details class="formula-ref">
+            <summary><i class="fa-solid fa-flask" style="margin-right:6px;"></i> Damage Formula Reference</summary>
+            <div class="formula-steps">
+              <div><strong>1.</strong> Base DMG = <code>Total ATK &times; Talent%</code></div>
+              <div><strong>2.</strong> DMG Bonus = <code>Base &times; (1 + Elemental DMG%)</code></div>
+              <div><strong>3.</strong> CRIT DMG = <code>DMG Bonus &times; (1 + CRIT DMG%)</code></div>
+              <div><strong>4.</strong> Average = <code>DMG Bonus &times; (1 + CRIT Rate &times; CRIT DMG%)</code></div>
+              <div><strong>5.</strong> DEF Mult = <code>(Lv + 100) / ((Lv + 100) + (EnemyLv + 100) &times; (1 - DEF Shred%))</code></div>
+              <div><strong>6.</strong> RES Mult: <code>RES &lt; 0 &rarr; 1 &minus; RES/2</code>, <code>RES &ge; 0.75 &rarr; 1/(1+4&times;RES)</code>, else <code>1 &minus; RES</code></div>
+              <div><strong>7a.</strong> Vaporize: <code>&times;1.5 &times; (1 + 2.78&times;EM/(EM+1400))</code></div>
+              <div><strong>7b.</strong> Melt: <code>&times;2.0 &times; (1 + 2.78&times;EM/(EM+1400))</code></div>
+              <div><strong>7c.</strong> Spread/Aggravate: <code>+ LevelMult &times; (1 + 5&times;EM/(EM+1200))</code> flat bonus</div>
+              <div><strong>7d.</strong> Hyperbloom: <code>LevelMult &times; (1 + 16&times;EM/(EM+2000))</code> flat damage (ignores ATK/CRIT/DMG%)</div>
+              <div><strong>8.</strong> Final = <code>Avg &times; DEF &times; RES &times; Reaction</code></div>
+            </div>
+          </details>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <!-- ═══ SCRIPTS ═══ -->
+  <script>
+    /* ===== Element Colors ===== */
+    var elementColors = {
+      pyro:    '#ef7938',
+      hydro:   '#4cc2f1',
+      anemo:   '#74c2a8',
+      electro: '#af8fd1',
+      dendro:  '#a5d63e',
+      cryo:    '#9fd6e3',
+      geo:     '#fab72e'
+    };
+
+    /* ===== Starfield Canvas Animation ===== */
+    (function() {
+      var canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var stars = [];
+      var STAR_COUNT = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function initStars() {
+        stars = [];
+        for (var i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < stars.length; i++) {
+          var s = stars[i];
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          var hsl = s.hue > 0
+            ? 'hsla(' + s.hue + ', 60%, 70%, ' + s.alpha + ')'
+            : 'rgba(200,200,220,' + s.alpha + ')';
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', function() { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ===== Navigation Scroll Effect ===== */
+    (function() {
+      var nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', function() {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+    })();
+
+    /* ===== Mobile Nav Toggle ===== */
+    (function() {
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        links.classList.toggle('open');
+        var icon = toggle.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-bars');
+          icon.classList.toggle('fa-xmark');
+        }
+      });
+    })();
+
+    /* ===== Level Multiplier Tables for Additive & Transformative Reactions ===== */
+    // Spread base level multiplier (approximate)
+    var LEVEL_MULT_SPREAD = [
+      1, 17.2, 10, 33.8, 20, 67.3, 30, 112.8, 40, 173.7,
+      50, 253.3, 60, 356.1, 70, 493.2, 80, 680.0, 90, 1446.9
+    ];
+    // Aggravate base (~1.15x Spread)
+    var LEVEL_MULT_AGGRAVATE = [
+      1, 19.8, 10, 38.9, 20, 77.4, 30, 129.7, 40, 199.8,
+      50, 291.3, 60, 409.5, 70, 567.2, 80, 781.9, 90, 1663.9
+    ];
+    // Hyperbloom / Burgeon base (same as transformative reaction base)
+    var LEVEL_MULT_TRANSFORMATIVE = [
+      1, 17.2, 10, 33.8, 20, 67.3, 30, 112.8, 40, 173.7,
+      50, 253.3, 60, 356.1, 70, 493.2, 80, 680.0, 90, 1446.9
+    ];
+
+    function getLevelMultiplier(level, type) {
+      var table;
+      if (type === 'aggravate') {
+        table = LEVEL_MULT_AGGRAVATE;
+      } else if (type === 'hyperbloom') {
+        table = LEVEL_MULT_TRANSFORMATIVE;
+      } else {
+        table = LEVEL_MULT_SPREAD;
+      }
+      if (level <= table[0]) return table[1];
+      for (var i = 0; i < table.length - 2; i += 2) {
+        var l1 = table[i], v1 = table[i + 1];
+        var l2 = table[i + 2], v2 = table[i + 3];
+        if (level >= l1 && level <= l2) {
+          var t = (level - l1) / (l2 - l1);
+          return v1 + t * (v2 - v1);
+        }
+      }
+      return table[table.length - 1];
+    }
+
+    /* ===== DOM References ===== */
+    var charSelect      = document.getElementById('charSelect');
+    var elementDot      = document.getElementById('elementDot');
+    var charLevelIn     = document.getElementById('charLevel');
+    var charLevelVal    = document.getElementById('charLevelVal');
+    var baseATKIn       = document.getElementById('baseATK');
+    var totalATKIn      = document.getElementById('totalATK');
+    var emIn            = document.getElementById('elemMastery');
+    var emBonusVal      = document.getElementById('emBonusVal');
+    var emAmpVal        = document.getElementById('emAmpVal');
+    var emAddVal        = document.getElementById('emAddVal');
+    var emHBVal         = document.getElementById('emHBVal');
+    var talentIn        = document.getElementById('talentMult');
+    var critRateIn      = document.getElementById('critRate');
+    var critDMGIn       = document.getElementById('critDMG');
+    var elemDMGIn       = document.getElementById('elemDMG');
+    var enemyLevelIn    = document.getElementById('enemyLevel');
+    var enemyLevelVal   = document.getElementById('enemyLevelVal');
+    var enemyRESIn      = document.getElementById('enemyRES');
+    var reactionIn      = document.getElementById('reactionType');
+    var defShredIn      = document.getElementById('defShred');
+    var defShredVal     = document.getElementById('defShredVal');
+
+    // Result displays
+    var resNonCrit      = document.getElementById('resNonCrit');
+    var resCrit         = document.getElementById('resCrit');
+    var resAvg          = document.getElementById('resAvg');
+    var resReaction     = document.getElementById('resReaction');
+    var resReactionSub  = document.getElementById('resReactionSub');
+    var resHyperbloom   = document.getElementById('resHyperbloom');
+
+    // DEF / RES summary
+    var defMultDisplay  = document.getElementById('defMultDisplay');
+    var resMultDisplay  = document.getElementById('resMultDisplay');
+    var defShredDisplay = document.getElementById('defShredDisplay');
+    var lvDisplay       = document.getElementById('lvDisplay');
+
+    // Cards
+    var cardReaction    = document.getElementById('cardReaction');
+    var cardHyperbloom  = document.getElementById('cardHyperbloom');
+
+    // Buff count
+    var activeBuffCountEl = document.getElementById('activeBuffCount');
+
+    /* ===== Formatting ===== */
+    function fmt(n) {
+      if (!isFinite(n) || isNaN(n)) return '—';
+      return Math.round(n).toLocaleString('en-US');
+    }
+
+    /* ===== RES Multiplier ===== */
+    function calcRESMult(resDecimal) {
+      if (resDecimal < 0) {
+        return 1 - resDecimal / 2;
+      } else if (resDecimal >= 0.75) {
+        return 1 / (1 + 4 * resDecimal);
+      } else {
+        return 1 - resDecimal;
+      }
+    }
+
+    /* ===== Core Damage Calculation ===== */
+    function computeDamage(totalATK, em, critRate, critDMG, elemDMG, talentPct, charLevel, enemyLevel, enemyRES, reaction, defShred) {
+      // ── EM bonuses ──
+      var emAmpBonus = (2.78 * em) / (em + 1400);
+      var emAddBonus = (5 * em) / (em + 1200);
+      var emHBBonus  = (16 * em) / (em + 2000);
+
+      // ── Step 1: Base DMG (ATK-scaling) ──
+      var baseDMG = totalATK * talentPct;
+
+      // ── Step 2: Additive flat bonus (Spread / Aggravate) ──
+      var additiveFlat = 0;
+      if (reaction === 'spread' || reaction === 'aggravate') {
+        var levelMult = getLevelMultiplier(charLevel, reaction);
+        additiveFlat = levelMult * (1 + emAddBonus);
+      }
+
+      // ── Step 3: Total base before DMG Bonus ──
+      var totalBase = baseDMG + additiveFlat;
+
+      // ── Step 4: Apply DMG Bonus ──
+      var dmgAfterBonus = totalBase * (1 + elemDMG);
+
+      // ── Step 5: CRIT ──
+      var nonCritHit = dmgAfterBonus;
+      var critHit    = dmgAfterBonus * (1 + critDMG);
+      var avgHit     = dmgAfterBonus * (1 + critRate * critDMG);
+
+      // ── Step 6: DEF Multiplier (with shred) ──
+      var defMult = (charLevel + 100) / ((charLevel + 100) + (enemyLevel + 100) * (1 - defShred));
+
+      // ── Step 7: RES Multiplier ──
+      var resMult = calcRESMult(enemyRES);
+
+      // ── Apply DEF + RES ──
+      var finalNonCrit = nonCritHit * defMult * resMult;
+      var finalCrit    = critHit    * defMult * resMult;
+      var finalAvg     = avgHit     * defMult * resMult;
+
+      // ── Step 8: Reaction ──
+      var reactionMult = 1;
+      if (reaction === 'vaporize') {
+        reactionMult = 1.5 * (1 + emAmpBonus);
+      } else if (reaction === 'melt') {
+        reactionMult = 2.0 * (1 + emAmpBonus);
+      }
+
+      var reactionDMG = null;
+      if (reaction === 'vaporize' || reaction === 'melt') {
+        reactionDMG = finalCrit * reactionMult;
+      } else if (reaction === 'spread' || reaction === 'aggravate') {
+        reactionDMG = finalCrit;
+      }
+
+      // ── Hyperbloom (transformative) ──
+      var hyperbloomDMG = null;
+      if (reaction === 'hyperbloom') {
+        var hbLevelMult = getLevelMultiplier(charLevel, 'hyperbloom');
+        hyperbloomDMG = hbLevelMult * (1 + emHBBonus) * resMult;
+      }
+
+      return {
+        emAmpBonus: emAmpBonus,
+        emAddBonus: emAddBonus,
+        emHBBonus: emHBBonus,
+        baseDMG: baseDMG,
+        additiveFlat: additiveFlat,
+        totalBase: totalBase,
+        dmgAfterBonus: dmgAfterBonus,
+        nonCritHit: nonCritHit,
+        critHit: critHit,
+        avgHit: avgHit,
+        defMult: defMult,
+        resMult: resMult,
+        finalNonCrit: finalNonCrit,
+        finalCrit: finalCrit,
+        finalAvg: finalAvg,
+        reactionMult: reactionMult,
+        reactionDMG: reactionDMG,
+        hyperbloomDMG: hyperbloomDMG
+      };
+    }
+
+    /* ===== Buff State ===== */
+    var activeBuffs = {
+      bennett: false,
+      kazuha:  false,
+      furina:  false,
+      sucrose: false,
+      zhongli: false
+    };
+
+    function getBuffAdjustments() {
+      var adj = { totalATK: 0, elemDMG: 0, em: 0, enemyRES: 0 };
+      if (activeBuffs.bennett) adj.totalATK += 800;
+      if (activeBuffs.kazuha)  adj.elemDMG  += 0.40;
+      if (activeBuffs.furina)  adj.elemDMG  += 0.50;
+      if (activeBuffs.sucrose) adj.em       += 200;
+      if (activeBuffs.zhongli) adj.enemyRES  -= 0.20;
+      return adj;
+    }
+
+    function countActiveBuffs() {
+      var n = 0;
+      for (var k in activeBuffs) {
+        if (activeBuffs[k]) n++;
+      }
+      return n;
+    }
+
+    /* ===== Update Compare Visibility ===== */
+    function updateCompareVisibility() {
+      var anyActive = countActiveBuffs() > 0;
+      var display = anyActive ? '' : 'none';
+
+      var compareIds = [
+        'compareNonCrit', 'compareCrit', 'compareAvg',
+        'compareReaction', 'compareHyperbloom'
+      ];
+      for (var i = 0; i < compareIds.length; i++) {
+        var el = document.getElementById(compareIds[i]);
+        if (el) el.style.display = display;
+      }
+
+      var deltaIds = ['deltaNonCrit', 'deltaCrit', 'deltaAvg', 'deltaReaction', 'deltaHB'];
+      for (var j = 0; j < deltaIds.length; j++) {
+        var el2 = document.getElementById(deltaIds[j]);
+        if (el2) el2.style.display = display;
+      }
+    }
+
+    /* ===== Main Recalc ===== */
+    function recalc() {
+      // ── Read inputs ──
+      var charLevel   = parseInt(charLevelIn.value) || 90;
+      var totalATK    = parseFloat(totalATKIn.value) || 0;
+      var em          = parseFloat(emIn.value) || 0;
+      var critRate    = Math.min(parseFloat(critRateIn.value) || 0, 100) / 100;
+      var critDMG     = (parseFloat(critDMGIn.value) || 0) / 100;
+      var elemDMG     = (parseFloat(elemDMGIn.value) || 0) / 100;
+      var talentPct   = (parseFloat(talentIn.value) || 0) / 100;
+      var enemyLevel  = parseInt(enemyLevelIn.value) || 90;
+      var enemyRES    = (parseFloat(enemyRESIn.value) || 0) / 100;
+      var reaction    = reactionIn.value;
+      var defShred    = Math.min(parseFloat(defShredIn.value) || 0, 100) / 100;
+
+      // ── Base computation ──
+      var baseResult = computeDamage(totalATK, em, critRate, critDMG, elemDMG, talentPct, charLevel, enemyLevel, enemyRES, reaction, defShred);
+
+      // ── Buffed computation ──
+      var buffAdj = getBuffAdjustments();
+      var buffedTotalATK  = totalATK + buffAdj.totalATK;
+      var buffedElemDMG   = elemDMG  + buffAdj.elemDMG;
+      var buffedEM        = em        + buffAdj.em;
+      var buffedEnemyRES  = enemyRES  + buffAdj.enemyRES;
+      var buffResult = computeDamage(buffedTotalATK, buffedEM, critRate, critDMG, buffedElemDMG, talentPct, charLevel, enemyLevel, buffedEnemyRES, reaction, defShred);
+
+      var anyActive = countActiveBuffs() > 0;
+
+      // ── EM display info ──
+      emAmpVal.textContent = '+' + (baseResult.emAmpBonus * 100).toFixed(1) + '%';
+      emAddVal.textContent = '+' + (baseResult.emAddBonus * 100).toFixed(1) + '%';
+      emHBVal.textContent  = '+' + (baseResult.emHBBonus * 100).toFixed(1) + '%';
+      emBonusVal.textContent = em > 0 ? '(EM: ' + em + ')' : '';
+
+      // ── DEF / RES summary ──
+      defMultDisplay.textContent = baseResult.defMult.toFixed(4);
+      resMultDisplay.textContent = baseResult.resMult.toFixed(4);
+      defShredDisplay.textContent = (defShred * 100).toFixed(1) + '%';
+      lvDisplay.textContent = charLevel + ' / ' + enemyLevel;
+      defShredVal.textContent = (defShred * 100).toFixed(1) + '%';
+
+      // ── Main result display ──
+      resNonCrit.textContent = fmt(baseResult.finalNonCrit);
+      resCrit.textContent    = fmt(baseResult.finalCrit);
+      resAvg.textContent     = fmt(baseResult.finalAvg);
+
+      // ── Reaction result ──
+      var reactionLabel;
+      if (reaction === 'hyperbloom') {
+        cardReaction.style.display = 'none';
+        cardHyperbloom.style.display = '';
+
+        resHyperbloom.textContent = fmt(baseResult.hyperbloomDMG);
+        resReactionSub.textContent = 'Hyperbloom deals flat transformative damage — uses EM only';
+
+        if (anyActive) {
+          document.getElementById('cmpBaseHB').textContent  = fmt(baseResult.hyperbloomDMG);
+          document.getElementById('cmpBuffHB').textContent  = fmt(buffResult.hyperbloomDMG);
+          document.getElementById('deltaHB').textContent    = 'Δ ' + fmt(buffResult.hyperbloomDMG - baseResult.hyperbloomDMG);
+        }
+      } else {
+        cardReaction.style.display = '';
+        cardHyperbloom.style.display = 'none';
+
+        if (baseResult.reactionDMG !== null) {
+          resReaction.textContent = fmt(baseResult.reactionDMG);
+          if (reaction === 'vaporize') {
+            reactionLabel = 'Critical hit &times; ' + baseResult.reactionMult.toFixed(2) + 'x';
+          } else if (reaction === 'melt') {
+            reactionLabel = 'Critical hit &times; ' + baseResult.reactionMult.toFixed(2) + 'x';
+          } else if (reaction === 'spread' || reaction === 'aggravate') {
+            reactionLabel = 'Critical hit with additive flat bonus';
+          }
+        } else {
+          resReaction.textContent = 'N/A';
+          reactionLabel = 'No reaction selected';
+        }
+        resReactionSub.textContent = reactionLabel;
+
+        if (anyActive && baseResult.reactionDMG !== null) {
+          document.getElementById('cmpBaseReaction').textContent  = fmt(baseResult.reactionDMG);
+          document.getElementById('cmpBuffReaction').textContent  = fmt(buffResult.reactionDMG);
+          document.getElementById('deltaReaction').textContent    = 'Δ ' + fmt(buffResult.reactionDMG - baseResult.reactionDMG);
+        }
+      }
+
+      // ── Comparison values ──
+      if (anyActive) {
+        document.getElementById('cmpBaseNonCrit').textContent  = fmt(baseResult.finalNonCrit);
+        document.getElementById('cmpBuffNonCrit').textContent  = fmt(buffResult.finalNonCrit);
+        document.getElementById('deltaNonCrit').textContent    = 'Δ ' + fmt(buffResult.finalNonCrit - baseResult.finalNonCrit);
+
+        document.getElementById('cmpBaseCrit').textContent     = fmt(baseResult.finalCrit);
+        document.getElementById('cmpBuffCrit').textContent     = fmt(buffResult.finalCrit);
+        document.getElementById('deltaCrit').textContent       = 'Δ ' + fmt(buffResult.finalCrit - baseResult.finalCrit);
+
+        document.getElementById('cmpBaseAvg').textContent      = fmt(baseResult.finalAvg);
+        document.getElementById('cmpBuffAvg').textContent      = fmt(buffResult.finalAvg);
+        document.getElementById('deltaAvg').textContent        = 'Δ ' + fmt(buffResult.finalAvg - baseResult.finalAvg);
+      }
+
+      updateCompareVisibility();
+      activeBuffCountEl.textContent = countActiveBuffs() + ' active';
+
+      // ── Update slider labels ──
+      charLevelVal.textContent = charLevel;
+      enemyLevelVal.textContent = enemyLevel;
+    }
+
+    /* ===== Character Select Handler ===== */
+    charSelect.addEventListener('change', function() {
+      var opt = this.options[this.selectedIndex];
+      var element = opt.dataset.element || null;
+
+      // Update element dot
+      if (element && elementColors[element]) {
+        elementDot.style.background = elementColors[element];
+        elementDot.style.boxShadow = '0 0 10px ' + elementColors[element] + '88';
+      } else {
+        elementDot.style.background = 'var(--gold)';
+        elementDot.style.boxShadow = '0 0 6px var(--gold-dim)';
+      }
+
+      if (opt.value !== 'custom') {
+        // Fill pre-filled stats from data attributes
+        if (opt.dataset.baseatk)   baseATKIn.value   = opt.dataset.baseatk;
+        if (opt.dataset.totalatk)  totalATKIn.value  = opt.dataset.totalatk;
+        if (opt.dataset.em)        emIn.value        = opt.dataset.em;
+        if (opt.dataset.critrate)  critRateIn.value  = opt.dataset.critrate;
+        if (opt.dataset.critdmg)   critDMGIn.value   = opt.dataset.critdmg;
+        if (opt.dataset.elemdmg)   elemDMGIn.value   = opt.dataset.elemdmg;
+        if (opt.dataset.talent)    talentIn.value    = opt.dataset.talent;
+        if (opt.dataset.reaction)  reactionIn.value  = opt.dataset.reaction;
+        if (opt.dataset.enemyres)  enemyRESIn.value  = opt.dataset.enemyres;
+        // Reset def shred on preset change
+        defShredIn.value = '0';
+      }
+
+      recalc();
+    });
+
+    /* ===== Buff Toggle Handlers ===== */
+    var buffToggles = document.querySelectorAll('.buff-toggle');
+    buffToggles.forEach(function(toggle) {
+      toggle.addEventListener('click', function() {
+        var buffId = toggle.dataset.buff;
+        activeBuffs[buffId] = !activeBuffs[buffId];
+        toggle.classList.toggle('active', activeBuffs[buffId]);
+        recalc();
+      });
+    });
+
+    /* ===== Input Event Listeners ===== */
+    var allInputs = [
+      charLevelIn, baseATKIn, totalATKIn, emIn, talentIn,
+      critRateIn, critDMGIn, elemDMGIn, enemyLevelIn, enemyRESIn,
+      reactionIn, defShredIn
+    ];
+
+    allInputs.forEach(function(el) {
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+
+    /* ===== Initial Calculation ===== */
+    recalc();
+
+    /* ===== Show initial buff count ===== */
+    activeBuffCountEl.textContent = '0 active';
+  </script>
+
+</body>
+</html>

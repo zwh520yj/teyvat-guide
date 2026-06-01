@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events — Teyvat Guide</title>
+  <meta name="description" content="Genshin Impact current and upcoming events for Version 5.7. Track limited-time events, double drops, endgame rotations, and plan your schedule.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Event Status Badges ── */
+    .event-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+    .event-status.active {
+      background: rgba(76,175,80,0.12);
+      color: var(--success);
+      border-color: rgba(76,175,80,0.3);
+    }
+    .event-status.upcoming {
+      background: rgba(255,152,0,0.12);
+      color: var(--warning);
+      border-color: rgba(255,152,0,0.3);
+    }
+    .event-status.ended {
+      background: rgba(244,67,54,0.1);
+      color: var(--danger);
+      border-color: rgba(244,67,54,0.25);
+    }
+    .event-status .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .event-status.active .status-dot {
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(76,175,80,0.6);
+      animation: pulse-glow 2s infinite;
+    }
+    .event-status.upcoming .status-dot {
+      background: var(--warning);
+      box-shadow: 0 0 8px rgba(255,152,0,0.4);
+    }
+    .event-status.ended .status-dot {
+      background: var(--danger);
+    }
+
+    /* ── Event Card ── */
+    .event-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      transition: all 0.35s var(--ease-out);
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .event-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-4px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+    }
+    .event-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .event-card.status-active::before {
+      background: linear-gradient(90deg, var(--success), transparent);
+    }
+    .event-card.status-upcoming::before {
+      background: linear-gradient(90deg, var(--warning), transparent);
+    }
+    .event-card.status-ended::before {
+      background: linear-gradient(90deg, var(--danger), transparent);
+    }
+    .event-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .event-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+    .event-type-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      background: rgba(201,169,110,0.1);
+      color: var(--gold-light);
+      border: 1px solid var(--border-gold);
+    }
+    .event-description {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+    .event-meta {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .event-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .event-meta-item i {
+      color: var(--gold-dim);
+      font-size: 0.75rem;
+    }
+
+    /* ── Event Calendar Table ── */
+    .calendar-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+    }
+    .calendar-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px;
+    }
+    .calendar-table thead th {
+      padding: 14px 18px;
+      text-align: left;
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .calendar-table tbody td {
+      padding: 13px 18px;
+      font-size: 0.86rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .calendar-table tbody tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+    .calendar-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .cal-event-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .cal-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .cal-status .cal-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .cal-status.cal-active .cal-dot {
+      background: var(--success);
+      box-shadow: 0 0 6px rgba(76,175,80,0.5);
+    }
+    .cal-status.cal-upcoming .cal-dot {
+      background: var(--warning);
+      box-shadow: 0 0 6px rgba(255,152,0,0.4);
+    }
+    .cal-status.cal-ended .cal-dot {
+      background: var(--danger);
+    }
+
+    /* ── Section Divider ── */
+    .section-divider {
+      width: 80px;
+      height: 2px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    }
+
+    /* ── Highlight Banner ── */
+    .event-highlight {
+      background: linear-gradient(135deg, rgba(201,169,110,0.06) 0%, rgba(201,169,110,0.01) 100%);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .event-highlight h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+    .event-highlight p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .event-highlight .countdown {
+      display: inline-flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    .countdown-block {
+      text-align: center;
+      min-width: 56px;
+    }
+    .countdown-number {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--gold-light);
+      line-height: 1;
+    }
+    .countdown-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .event-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .event-meta {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .countdown {
+        gap: 0.6rem;
+      }
+      .countdown-block {
+        min-width: 44px;
+      }
+      .countdown-number {
+        font-size: 1.2rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .calendar-table-wrap {
+        border-radius: var(--radius);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html" class="active">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero" style="min-height:45vh;padding-top:4rem;">
+    <div class="hero-content">
+      <span class="hero-badge">Version 5.7</span>
+      <h1>Current Events</h1>
+      <p>Stay up to date with all limited-time events, double drop windows, Spiral Abyss rotations, and in-game activities across Teyvat.</p>
+    </div>
+  </section>
+
+  <!-- ── Active Event Highlight ── -->
+  <section class="section reveal" style="padding-top:0;">
+    <div class="section-inner">
+      <div class="event-highlight" id="activeHighlight">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Event Cards ── -->
+  <section class="section reveal" style="padding-top:1rem;">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Limited-Time Events</span>
+        <h2>All Current Events</h2>
+        <div class="section-divider"></div>
+        <p>Every active, upcoming, and recently ended event in Version 5.7. Check back regularly for updates.</p>
+      </div>
+      <div class="grid-2" id="eventCards">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Event Calendar ── -->
+  <section class="section reveal" style="background:rgba(255,255,255,0.01);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Event Calendar</span>
+        <h2>5.7 Event Schedule</h2>
+        <div class="section-divider"></div>
+        <p>Full timeline of Version 5.7 events. Plan your Primogem spending and resin usage around these dates.</p>
+      </div>
+      <div class="calendar-table-wrap">
+        <table class="calendar-table">
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Duration</th>
+              <th>Rewards</th>
+            </tr>
+          </thead>
+          <tbody id="calendarBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <!-- ── Shared Data ── -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+
+  <!-- ── Scripts ── -->
+  <script>
+    /* ===== Starfield Canvas Animation ===== */
+    (function() {
+      const canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const STAR_COUNT = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          const hsl = s.hue > 0
+            ? `hsla(${s.hue}, 60%, 70%, ${s.alpha})`
+            : `rgba(200,200,220,${s.alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ===== Scroll Reveal (IntersectionObserver) ===== */
+    (function() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    })();
+
+    /* ===== Navigation Scroll Effect ===== */
+    (function() {
+      const nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+    })();
+
+    /* ===== Mobile Nav Toggle ===== */
+    (function() {
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', () => {
+        links.classList.toggle('open');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-bars');
+          icon.classList.toggle('fa-xmark');
+        }
+      });
+    })();
+
+    /* ===== Status icon map ===== */
+    const statusIcons = {
+      active: 'fa-circle-check',
+      upcoming: 'fa-hourglass-half',
+      ended: 'fa-circle-xmark'
+    };
+
+    /* ===== EVENT DATA ===== */
+    var EVENTS = [
+      {name:'Overflowing Mastery',status:'active',type:'Double Drops',icon:'fa-book-open',
+       description:'Double talent book drops from Domains of Mastery. Use Original Resin to claim 3 double rewards per day.',
+       duration:'June 1 – June 8, 2026',rewards:'2× Talent Books (3 claims/day)'},
+      {name:'Spiral Abyss — Cycle 87',status:'active',type:'Endgame',icon:'fa-dungeon',
+       description:'5.7 Abyss rotation. Blessing: Characters gain 20% ATK when HP changes (max 3 stacks). Floor 12: Consecrated Beasts, Aeonblight Drake, Icewind Suite.',
+       duration:'June 1 – June 15, 2026',rewards:'Up to 1200 Primogems + Artifacts'},
+      {name:'Character Event Wish: Furina',status:'active',type:'Banner',icon:'fa-star',
+       description:'The Hydro Archon returns! Furina banner featuring rate-up 4★ characters.',
+       duration:'June 1 – June 21, 2026',rewards:'Furina (Rate-Up 5★)'},
+      {name:'Arlecchino Rerun',status:'active',type:'Banner',icon:'fa-skull',
+       description:'The Knave banner continues. Arlecchino is a top-tier Pyro DPS with Bond of Life mechanics.',
+       duration:'June 1 – June 21, 2026',rewards:'Arlecchino (Rate-Up 5★)'},
+      {name:'Ley Line Overflow',status:'upcoming',type:'Double Drops',icon:'fa-coins',
+       description:'Double Mora and EXP book drops from Blossoms. 3 double rewards per day.',
+       duration:'Expected June 8, 2026',rewards:'2× Mora & EXP'},
+      {name:'Trial of the Brave',status:'upcoming',type:'Combat',icon:'fa-sword',
+       description:'Face increasingly difficult combat challenges with trial characters. Earn a free 4★ weapon.',
+       duration:'Expected June 15, 2026',rewards:'~420 Primogems + Event Weapon'},
+      {name:'Nahida Banner (Predicted)',status:'upcoming',type:'Banner',icon:'fa-leaf',
+       description:'The Dendro Archon predicted to return in Phase 2. Save your Primogems!',
+       duration:'Expected June 22, 2026',rewards:'Nahida (Predicted Rate-Up 5★)'},
+    ];
+
+    /* ===== Active Highlight Banner ===== */
+    (function() {
+      const container = document.getElementById('activeHighlight');
+      if (!container) return;
+
+      const activeEvent = EVENTS.find(e => e.status === 'active');
+      if (!activeEvent) {
+        container.style.display = 'none';
+        return;
+      }
+
+      container.innerHTML = `
+        <span class="event-status active" style="margin-bottom:0.75rem;">
+          <span class="status-dot"></span> Now Live
+        </span>
+        <h3><i class="fa-solid fa-calendar-star" style="color:var(--gold);margin-right:8px;"></i>${activeEvent.name}</h3>
+        <p>${activeEvent.description}</p>
+        <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem;">
+          <i class="fa-regular fa-clock" style="color:var(--gold-dim);margin-right:6px;"></i>
+          ${activeEvent.duration}
+        </div>
+        <a href="#eventCards" class="btn btn-outline btn-sm">
+          <i class="fa-solid fa-angles-down"></i> View All Events
+        </a>
+      `;
+    })();
+
+    /* ===== Event Cards Rendering ===== */
+    (function() {
+      const container = document.getElementById('eventCards');
+      if (!container) return;
+
+      EVENTS.forEach(ev => {
+        const card = document.createElement('div');
+        card.className = `event-card status-${ev.status} reveal`;
+
+        const iconMap = {
+          'Double Drops': 'fa-droplet',
+          'Endgame': 'fa-skull',
+          'Combat': 'fa-swords',
+          'Exploration': 'fa-compass',
+          'Minigame': 'fa-gamepad',
+          'Story': 'fa-book-open',
+          'Community': 'fa-users'
+        };
+        const eventIcon = iconMap[ev.type] || 'fa-calendar-day';
+
+        card.innerHTML = `
+          <div class="event-card-header">
+            <span class="event-name">
+              <i class="fa-solid ${eventIcon}" style="color:var(--gold-dim);margin-right:8px;font-size:0.95rem;"></i>${ev.name}
+            </span>
+            <span class="event-status ${ev.status}">
+              <span class="status-dot"></span> ${ev.status.charAt(0).toUpperCase() + ev.status.slice(1)}
+            </span>
+          </div>
+          <span class="event-type-tag">${ev.type}</span>
+          <p class="event-description">${ev.description}</p>
+          <div class="event-meta">
+            <span class="event-meta-item">
+              <i class="fa-regular fa-calendar"></i> ${ev.duration}
+            </span>
+            <span class="event-meta-item">
+              <i class="fa-solid ${statusIcons[ev.status]}"></i> ${ev.status === 'active' ? 'In Progress' : ev.status === 'upcoming' ? 'Coming Soon' : 'Concluded'}
+            </span>
+          </div>
+        `;
+
+        const obs = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              obs.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15 });
+        obs.observe(card);
+
+        container.appendChild(card);
+      });
+    })();
+
+    /* ===== Event Calendar Table Rendering ===== */
+    (function() {
+      const tbody = document.getElementById('calendarBody');
+      if (!tbody) return;
+
+      // Extended calendar data with projected events for 5.7
+      const calendarEvents = [
+        { name: 'Overflowing Mastery', type: 'Double Drops', status: 'active', duration: 'June 1 – June 8, 2026', rewards: '3x Talent Books per day' },
+        { name: 'Spiral Abyss — Cycle 87', type: 'Endgame', status: 'active', duration: 'June 1 – June 15, 2026', rewards: '600 Primogems (36★)' },
+        { name: 'Wish Banner — Phase 2', type: 'Gacha', status: 'upcoming', duration: 'June 8 – June 28, 2026', rewards: 'Limited 5★ Characters' },
+        { name: 'Ley Line Overflow', type: 'Double Drops', status: 'upcoming', duration: 'Expected June 15 – June 22', rewards: '3x Mora/EXP Ley Lines per day' },
+        { name: 'Masterful Chefs', type: 'Minigame', status: 'upcoming', duration: 'Expected June 20 – June 30', rewards: '420 Primogems + Crown of Insight' },
+        { name: 'Liben — Marvelous Merchandise', type: 'Community', status: 'upcoming', duration: 'Expected Late June 2026', rewards: 'Primogems + Mora + Ascension Materials' },
+        { name: 'Spiral Abyss — Cycle 88', type: 'Endgame', status: 'upcoming', duration: 'June 16 – June 30, 2026', rewards: '600 Primogems (36★)' },
+        { name: 'Version 5.8 Livestream', type: 'Community', status: 'upcoming', duration: 'Expected June 28, 2026', rewards: '300 Primogems (redemption codes)' }
+      ];
+
+      calendarEvents.forEach(ev => {
+        const tr = document.createElement('tr');
+
+        const statusClass = ev.status === 'active' ? 'cal-active' : ev.status === 'upcoming' ? 'cal-upcoming' : 'cal-ended';
+        const statusLabel = ev.status.charAt(0).toUpperCase() + ev.status.slice(1);
+
+        tr.innerHTML = `
+          <td class="cal-event-name">${ev.name}</td>
+          <td>${ev.type}</td>
+          <td>
+            <span class="cal-status ${statusClass}">
+              <span class="cal-dot"></span> ${statusLabel}
+            </span>
+          </td>
+          <td>${ev.duration}</td>
+          <td>${ev.rewards}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    })();
+  </script>
+
+</body>
+</html>

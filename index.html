@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teyvat Guide — Genshin Impact Strategy Hub</title>
+  <meta name="description" content="Comprehensive Genshin Impact guides: character builds, tier lists, weapon rankings, artifact sets, team compositions, boss strategies, domain farming, and interactive tools.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Hero Element Orbs ── */
+    .hero-elements {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
+    }
+    .elem-orb {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: #fff;
+      margin: 0 -3px;
+      position: relative;
+      animation: orbFloat 4s ease-in-out infinite;
+      transition: transform 0.35s var(--ease-spring), box-shadow 0.3s var(--ease-out);
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.15);
+    }
+    .elem-orb:hover {
+      transform: translateY(-10px) scale(1.2);
+      z-index: 10;
+      border-color: rgba(255,255,255,0.5);
+      filter: brightness(1.3);
+    }
+    .elem-orb::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      opacity: 0;
+      transition: opacity 0.35s;
+      white-space: nowrap;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .elem-orb:hover::after {
+      opacity: 1;
+      color: #fff;
+    }
+    .elem-orb:nth-child(1) { animation-delay: 0.0s; }
+    .elem-orb:nth-child(2) { animation-delay: 0.25s; }
+    .elem-orb:nth-child(3) { animation-delay: 0.5s; }
+    .elem-orb:nth-child(4) { animation-delay: 0.75s; }
+    .elem-orb:nth-child(5) { animation-delay: 1.0s; }
+    .elem-orb:nth-child(6) { animation-delay: 1.25s; }
+    .elem-orb:nth-child(7) { animation-delay: 1.5s; }
+
+    .orb-pyro  { background: radial-gradient(circle at 40% 40%, rgba(239,121,56,0.95), rgba(180,60,20,0.85)); box-shadow: 0 0 30px var(--pyro-glow), 0 0 60px rgba(239,121,56,0.15); }
+    .orb-hydro { background: radial-gradient(circle at 40% 40%, rgba(76,194,241,0.95), rgba(30,130,180,0.85)); box-shadow: 0 0 30px var(--hydro-glow), 0 0 60px rgba(76,194,241,0.15); }
+    .orb-anemo { background: radial-gradient(circle at 40% 40%, rgba(116,194,168,0.95), rgba(60,140,110,0.85)); box-shadow: 0 0 30px var(--anemo-glow), 0 0 60px rgba(116,194,168,0.15); }
+    .orb-electro{background: radial-gradient(circle at 40% 40%, rgba(175,143,209,0.95), rgba(110,70,160,0.85)); box-shadow: 0 0 30px var(--electro-glow), 0 0 60px rgba(175,143,209,0.15); }
+    .orb-dendro{ background: radial-gradient(circle at 40% 40%, rgba(165,214,62,0.95), rgba(100,160,20,0.85)); box-shadow: 0 0 30px var(--dendro-glow), 0 0 60px rgba(165,214,62,0.15); }
+    .orb-cryo  { background: radial-gradient(circle at 40% 40%, rgba(159,214,227,0.95), rgba(90,160,180,0.85)); box-shadow: 0 0 30px var(--cryo-glow), 0 0 60px rgba(159,214,227,0.15); }
+    .orb-geo   { background: radial-gradient(circle at 40% 40%, rgba(250,183,46,0.95), rgba(190,120,10,0.85)); box-shadow: 0 0 30px var(--geo-glow), 0 0 60px rgba(250,183,46,0.15); }
+
+    @keyframes orbFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-18px); }
+    }
+
+    /* ── Hero shimmer text ── */
+    .hero-subtitle-highlight {
+      background: linear-gradient(135deg, var(--gold-light), #fff, var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: subtitleShimmer 3s ease-in-out infinite;
+    }
+    @keyframes subtitleShimmer {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.3); }
+    }
+
+    /* ── Tier chars: horizontal scrollable card row ── */
+    .tier-card-row {
+      display: flex;
+      gap: 1.25rem;
+      overflow-x: auto;
+      padding: 0.5rem 0.25rem 1.25rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .tier-card-row::-webkit-scrollbar { height: 4px; }
+    .tier-card-row::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
+
+    .tier-char-card {
+      flex: 0 0 auto;
+      width: 160px;
+      scroll-snap-align: start;
+    }
+    .tier-char-card .char-card-img {
+      font-size: 3rem;
+    }
+    .tier-char-card .char-card-body {
+      text-align: center;
+    }
+    .tier-char-card .char-card-body h3 {
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    .tier-char-card .char-card-body .tier-role {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Featured builds: horizontal scrollable ── */
+    .build-card-row {
+      display: flex;
+      gap: 1.5rem;
+      overflow-x: auto;
+      padding: 0.25rem 0.25rem 1rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .build-card-row::-webkit-scrollbar { height: 4px; }
+    .build-card-row::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 2px; }
+
+    .featured-build-card {
+      flex: 0 0 300px;
+      max-width: 320px;
+      scroll-snap-align: start;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all 0.35s var(--ease-out);
+    }
+    .featured-build-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-4px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.4);
+    }
+
+    .build-img-wrap {
+      position: relative;
+      width: 100%;
+      padding-bottom: 70%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      font-weight: 900;
+      color: #fff;
+    }
+    .build-img-wrap img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .build-img-wrap img.show {
+      display: block;
+    }
+
+    .build-rarity-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 3;
+      padding: 5px 10px;
+      border-radius: var(--radius-full);
+      background: rgba(0,0,0,0.75);
+      color: var(--star5);
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+
+    .build-details {
+      padding: 1.25rem;
+    }
+    .build-details h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .build-details .build-role {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .build-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      font-size: 0.78rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .build-detail-label { color: var(--text-muted); }
+    .build-detail-value { color: var(--text-primary); font-weight: 600; text-align: right; max-width: 55%; }
+    .build-details .btn { margin-top: 1rem; width: 100%; justify-content: center; }
+
+    .element-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      z-index: 2;
+    }
+
+    /* ── Banner Cards ── */
+    .banner-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .banner-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s var(--ease-out);
+    }
+    .banner-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-4px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+    }
+    .banner-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, rgba(201,169,110,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .banner-card.upcoming-card {
+      opacity: 0.65;
+    }
+    .banner-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      border: 1px solid;
+      position: relative;
+      z-index: 2;
+    }
+    .banner-badge.active-badge {
+      background: rgba(76,175,80,0.12);
+      color: var(--success);
+      border-color: rgba(76,175,80,0.3);
+    }
+    .banner-badge.upcoming-badge {
+      background: rgba(255,152,0,0.12);
+      color: var(--warning);
+      border-color: rgba(255,152,0,0.3);
+    }
+    .banner-carousel {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 2;
+    }
+    .banner-char-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .banner-char-avatar {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #fff;
+      border: 2px solid var(--border-gold);
+      position: relative;
+      overflow: hidden;
+    }
+    .banner-char-avatar img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: none;
+    }
+    .banner-char-avatar img.show {
+      display: block;
+    }
+    .banner-char-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .banner-weapon-row {
+      color: var(--gold-light);
+      font-size: 0.78rem;
+      margin-top: 6px;
+      font-weight: 500;
+      position: relative;
+      z-index: 2;
+    }
+    .banner-time-row {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── Tool Cards ── */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+    }
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.35s var(--ease-out);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 0%, rgba(201,169,110,0.06) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+    .tool-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-5px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.35), 0 0 0 1px rgba(201,169,110,0.1);
+    }
+    .tool-card:hover::before {
+      opacity: 1;
+    }
+    .tool-card-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(201,169,110,0.09);
+      border: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.7rem;
+      color: var(--gold);
+      transition: all 0.35s var(--ease-out);
+      position: relative;
+      z-index: 2;
+    }
+    .tool-card:hover .tool-card-icon {
+      background: rgba(201,169,110,0.18);
+      box-shadow: 0 0 30px rgba(201,169,110,0.25);
+      transform: scale(1.08);
+    }
+    .tool-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 2;
+    }
+    .tool-card p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ── Newsletter CTA ── */
+    .cta-newsletter {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 5rem 2rem;
+      background: linear-gradient(180deg, transparent 0%, rgba(201,169,110,0.03) 40%, rgba(201,169,110,0.06) 60%, transparent 100%);
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .cta-newsletter h2 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 0.75rem;
+    }
+    .cta-newsletter p {
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto 1.5rem;
+      font-size: 0.95rem;
+    }
+    .cta-form {
+      display: flex;
+      gap: 10px;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+    .cta-form input {
+      flex: 1;
+      padding: 13px 20px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.25s;
+    }
+    .cta-form input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,169,110,0.1);
+    }
+    .cta-form .btn {
+      flex-shrink: 0;
+    }
+
+    /* ── Section Divider ── */
+    .section-divider {
+      width: 80px;
+      height: 2px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    }
+
+    /* ── Stat pills for build cards ── */
+    .stat-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .stat-pill.pill-main { color: var(--gold-light); border-color: var(--border-gold); }
+
+    /* ── Tier rows ── */
+    .tier-section { margin-bottom: 1.5rem; }
+    .tier-row-header {
+      display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;
+    }
+    .tier-badge {
+      width: 48px; height: 48px; border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 900;
+      flex-shrink: 0;
+    }
+    .tier-badge.s { background: #ff5252; color: #fff; }
+    .tier-badge.a { background: #ff8c42; color: #fff; }
+    .tier-badge.b { background: #ffb13b; color: #111; }
+    .tier-row-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .tier-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .tier-chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px 7px 7px;
+      border-radius: 50px; background: var(--bg-card); border: 1px solid var(--border-subtle);
+      cursor: pointer; transition: all 0.25s var(--ease-out); text-decoration: none;
+      color: var(--text-primary); font-size: 0.82rem; font-weight: 500; white-space: nowrap;
+    }
+    .tier-chip:hover { border-color: var(--gold-dim); transform: translateY(-2px); background: var(--bg-card-hover); }
+    .tier-chip-avatar {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; color: #fff;
+    }
+    .tier-chip-avatar img {
+      width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: none;
+    }
+    .tier-chip-stars { color: var(--star5); font-size: 0.65rem; letter-spacing: 0.5px; }
+
+    /* ── Home team card ── */
+    .home-team-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: 1.5rem;
+      transition: all 0.35s var(--ease-out); cursor: pointer;
+      text-decoration: none; color: var(--text-primary); display: block;
+    }
+    .home-team-card:hover { border-color: var(--border-active); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.3); }
+    .home-team-card h3 { font-family:'Cinzel',serif; font-size:1.05rem; margin-bottom:10px; }
+    .home-team-slots { display: flex; gap: 12px; margin-bottom: 10px; }
+    .home-team-slot {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .home-team-slot-avatar {
+      width: 52px; height: 52px; border-radius: 50%; position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; font-weight: 900; color: #fff; border: 2px solid var(--border-subtle);
+    }
+    .home-team-slot-avatar img {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; border-radius: 50%; display: none;
+    }
+    .home-team-slot-name { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .tier-card-row { justify-content: flex-start; flex-wrap: nowrap; }
+      .build-card-row { justify-content: flex-start; flex-wrap: nowrap; }
+      .tool-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .banner-grid { grid-template-columns: 1fr; }
+      .cta-form { flex-direction: column; align-items: stretch; }
+      .cta-form .btn { width: 100%; justify-content: center; }
+      .tier-char-card { width: 130px; }
+      .featured-build-card { flex: 0 0 260px; max-width: 280px; }
+      .build-img-wrap { font-size: 3rem; padding-bottom: 60%; }
+      .tool-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 380px) {
+      .tool-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html" class="active">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <section class="hero" style="min-height:75vh;padding-top:5rem;">
+    <div class="hero-content">
+      <span class="hero-badge">✦ Your Journey Across Teyvat Starts Here</span>
+      <h1>Teyvat Guide</h1>
+      <p>The most comprehensive <span class="hero-subtitle-highlight">Genshin Impact</span> strategy resource. Character builds, tier lists, team compositions, boss guides, and interactive tools — everything you need to master the world of Teyvat.</p>
+      <div class="hero-cta">
+        <a href="characters.html" class="btn btn-primary">
+          <i class="fa-solid fa-users"></i> Explore Characters
+        </a>
+        <a href="wish-sim.html" class="btn btn-outline">
+          <i class="fa-solid fa-dice"></i> Wish Simulator
+        </a>
+        <a href="guides.html" class="btn btn-outline">
+          <i class="fa-solid fa-book-open"></i> View Guides
+        </a>
+      </div>
+
+      <!-- 7 Element Orbs — click to filter characters by element -->
+      <div class="hero-elements">
+        <div class="elem-orb orb-pyro" data-label="Pyro" title="View Pyro Characters" onclick="window.location.href='characters.html#filter-pyro'"><i class="fa-solid fa-fire"></i></div>
+        <div class="elem-orb orb-hydro" data-label="Hydro" title="View Hydro Characters" onclick="window.location.href='characters.html#filter-hydro'"><i class="fa-solid fa-droplet"></i></div>
+        <div class="elem-orb orb-anemo" data-label="Anemo" title="View Anemo Characters" onclick="window.location.href='characters.html#filter-anemo'"><i class="fa-solid fa-wind"></i></div>
+        <div class="elem-orb orb-electro" data-label="Electro" title="View Electro Characters" onclick="window.location.href='characters.html#filter-electro'"><i class="fa-solid fa-bolt"></i></div>
+        <div class="elem-orb orb-dendro" data-label="Dendro" title="View Dendro Characters" onclick="window.location.href='characters.html#filter-dendro'"><i class="fa-solid fa-leaf"></i></div>
+        <div class="elem-orb orb-cryo" data-label="Cryo" title="View Cryo Characters" onclick="window.location.href='characters.html#filter-cryo'"><i class="fa-solid fa-snowflake"></i></div>
+        <div class="elem-orb orb-geo" data-label="Geo" title="View Geo Characters" onclick="window.location.href='characters.html#filter-geo'"><i class="fa-solid fa-mountain"></i></div>
+      </div>
+      <p style="text-align:center;margin-top:2rem;font-size:0.82rem;color:var(--text-muted);animation:fadeInUp 0.8s 0.5s var(--ease-out) both;">Click an element orb to browse its characters →</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+     FULL TIER LIST — S / A / B tiers
+     ============================================================ -->
+<section class="section reveal" id="tierlist">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-tag">v5.7 Meta Rankings</span>
+      <h2>Character Tier List</h2>
+      <div class="section-divider"></div>
+      <p>Based on Spiral Abyss performance, team flexibility, and account value. All ratings by top theorycrafters.</p>
+    </div>
+    <div id="tierListContainer">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FEATURED BUILDS — 8 characters
+     ============================================================ -->
+<section class="section reveal" style="background:rgba(255,255,255,0.008);">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-tag">Build Database</span>
+      <h2>Featured Character Builds</h2>
+      <div class="section-divider"></div>
+      <p>Optimized weapons, artifacts, and stat priorities — tested by the theorycrafting community.</p>
+    </div>
+    <div class="build-card-row" id="featuredBuilds">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     POPULAR TEAMS — 6 top meta teams
+     ============================================================ -->
+<section class="section reveal">
+  <div class="section-inner">
+    <div class="section-header">
+      <span class="section-tag">Team Compositions</span>
+      <h2>Popular Meta Teams</h2>
+      <div class="section-divider"></div>
+      <p>Proven team archetypes dominating the current Spiral Abyss. Click any team to view full rotation guides.</p>
+    </div>
+    <div class="grid-2" id="homeTeams">
+      <!-- Rendered by JS -->
+    </div>
+    <div style="text-align:center;margin-top:2rem;">
+      <a href="teams.html" class="btn btn-outline"><i class="fa-solid fa-users"></i> View All 12 Teams</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CURRENT BANNERS
+     ============================================================ -->
+  <section class="section reveal">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Wish Banners</span>
+        <h2>Current Banners</h2>
+        <div class="section-divider"></div>
+        <p>What is available right now on the Wish screen. Plan your Primogems wisely.</p>
+      </div>
+      <div class="banner-grid" id="bannerGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ESSENTIAL TOOLS
+       ============================================================ -->
+  <section class="section reveal" style="background:rgba(255,255,255,0.008);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Interactive Utilities</span>
+        <h2>Essential Tools</h2>
+        <div class="section-divider"></div>
+        <p>Handy calculators and simulators to optimize your Genshin Impact experience.</p>
+      </div>
+      <div class="tool-grid" id="toolGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       NEWSLETTER CTA
+       ============================================================ -->
+  <section class="cta-newsletter reveal">
+    <h2>Stay Ahead of the Meta</h2>
+    <p>Get the latest build guides, banner analyses, and redemption codes delivered to your inbox. No spam — only primo-quality content.</p>
+    <form class="cta-form" onsubmit="event.preventDefault(); alert('Thanks for subscribing! Check your inbox for confirmation.');">
+      <input type="email" placeholder="Enter your email address" required>
+      <button type="submit" class="btn btn-primary">
+        <i class="fa-solid fa-paper-plane"></i> Subscribe
+      </button>
+    </form>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+      Character images courtesy of Enka.Network and community dataminers.
+    </p>
+  </footer>
+
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+  <!-- Shared data & utilities -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+
+  <script>
+  /* ============================================================
+     INLINE ELEMENT REFERENCE (also in data.js, duplicated for safety)
+     ============================================================ */
+  const ELS = {
+    pyro:  { name:'Pyro',  color:'#ef7938', icon:'fa-fire' },
+    hydro: { name:'Hydro', color:'#4cc2f1', icon:'fa-droplet' },
+    anemo: { name:'Anemo', color:'#74c2a8', icon:'fa-wind' },
+    electro:{ name:'Electro',color:'#af8fd1', icon:'fa-bolt' },
+    dendro:{ name:'Dendro', color:'#a5d63e', icon:'fa-leaf' },
+    cryo:  { name:'Cryo',  color:'#9fd6e3', icon:'fa-snowflake' },
+    geo:   { name:'Geo',   color:'#fab72e', icon:'fa-mountain' }
+  };
+
+  /* ============================================================
+     IMAGE HELPER: show on load, hide on error
+     ============================================================ */
+  function handleCharImg(imgEl) {
+    imgEl.addEventListener('load', function() {
+      this.style.display = 'block';
+    });
+    imgEl.addEventListener('error', function() {
+      this.style.display = 'none';
+    });
+    // If already loaded from cache
+    if (imgEl.complete && imgEl.naturalWidth > 0) {
+      imgEl.style.display = 'block';
+    }
+  }
+
+  /* ============================================================
+     STARFIELD CANVAS ANIMATION
+     ============================================================ */
+  (function() {
+    const canvas = document.getElementById('starfield');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    const STAR_COUNT = 220;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = document.documentElement.scrollHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.8 + 0.3,
+          baseAlpha: Math.random() * 0.7 + 0.15,
+          alpha: 0,
+          twinkleSpeed: Math.random() * 0.018 + 0.004,
+          twinkleOffset: Math.random() * Math.PI * 2,
+          hue: Math.random() < 0.12 ? 40 + Math.random() * 10 : 0
+        });
+      }
+    }
+
+    function draw(timestamp) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const s of stars) {
+        s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.3;
+        s.alpha = Math.max(0.04, Math.min(1, s.alpha));
+        const fill = s.hue > 0
+          ? `hsla(${s.hue}, 65%, 72%, ${s.alpha})`
+          : `rgba(210,210,230,${s.alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', () => {
+      resize();
+      initStars();
+    });
+    resize();
+    initStars();
+    requestAnimationFrame(draw);
+  })();
+
+  /* ============================================================
+     SCROLL REVEAL (IntersectionObserver)
+     ============================================================ */
+  (function() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  })();
+
+  /* ============================================================
+     NAVIGATION SCROLL EFFECT
+     ============================================================ */
+  (function() {
+    const nav = document.getElementById('navbar');
+    if (!nav) return;
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    });
+  })();
+
+  /* ============================================================
+     MOBILE NAV TOGGLE
+     ============================================================ */
+  (function() {
+    const toggle = document.getElementById('navToggle');
+    const links = document.getElementById('navLinks');
+    if (!toggle || !links) return;
+    toggle.addEventListener('click', () => {
+      links.classList.toggle('open');
+      const icon = toggle.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-xmark');
+      }
+    });
+  })();
+
+  /* ============================================================
+     FULL TIER LIST — S / A / B with 30+ characters
+     ============================================================ */
+  (function() {
+    const tierData = {
+      S: [
+        { name:'Furina', el:'hydro', st:5, role:'Sub-DPS / Buffer' },
+        { name:'Neuvillette', el:'hydro', st:5, role:'Main DPS' },
+        { name:'Nahida', el:'dendro', st:5, role:'Sub-DPS / Support' },
+        { name:'Kazuha', el:'anemo', st:5, role:'Support / CC' },
+        { name:'Arlecchino', el:'pyro', st:5, role:'Main DPS' },
+        { name:'Zhongli', el:'geo', st:5, role:'Shield / Support' },
+        { name:'Yelan', el:'hydro', st:5, role:'Sub-DPS' },
+        { name:'Raiden Shogun', el:'electro', st:5, role:'Sub-DPS / Battery' },
+      ],
+      A: [
+        { name:'Alhaitham', el:'dendro', st:5, role:'Main DPS' },
+        { name:'Bennett', el:'pyro', st:4, role:'Support / Healer' },
+        { name:'Xiangling', el:'pyro', st:4, role:'Sub-DPS' },
+        { name:'Xingqiu', el:'hydro', st:4, role:'Sub-DPS' },
+        { name:'Fischl', el:'electro', st:4, role:'Sub-DPS' },
+        { name:'Kuki Shinobu', el:'electro', st:4, role:'Hyperbloom / Healer' },
+        { name:'Sucrose', el:'anemo', st:4, role:'Support / EM Buffer' },
+        { name:'Ayaka', el:'cryo', st:5, role:'Main DPS' },
+        { name:'Nilou', el:'hydro', st:5, role:'Bloom Enabler' },
+        { name:'Navia', el:'geo', st:5, role:'Main DPS' },
+        { name:'Hu Tao', el:'pyro', st:5, role:'Main DPS' },
+        { name:'Clorinde', el:'electro', st:5, role:'Main DPS' },
+      ],
+      B: [
+        { name:'Xiao', el:'anemo', st:5, role:'Main DPS' },
+        { name:'Wanderer', el:'anemo', st:5, role:'Main DPS' },
+        { name:'Tighnari', el:'dendro', st:5, role:'Main DPS' },
+        { name:'Keqing', el:'electro', st:5, role:'Main DPS' },
+        { name:'Diluc', el:'pyro', st:5, role:'Main DPS' },
+        { name:'Ganyu', el:'cryo', st:5, role:'Main DPS' },
+        { name:'Venti', el:'anemo', st:5, role:'Support / CC' },
+        { name:'Yaoyao', el:'dendro', st:4, role:'Healer / Support' },
+        { name:'Layla', el:'cryo', st:4, role:'Shield' },
+        { name:'Gaming', el:'pyro', st:4, role:'Main DPS' },
+      ]
+    };
+
+    const container = document.getElementById('tierListContainer');
+    if (!container) return;
+
+    Object.entries(tierData).forEach(([tier, chars]) => {
+      const section = document.createElement('div');
+      section.className = 'tier-section';
+
+      let chipsHTML = '';
+      chars.forEach(ch => {
+        const el = ELS[ch.el];
+        const imgName = ch.name.replace(/ /g, '_');
+        chipsHTML +=
+          '<a href="characters.html#filter-' + ch.el + '" class="tier-chip">' +
+            '<span class="tier-chip-avatar" style="background:' + el.color + '">' +
+              '<img src="https://enka.network/ui/UI_AvatarIcon_Side_' + imgName + '.png" onerror="this.style.display=\'none\'" alt="' + ch.name + '" loading="lazy">' +
+              ch.name[0] +
+            '</span>' +
+            ch.name +
+          '</a>';
+      });
+
+      const tierLabel = tier === 'S' ? 'Top Meta' : tier === 'A' ? 'Strong Picks' : 'Viable';
+      section.innerHTML =
+        '<div class="tier-row-header">' +
+          '<div class="tier-badge ' + tier.toLowerCase() + '">' + tier + '</div>' +
+          '<span class="tier-row-label">' + tierLabel + ' — ' + chars.length + ' characters</span>' +
+        '</div>' +
+        '<div class="tier-chips">' + chipsHTML + '</div>';
+      container.appendChild(section);
+
+      // Activate images
+      section.querySelectorAll('img').forEach(img => handleCharImg(img));
+    });
+  })();
+
+  /* ============================================================
+     FEATURED BUILDS — 8 character cards with images + build details
+     ============================================================ */
+  (function() {
+    const builds = [
+      { name:'Furina', el:'hydro', role:'Sub-DPS / Buffer', st:5, weapon:'Splendor of Tranquil Waters', artifact:'Golden Troupe (4pc)', sands:'HP% / ER%', goblet:'Hydro DMG', circlet:'CRIT Rate / DMG', talents:'Skill > Burst > NA', desc:'The Hydro Archon — massive off-field DMG and team-wide buffing. Universal support for any team composition.' },
+      { name:'Neuvillette', el:'hydro', role:'Main DPS', st:5, weapon:'Tome of the Eternal Flow', artifact:'Marechaussee Hunter (4pc)', sands:'HP%', goblet:'Hydro DMG', circlet:'CRIT DMG / Rate', talents:'NA > Skill > Burst', desc:'Hydro Sovereign with devastating charged attack beams. Highest consistent DPS in the game — shreds through Spiral Abyss.' },
+      { name:'Arlecchino', el:'pyro', role:'Main DPS', st:5, weapon:'Crimson Moon\'s Semblance', artifact:'Fragment of Harmonic Whimsy (4pc)', sands:'ATK%', goblet:'Pyro DMG', circlet:'CRIT Rate / DMG', talents:'NA > Skill > Burst', desc:'The Knave — catastrophic Pyro damage via Bond of Life mechanic. Pure offensive powerhouse that cannot be healed.' },
+      { name:'Nahida', el:'dendro', role:'Sub-DPS / Support', st:5, weapon:'A Thousand Floating Dreams', artifact:'Deepwood Memories (4pc)', sands:'EM', goblet:'EM / Dendro DMG', circlet:'EM / CRIT', talents:'Skill > Burst > NA', desc:'Dendro Archon enables every Dendro team. Massive EM sharing, off-field Dendro application, tri-karma purification.' },
+      { name:'Raiden Shogun', el:'electro', role:'Sub-DPS / Battery', st:5, weapon:'Engulfing Lightning', artifact:'Emblem of Severed Fate (4pc)', sands:'ER% / ATK%', goblet:'Electro DMG / ATK%', circlet:'CRIT Rate / DMG', talents:'Burst > Skill > NA', desc:'The Electro Archon batteries any team. National team driver, Hyperbloom trigger, and devastating Burst nuke.' },
+      { name:'Kazuha', el:'anemo', role:'Support / CC', st:5, weapon:'Freedom-Sworn', artifact:'Viridescent Venerer (4pc)', sands:'EM', goblet:'EM', circlet:'EM', talents:'Skill = Burst > NA', desc:'Premium Anemo support. Groups enemies, shreds RES, buffs Elemental DMG. Triple EM build for maximum buffing potential.' },
+      { name:'Zhongli', el:'geo', role:'Shield / Support', st:5, weapon:'Vortex Vanquisher', artifact:'Tenacity of the Millelith (4pc)', sands:'HP%', goblet:'HP% / Geo DMG', circlet:'HP% / CRIT', talents:'Skill > Burst > NA', desc:'The strongest shielder in the game. Universal RES shred, petrification Burst, and unbreakable shield. Fits almost any team.' },
+      { name:'Alhaitham', el:'dendro', role:'Main DPS', st:5, weapon:'Light of Foliar Incision', artifact:'Gilded Dreams (4pc)', sands:'EM / ATK%', goblet:'Dendro DMG', circlet:'CRIT Rate / DMG', talents:'Skill > NA > Burst', desc:'Dendro sword carry with chisel-light mirrors. Spread reaction specialist. Complex but rewarding rotation patterns.' },
+    ];
+
+    const container = document.getElementById('featuredBuilds');
+    if (!container) return;
+
+    builds.forEach(b => {
+      const el = ELS[b.el];
+      const card = document.createElement('div');
+      card.className = 'featured-build-card';
+      card.innerHTML =
+        '<div class="build-img-wrap" style="background:linear-gradient(160deg,'+el.color+'44 0%,'+el.color+'88 50%,#111 100%);">'+
+          '<img src="https://enka.network/ui/UI_AvatarIcon_Side_'+b.name.replace(/ /g,'_')+'.png" onerror="this.style.display=\'none\'" alt="'+b.name+'" loading="lazy">'+
+          b.name[0].toUpperCase()+
+        '</div>'+
+        '<div class="build-details">'+
+          '<h3>'+b.name+'</h3>'+
+          '<div class="build-role"><i class="fa-solid '+el.icon+'" style="color:'+el.color+';margin-right:4px;font-size:0.7rem;"></i>'+el.name+' · '+b.role+'</div>'+
+          '<div class="build-detail-row"><span class="build-detail-label">Weapon</span><span class="build-detail-value">'+b.weapon+'</span></div>'+
+          '<div class="build-detail-row"><span class="build-detail-label">Artifact</span><span class="build-detail-value">'+b.artifact+'</span></div>'+
+          '<div class="build-detail-row"><span class="build-detail-label">Sands</span><span class="build-detail-value">'+b.sands+'</span></div>'+
+          '<div class="build-detail-row"><span class="build-detail-label">Goblet</span><span class="build-detail-value">'+b.goblet+'</span></div>'+
+          '<div class="build-detail-row"><span class="build-detail-label">Circlet</span><span class="build-detail-value">'+b.circlet+'</span></div>'+
+          '<div class="build-detail-row" style="border-bottom:none;"><span class="build-detail-label">Priority</span><span class="build-detail-value">'+b.talents+'</span></div>'+
+          '<p style="font-size:0.8rem;color:var(--text-secondary);margin-top:12px;line-height:1.6;">'+b.desc+'</p>'+
+          '<a href="characters.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-circle-info"></i> Full Build Guide</a>'+
+        '</div>';
+      container.appendChild(card);
+      const img = card.querySelector('img'); if(img) handleCharImg(img);
+    });
+  })();
+
+  /* ============================================================
+     POPULAR TEAMS — 6 team cards
+     ============================================================ */
+  (function() {
+    const teams = [
+      { name:'Hyperbloom', tier:'S', team:['Nahida','Yelan','Kuki Shinobu','Alhaitham'], desc:'Top single-target team. Bloom seeds + Electro = homing missiles. Low investment, insane output.' },
+      { name:'Neuvillette Hyper', tier:'S', team:['Neuvillette','Furina','Kazuha','Baizhu'], desc:'Neuvillette charged beams + Furina buffs. Highest consistent DPS in the game. C1 recommended.' },
+      { name:'National (Rational)', tier:'S', team:['Raiden Shogun','Bennett','Xiangling','Xingqiu'], desc:'Classic braindead team. Raiden batteries, Xiangling snapshots. Easy 36★ Abyss.' },
+      { name:'Arlecchino Vape', tier:'S', team:['Arlecchino','Yelan','Bennett','Kazuha'], desc:'Arlecchino NA spam + Yelan Vaporize. Massive single-target Pyro damage. Cannot be healed.' },
+      { name:'Nilou Bloom', tier:'A', team:['Nilou','Nahida','Kokomi','Collei'], desc:'Bountiful Core explosions devastate AoE chambers. Must be pure Dendro + Hydro team.' },
+      { name:'Mono Geo', tier:'A', team:['Itto','Gorou','Albedo','Zhongli'], desc:'Unga bunga. Itto charged attacks + Gorou buffs + Zhongli shred. Immortal and consistent.' },
+    ];
+    const container = document.getElementById('homeTeams');
+    if (!container) return;
+    teams.forEach(t => {
+      let slotsHTML = '';
+      t.team.forEach(name => {
+        const elKey = Object.keys(ELS).find(k => {
+          if (name.includes('Shogun')) return k === 'electro';
+          if (name === 'Nahida' || name === 'Collei' || name === 'Alhaitham') return k === 'dendro';
+          if (name === 'Yelan' || name === 'Xingqiu' || name === 'Kokomi' || name === 'Nilou' || name === 'Neuvillette' || name === 'Furina') return k === 'hydro';
+          if (name === 'Bennett' || name === 'Xiangling' || name === 'Arlecchino') return k === 'pyro';
+          if (name === 'Kazuha') return k === 'anemo';
+          if (name === 'Kuki Shinobu' || name === 'Raiden Shogun') return k === 'electro';
+          if (name === 'Zhongli' || name === 'Gorou' || name === 'Albedo' || name === 'Itto') return k === 'geo';
+          if (name === 'Baizhu') return k === 'dendro';
+          return 'pyro';
+        });
+        const el = ELS[elKey] || ELS['pyro'];
+        slotsHTML += '<div class="home-team-slot"><div class="home-team-slot-avatar" style="background:'+el.color+'"><img src="https://enka.network/ui/UI_AvatarIcon_Side_'+name.replace(/ /g,'_')+'.png" onerror="this.style.display=\'none\'" loading="lazy">'+name[0].toUpperCase()+'</div><span class="home-team-slot-name">'+name+'</span></div>';
+      });
+      container.innerHTML += '<a href="teams.html" class="home-team-card"><h3>'+t.name+' <span class="tag" style="background:'+(t.tier==='S'?'var(--danger)':'var(--warning)')+';color:#fff;padding:2px 8px;border-radius:50px;font-size:0.65rem;vertical-align:middle;">'+t.tier+'</span></h3><div class="home-team-slots">'+slotsHTML+'</div><p style="font-size:0.82rem;color:var(--text-secondary);">'+t.desc+'</p></a>';
+      container.querySelectorAll('img').forEach(handleCharImg);
+    });
+  })();
+
+  /* ============================================================
+     CURRENT BANNERS — 3 banner cards with character images
+     ============================================================ */
+  (function() {
+    const banners = [
+      {
+        status: 'active',
+        statusClass: 'active-badge',
+        label: 'Active',
+        fiveStars: [
+          { name: 'Navia', element: 'geo' },
+          { name: 'Kamisato Ayaka', element: 'cryo' }
+        ],
+        weapon: 'Verdict + Mistsplitter Reforged',
+        duration: 'May 18 – June 8, 2026'
+      },
+      {
+        status: 'active',
+        statusClass: 'active-badge',
+        label: 'Active',
+        fiveStars: [
+          { name: 'Zhongli', element: 'geo' },
+          { name: 'Tartaglia', element: 'hydro' }
+        ],
+        weapon: 'Vortex Vanquisher + Polar Star',
+        duration: 'May 28 – June 18, 2026'
+      },
+      {
+        status: 'upcoming',
+        statusClass: 'upcoming-badge',
+        label: 'Upcoming',
+        fiveStars: [
+          { name: 'Raiden_Shogun', element: 'electro', displayName: 'Raiden Shogun' },
+          { name: 'Yae_Miko', element: 'electro', displayName: 'Yae Miko' }
+        ],
+        weapon: 'Engulfing Lightning + Kagura\'s Verity',
+        duration: 'Expected June 18, 2026'
+      }
+    ];
+
+    const container = document.getElementById('bannerGrid');
+    if (!container) return;
+
+    banners.forEach(b => {
+      const card = document.createElement('div');
+      card.className = 'banner-card' + (b.status === 'upcoming' ? ' upcoming-card' : '');
+
+      let charsHTML = '';
+      b.fiveStars.forEach(c => {
+        const el = ELS[c.element];
+        const imgName = c.name.replace(/ /g, '_');
+        const label = c.displayName || c.name.replace(/_/g, ' ');
+        charsHTML +=
+          '<div class="banner-char-slot">' +
+            '<div class="banner-char-avatar" style="background:radial-gradient(circle at 40% 40%, ' + el.color + 'cc, ' + el.color + '44); box-shadow:0 0 18px ' + el.color + '33;">' +
+              '<img src="https://enka.network/ui/UI_AvatarIcon_Side_' + imgName + '.png" onerror="this.style.display=\'none\'" alt="' + label + '" loading="lazy">' +
+              label[0].toUpperCase() +
+            '</div>' +
+            '<span class="banner-char-name">' + label + '</span>' +
+          '</div>';
+      });
+
+      card.innerHTML =
+        '<span class="banner-badge ' + b.statusClass + '">' + b.label + '</span>' +
+        '<div class="banner-carousel">' + charsHTML + '</div>' +
+        '<div class="banner-weapon-row"><i class="fa-solid fa-gavel" style="margin-right:6px;color:var(--gold-dim);"></i>' + b.weapon + '</div>' +
+        '<div class="banner-time-row"><i class="fa-regular fa-clock" style="margin-right:6px;"></i>' + b.duration + '</div>';
+
+      container.appendChild(card);
+
+      // Activate banner images
+      card.querySelectorAll('img').forEach(handleCharImg);
+    });
+  })();
+
+  /* ============================================================
+     ESSENTIAL TOOLS — 5 tool link cards
+     ============================================================ */
+  (function() {
+    const tools = [
+      {
+        icon: 'fa-dice',
+        title: 'Wish Simulator',
+        desc: 'Simulate 10-pulls with accurate pity mechanics. Test your luck before spending real Primogems.',
+        href: 'wish-sim.html'
+      },
+      {
+        icon: 'fa-calculator',
+        title: 'Damage Calculator',
+        desc: 'Calculate exact damage output with buffs, resistances, and reaction multipliers factored in.',
+        href: 'damage-calc.html'
+      },
+      {
+        icon: 'fa-hourglass-half',
+        title: 'Resin Timer',
+        desc: 'Track your Original Resin regeneration and never cap at 160 again.',
+        href: 'resin-timer.html'
+      },
+      {
+        icon: 'fa-coins',
+        title: 'Primogem Calculator',
+        desc: 'Project your Primogem income from dailies, events, Abyss, and Welkin across future patches.',
+        href: 'primo-calc.html'
+      },
+      {
+        icon: 'fa-arrow-trend-up',
+        title: 'Ascension Planner',
+        desc: 'Plan material farming for character ascensions. See exactly what you need and when to farm.',
+        href: 'ascension-planner.html'
+      }
+    ];
+
+    const container = document.getElementById('toolGrid');
+    if (!container) return;
+
+    tools.forEach(t => {
+      const a = document.createElement('a');
+      a.className = 'tool-card';
+      a.href = t.href;
+      a.innerHTML =
+        '<div class="tool-card-icon"><i class="fa-solid ' + t.icon + '"></i></div>' +
+        '<h3>' + t.title + '</h3>' +
+        '<p>' + t.desc + '</p>';
+      container.appendChild(a);
+    });
+  })();
+  </script>
+
+</body>
+</html>

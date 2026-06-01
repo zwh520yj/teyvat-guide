@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weapons — Teyvat Guide</title>
+<meta name="description" content="Complete Genshin Impact weapon database: 100+ weapons with stats, passives, and best character matches.">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  .hero-mini { position:relative;z-index:1;text-align:center;padding:3rem 2rem 2rem; }
+  .hero-mini::before { content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(201,169,110,0.06) 0%,transparent 70%);pointer-events:none; }
+  .hero-mini-content { position:relative;z-index:2;max-width:650px;margin:0 auto; }
+  .hero-mini h1 { font-family:'Cinzel',serif;font-size:clamp(2rem,4.5vw,3.2rem);font-weight:900;background:linear-gradient(180deg,#fff,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+  .hero-mini p { font-size:1.05rem;color:var(--text-secondary);margin-top:.8rem; }
+  .stats-bar { text-align:center;font-size:.82rem;color:var(--text-muted);margin-bottom:1.5rem; }
+  .stats-bar span { color:var(--gold);font-weight:600; }
+  .wpn-card { background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);overflow:hidden;transition:all .35s var(--ease-out);display:flex;align-items:stretch; }
+  .wpn-card:hover { border-color:var(--border-active);transform:translateY(-3px);box-shadow:0 12px 36px rgba(0,0,0,0.3); }
+  .wpn-img-side { width:100px;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative;font-size:2.5rem;color:#fff; }
+  .wpn-img-side img { position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover; }
+  .wpn-info { flex:1;padding:1rem 1.2rem;display:flex;flex-direction:column;gap:6px; }
+  .wpn-info h3 { font-family:'Cinzel',serif;font-size:1rem;font-weight:700; }
+  .wpn-stats { display:flex;gap:1rem;font-size:.82rem;color:var(--text-secondary); }
+  .wpn-passive { font-size:.8rem;color:var(--text-secondary);line-height:1.5; }
+  .wpn-best { font-size:.76rem;color:var(--gold-light);margin-top:auto; }
+  .no-results { text-align:center;padding:3rem;color:var(--text-muted);grid-column:1/-1; }
+  @media(max-width:768px){.wpn-img-side{width:72px;font-size:1.8rem;}}
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+<nav class="nav" id="navbar">
+  <a href="index.html" class="nav-logo"><i class="fa-solid fa-gem"></i> Teyvat Guide</a>
+  <button class="nav-hamburger" id="navToggle"><i class="fa-solid fa-bars"></i></button>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Home</a>
+    <a href="characters.html">Characters</a>
+    <a href="weapons.html" class="active">Weapons</a>
+    <a href="artifacts.html">Artifacts</a>
+    <a href="bosses.html">Bosses</a>
+    <a href="domains.html">Domains</a>
+    <a href="teams.html">Teams</a>
+    <div class="nav-dropdown"><a href="#">Tools ▾</a><div class="nav-dropdown-menu">
+      <a href="resin-timer.html">Resin Timer</a><a href="primo-calc.html">Primo Calculator</a>
+      <a href="damage-calc.html">Damage Calculator</a><a href="ascension-planner.html">Ascension Planner</a>
+      <a href="wish-sim.html">Wish Simulator</a></div></div>
+    <a href="spiral-abyss.html">Spiral Abyss</a>
+    <a href="guides.html">Guides</a>
+    <a href="events.html">Events</a><a href="codes.html">Codes</a>
+  </div>
+</nav>
+
+<section class="hero-mini"><div class="hero-mini-content">
+  <div class="hero-badge">Weapon Database</div>
+  <h1>Weapon Database</h1>
+  <p>100+ weapons with Base ATK, substats, passives, and best character matches. Filter by type, rarity, and search by name.</p>
+</div></section>
+
+<div class="section"><div class="section-inner">
+  <div class="stats-bar" id="statsBar">Loading weapons...</div>
+  <div class="filter-bar">
+    <input type="text" id="searchInput" placeholder="Search weapons by name...">
+  </div>
+  <div class="filter-bar" id="typeFilters">
+    <button class="filter-chip active" data-filter="type" data-value="all">All Types</button>
+    <button class="filter-chip" data-filter="type" data-value="Sword"><i class="fa-solid fa-sword" style="margin-right:4px;"></i>Sword</button>
+    <button class="filter-chip" data-filter="type" data-value="Claymore"><i class="fa-solid fa-hammer" style="margin-right:4px;"></i>Claymore</button>
+    <button class="filter-chip" data-filter="type" data-value="Polearm"><i class="fa-solid fa-spear" style="margin-right:4px;"></i>Polearm</button>
+    <button class="filter-chip" data-filter="type" data-value="Bow"><i class="fa-solid fa-bow-arrow" style="margin-right:4px;"></i>Bow</button>
+    <button class="filter-chip" data-filter="type" data-value="Catalyst"><i class="fa-solid fa-book" style="margin-right:4px;"></i>Catalyst</button>
+  </div>
+  <div class="filter-bar" id="rarityFilters">
+    <button class="filter-chip active" data-filter="rarity" data-value="all">All Rarities</button>
+    <button class="filter-chip" data-filter="rarity" data-value="5">5★</button>
+    <button class="filter-chip" data-filter="rarity" data-value="4">4★</button>
+    <button class="filter-chip" data-filter="rarity" data-value="3">3★</button>
+  </div>
+  <div class="grid-2" id="weaponGrid"></div>
+</div></div>
+
+<footer class="footer">
+  <div class="footer-logo">Teyvat Guide</div>
+  <div class="footer-links"><a href="index.html">Home</a><a href="characters.html">Characters</a><a href="weapons.html">Weapons</a><a href="artifacts.html">Artifacts</a><a href="bosses.html">Bosses</a><a href="domains.html">Domains</a><a href="teams.html">Teams</a></div>
+  <p class="footer-disclaimer">Fan-made resource. Not affiliated with HoYoverse.</p>
+</footer>
+
+<script src="utils.js"></script>
+<script src="data.js"></script>
+<script>
+(function(){
+  const c=document.getElementById('starfield');if(c){const x=c.getContext('2d');let s=[];function rs(){c.width=innerWidth;c.height=document.documentElement.scrollHeight}function is(n){s=[];for(let i=0;i<n;i++)s.push({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.6+.3,a:Math.random(),sp:Math.random()*.008+.003})}function d(){x.clearRect(0,0,c.width,c.height);s.forEach(s=>{s.a+=s.sp;if(s.a>1)s.a=0;const a=Math.sin(s.a*Math.PI);x.beginPath();x.fillStyle=`rgba(201,169,110,${a*.5})`;x.arc(s.x,s.y,s.r,0,Math.PI*2);x.fill()});requestAnimationFrame(d)}rs();is(200);d();addEventListener('resize',()=>{rs();is(200)})}
+
+  const nav=document.getElementById('navbar');addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>20));
+  const nt=document.getElementById('navToggle'),nl=document.getElementById('navLinks');if(nt)nt.addEventListener('click',()=>nl.classList.toggle('open'));
+
+  const grid=document.getElementById('weaponGrid'),statsBar=document.getElementById('statsBar'),searchInput=document.getElementById('searchInput');
+  let filters={type:'all',rarity:'all',search:''};
+  const typeIcons={Sword:'fa-sword',Claymore:'fa-hammer',Polearm:'fa-spear',Bow:'fa-bow-arrow',Catalyst:'fa-book'};
+  const typeBg={Sword:'#4cc2f1',Claymore:'#ef7938',Polearm:'#a5d63e',Bow:'#af8fd1',Catalyst:'#74c2a8'};
+
+  function buildWpnCard(w){
+    const st=w.st,bg=typeBg[w.type]||'#555',bestFor=w.best?w.best.join(', '):'';
+    return'<div class="wpn-card" data-name="'+w.name+'" data-type="'+w.type+'" data-rarity="'+st+'">'+
+      '<div class="wpn-img-side" style="background:linear-gradient(135deg,'+bg+',#111);">'+
+        weaponImgHTML(w.name)+
+        '<i class="fa-solid '+typeIcons[w.type]+'" style="opacity:0.6;"></i>'+
+      '</div>'+
+      '<div class="wpn-info">'+
+        '<h3>'+w.name+'</h3>'+
+        '<span class="element-badge" style="background:'+bg+'">'+w.type+'</span>'+
+        '<div class="wpn-stats"><span>Base ATK: <strong>'+w.atk+'</strong></span><span>'+w.sub+': <strong>'+w.subV+'</strong></span></div>'+
+        '<div class="wpn-passive">'+w.pas+'</div>'+
+        (bestFor?'<div class="wpn-best"><i class="fa-solid fa-user-check" style="margin-right:4px;"></i>Best for: '+bestFor+'</div>':'')+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderAll(){if(!grid)return;grid.innerHTML='';
+    if(typeof WEAPONS==='undefined'||!WEAPONS.length){grid.innerHTML='<div class="no-results"><i class="fa-solid fa-exclamation-triangle"></i><p>Weapon data failed to load.</p></div>';return}
+    WEAPONS.forEach(w=>{grid.insertAdjacentHTML('beforeend',buildWpnCard(w))});applyFilters()}
+
+  function applyFilters(){if(!grid)return;const cards=grid.querySelectorAll('.wpn-card');let v=0;
+    cards.forEach(c=>{let s=true;if(filters.type!=='all'&&c.getAttribute('data-type')!==filters.type)s=false;if(filters.rarity!=='all'&&c.getAttribute('data-rarity')!==filters.rarity)s=false;if(filters.search&&c.getAttribute('data-name').toLowerCase().indexOf(filters.search.toLowerCase())===-1)s=false;c.style.display=s?'':'';if(s)v++});
+    const total=typeof WEAPONS!=='undefined'?WEAPONS.length:cards.length;if(statsBar)statsBar.innerHTML='Showing <span>'+v+'</span> of <span>'+total+'</span> weapons';
+    let nm=grid.querySelector('.no-results');if(v===0){if(!nm){nm=document.createElement('div');nm.className='no-results';nm.innerHTML='<i class="fa-solid fa-magnifying-glass"></i><p>No weapons match.</p>';grid.appendChild(nm)}}else if(nm)nm.remove()}
+
+  document.querySelectorAll('.filter-chip').forEach(ch=>{ch.addEventListener('click',function(){const p=this.parentElement;p.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');filters[this.getAttribute('data-filter')]=this.getAttribute('data-value');applyFilters()})});
+  if(searchInput)searchInput.addEventListener('input',function(){filters.search=searchInput.value.trim();applyFilters()});
+  renderAll();
+})();
+</script>
+</body>
+</html>

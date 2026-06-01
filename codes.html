@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redemption Codes — Teyvat Guide</title>
+  <meta name="description" content="Active Genshin Impact redemption codes for free Primogems, Mora, and rewards. Click to copy and redeem in-game.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Code Cards ── */
+    .code-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .code-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.35s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .code-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    }
+    .code-card.status-permanent::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--success), transparent);
+    }
+    .code-card.status-active::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .code-card.expired {
+      opacity: 0.55;
+    }
+    .code-card.expired::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--text-muted), transparent);
+    }
+    .code-card.expired:hover {
+      opacity: 0.75;
+    }
+
+    .code-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .code-status.status-active-tag {
+      background: rgba(76,175,80,0.12);
+      color: var(--success);
+      border: 1px solid rgba(76,175,80,0.3);
+    }
+    .code-status.status-permanent-tag {
+      background: rgba(76,194,241,0.12);
+      color: #4cc2f1;
+      border: 1px solid rgba(76,194,241,0.3);
+    }
+    .code-status.status-expired-tag {
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .code-status.status-warning-tag {
+      background: rgba(255,152,0,0.12);
+      color: var(--warning);
+      border: 1px solid rgba(255,152,0,0.3);
+    }
+
+    .code-string-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      user-select: all;
+    }
+    .code-string-wrapper:hover {
+      border-color: var(--gold-dim);
+      background: var(--bg-card-hover);
+    }
+    .code-string-wrapper.copied {
+      border-color: var(--success);
+      background: rgba(76,175,80,0.08);
+      animation: copyPulse 0.5s var(--ease-spring);
+    }
+    .code-string-wrapper.copied .code-text {
+      color: var(--success);
+    }
+    .code-text {
+      flex: 1;
+      font-family: 'Orbitron', monospace;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--gold-light);
+      transition: color 0.25s;
+      word-break: break-all;
+    }
+    .code-copy-icon {
+      flex-shrink: 0;
+      font-size: 1rem;
+      color: var(--text-muted);
+      transition: all 0.25s;
+    }
+    .code-string-wrapper:hover .code-copy-icon {
+      color: var(--gold);
+    }
+    .code-string-wrapper.copied .code-copy-icon {
+      color: var(--success);
+      animation: copyPop 0.4s var(--ease-spring);
+    }
+
+    @keyframes copyPulse {
+      0% { transform: scale(1); }
+      25% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    @keyframes copyPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+
+    .code-rewards {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .code-rewards i {
+      color: var(--gold);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .code-expiry {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Instructions Card ── */
+    .instructions-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem 2.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.5rem;
+      max-width: 700px;
+      margin: 0 auto;
+      transition: all 0.35s var(--ease-out);
+    }
+    .instructions-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    }
+    .instructions-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(201,169,110,0.1);
+      border: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .instructions-body h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+    .instructions-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .instructions-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+    }
+    .instructions-step .step-arrow {
+      color: var(--gold);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* ── Note Banner ── */
+    .note-banner {
+      background: rgba(255,152,0,0.06);
+      border: 1px solid rgba(255,152,0,0.2);
+      border-radius: var(--radius);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .note-banner i {
+      color: var(--warning);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .note-banner p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+    .note-banner strong {
+      color: var(--warning);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .code-grid {
+        grid-template-columns: 1fr;
+      }
+      .instructions-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+      }
+      .instructions-steps {
+        align-items: center;
+      }
+      .note-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.25rem 1.5rem;
+      }
+      .code-text {
+        font-size: 0.95rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .code-text {
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+      }
+      .code-string-wrapper {
+        padding: 10px 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="codes.html" class="active">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="hero-content">
+      <span class="hero-badge">✦ Free Primogems Await</span>
+      <h1>Redemption Codes</h1>
+      <p>Get free Primogems, Mora, EXP materials, and more. Click any code to copy it to your clipboard, then redeem it in-game.</p>
+    </div>
+  </section>
+
+  <!-- ── Active Codes ── -->
+  <section class="section reveal">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Claim Now</span>
+        <h2>Active Redemption Codes</h2>
+        <div class="section-divider"></div>
+        <p>Click any code to copy it instantly. Codes are case-sensitive &mdash; enter them exactly as shown.</p>
+      </div>
+      <div class="code-grid" id="activeCodeGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── How to Redeem ── -->
+  <section class="section reveal" style="background:rgba(255,255,255,0.01);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">In-Game</span>
+        <h2>How to Redeem</h2>
+        <div class="section-divider"></div>
+      </div>
+      <div class="instructions-card">
+        <div class="instructions-icon">
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <div class="instructions-body">
+          <h3>In-Game Redemption</h3>
+          <div class="instructions-steps">
+            <div class="instructions-step">
+              <span class="step-arrow">&rsaquo;</span>
+              <span>Open the <strong>Paimon Menu</strong> (ESC / Options button)</span>
+            </div>
+            <div class="instructions-step">
+              <span class="step-arrow">&rsaquo;</span>
+              <span>Go to <strong>Settings</strong> (gear icon)</span>
+            </div>
+            <div class="instructions-step">
+              <span class="step-arrow">&rsaquo;</span>
+              <span>Select <strong>Account</strong></span>
+            </div>
+            <div class="instructions-step">
+              <span class="step-arrow">&rsaquo;</span>
+              <span>Click <strong>Redeem Code</strong></span>
+            </div>
+            <div class="instructions-step">
+              <span class="step-arrow">&rsaquo;</span>
+              <span>Paste or type the code and press <strong>Exchange</strong></span>
+            </div>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:1rem;">
+            <i class="fa-solid fa-globe" style="margin-right:4px;"></i>
+            You can also redeem at <a href="https://genshin.hoyoverse.com/en/gift" target="_blank" rel="noopener">genshin.hoyoverse.com/gift</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Expired Codes ── -->
+  <section class="section reveal">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Recently Expired</span>
+        <h2>Expired Codes</h2>
+        <div class="section-divider"></div>
+        <p>These codes are no longer valid. Listed here for reference so you know what you might have missed.</p>
+      </div>
+      <div class="code-grid" id="expiredCodeGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Note ── -->
+  <section class="section reveal" style="background:rgba(255,255,255,0.01);padding-top:0;">
+    <div class="section-inner">
+      <div class="note-banner">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <p><strong>Codes are time-limited.</strong> Most redemption codes expire within days or weeks of release. Copy them now and redeem in-game as soon as possible to avoid missing out on free rewards.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="codes.html">Codes</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+      Redemption codes are provided as-is and may expire without notice.
+    </p>
+  </footer>
+
+  <!-- ── Shared Data ── -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+
+  <!-- ── Page Scripts ── -->
+  <script>
+    /* ===== Starfield Canvas Animation ===== */
+    (function() {
+      const canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const STAR_COUNT = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          const hsl = s.hue > 0
+            ? `hsla(${s.hue}, 60%, 70%, ${s.alpha})`
+            : `rgba(200,200,220,${s.alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ===== Scroll Reveal (IntersectionObserver) ===== */
+    (function() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    })();
+
+    /* ===== Navigation Scroll Effect ===== */
+    (function() {
+      const nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+    })();
+
+    /* ===== Mobile Nav Toggle ===== */
+    (function() {
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', () => {
+        links.classList.toggle('open');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-bars');
+          icon.classList.toggle('fa-xmark');
+        }
+      });
+    })();
+
+    /* ===== Copy Code to Clipboard ===== */
+    function copyCode(codeElement, codeStr) {
+      navigator.clipboard.writeText(codeStr).then(() => {
+        const wrapper = codeElement.closest('.code-string-wrapper');
+        const icon = wrapper.querySelector('.code-copy-icon');
+        const text = wrapper.querySelector('.code-text');
+
+        // Visual feedback
+        wrapper.classList.add('copied');
+        icon.classList.remove('fa-copy', 'fa-regular');
+        icon.classList.add('fa-solid', 'fa-circle-check');
+
+        // Store original text for reset
+        const originalText = text.textContent;
+
+        // Remove copied state after animation
+        setTimeout(() => {
+          wrapper.classList.remove('copied');
+          icon.classList.remove('fa-solid', 'fa-circle-check');
+          icon.classList.add('fa-copy', 'fa-regular');
+        }, 1800);
+      }).catch(() => {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = codeStr;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          const wrapper = codeElement.closest('.code-string-wrapper');
+          const icon = wrapper.querySelector('.code-copy-icon');
+          wrapper.classList.add('copied');
+          icon.classList.remove('fa-copy', 'fa-regular');
+          icon.classList.add('fa-solid', 'fa-circle-check');
+          setTimeout(() => {
+            wrapper.classList.remove('copied');
+            icon.classList.remove('fa-solid', 'fa-circle-check');
+            icon.classList.add('fa-copy', 'fa-regular');
+          }, 1800);
+        } finally {
+          document.body.removeChild(textarea);
+        }
+      });
+    }
+
+    /* ===== Determine Code Status Tag ===== */
+    function getStatusInfo(code) {
+      const status = code.status || '';
+      const statusLower = status.toLowerCase();
+
+      if (statusLower.includes('permanent')) {
+        return { cssClass: 'status-permanent-tag', label: 'Permanent' };
+      }
+      if (statusLower.includes('expired')) {
+        return { cssClass: 'status-expired-tag', label: 'Expired' };
+      }
+      if (statusLower.includes('active')) {
+        return { cssClass: 'status-active-tag', label: 'Active' };
+      }
+      return { cssClass: 'status-warning-tag', label: status || 'Active' };
+    }
+
+    /* ===== Get Card CSS Class from Status ===== */
+    function getCardStatusClass(code) {
+      const status = code.status || '';
+      const statusLower = status.toLowerCase();
+      if (statusLower.includes('permanent')) return 'status-permanent';
+      if (statusLower.includes('expired')) return 'expired';
+      return 'status-active';
+    }
+
+    /* ===== Extract Expiry Info ===== */
+    function getExpiryText(code) {
+      const status = code.status || '';
+      // Check if status contains expiry info like "Active — Expires June 30"
+      const expiryMatch = status.match(/expires?\s+(.+)/i);
+      if (expiryMatch) {
+        return expiryMatch[1].trim();
+      }
+      if (status.toLowerCase().includes('permanent')) {
+        return 'No expiration';
+      }
+      return status;
+    }
+
+    /* ===== CODES DATA ===== */
+    var CODES = [
+      {code:'GENSHINGIFT',rewards:'50 Primogems + 3 Hero\'s Wit',status:'Permanent',expires:'Never'},
+      {code:'SBNBPC67YHZ8',rewards:'60 Primogems + 5 Adventurer\'s Experience',status:'Active',expires:'June 30, 2026'},
+      {code:'WTNUIGE52JNT',rewards:'100 Primogems + 10 Mystic Enhancement Ore',status:'Active',expires:'June 15, 2026'},
+      {code:'3B6RYY7AHX9V',rewards:'60 Primogems + 5 Hero\'s Wit',status:'Active',expires:'June 10, 2026'},
+      {code:'NHEEJN97HN8M',rewards:'100 Primogems + 50,000 Mora',status:'Active',expires:'June 20, 2026'},
+      {code:'XTNDKTEBWA59',rewards:'60 Primogems + 5 EXP Books',status:'Expired',expires:'May 30, 2026'},
+      {code:'NAJEWZETD4XD',rewards:'100 Primogems + 10 Ore',status:'Expired',expires:'May 25, 2026'},
+    ];
+
+    /* ===== Render Active Codes ===== */
+    (function() {
+      const container = document.getElementById('activeCodeGrid');
+      if (!container) return;
+
+      const activeCodes = (typeof CODES !== 'undefined' ? CODES : []).filter(c => {
+        const s = (c.status || '').toLowerCase();
+        return !s.includes('expired');
+      });
+
+      if (activeCodes.length === 0) {
+        container.innerHTML = '<div class="card" style="grid-column:1/-1;text-align:center;padding:3rem 2rem;color:var(--text-muted);"><i class="fa-solid fa-ticket-simple" style="font-size:2rem;margin-bottom:1rem;display:block;color:var(--border-subtle);"></i>No active codes at the moment. Check back soon!</div>';
+        return;
+      }
+
+      activeCodes.forEach(code => {
+        const statusInfo = getStatusInfo(code);
+        const cardClass = getCardStatusClass(code);
+        const expiryText = getExpiryText(code);
+        const isPermanent = code.status.toLowerCase().includes('permanent');
+
+        const card = document.createElement('div');
+        card.className = 'code-card ' + cardClass;
+
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <span class="code-status ${statusInfo.cssClass}">
+              <i class="fa-solid fa-circle" style="font-size:0.4rem;"></i> ${statusInfo.label}
+            </span>
+          </div>
+          <div class="code-string-wrapper" onclick="copyCode(this, '${code.code.replace(/'/g, "\\'")}')" data-tooltip="Click to copy">
+            <span class="code-text">${code.code}</span>
+            <i class="fa-regular fa-copy code-copy-icon"></i>
+          </div>
+          <div class="code-rewards">
+            <i class="fa-solid fa-gift"></i>
+            <span>${code.rewards}</span>
+          </div>
+          <div class="code-expiry">
+            <i class="fa-regular fa-clock"></i>
+            <span>${expiryText}</span>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    })();
+
+    /* ===== Render Expired Codes ===== */
+    (function() {
+      const container = document.getElementById('expiredCodeGrid');
+      if (!container) return;
+
+      // Some representative expired codes for reference
+      const expiredCodes = [
+        { code: 'CT2BDW7JD38M', rewards: '60 Primogems + 5 Adventurer\'s Experience', status: 'Expired — May 31' },
+        { code: 'MAVUIE3G8T2H', rewards: '100 Primogems + 10 Mystic Enhancement Ore', status: 'Expired — May 22' },
+        { code: 'HOYOFANSJ8PSG', rewards: '30 Primogems + 3 Fine Enhancement Ore', status: 'Expired — May 15' },
+        { code: 'FOLLOWUSONXHS', rewards: '50 Primogems + 3 Hero\'s Wit', status: 'Expired — April 30' },
+        { code: 'IMPACTEVENTS26', rewards: '20,000 Mora + 2 Hero\'s Wit', status: 'Expired — April 18' },
+        { code: 'LIVESTREAM5PT0', rewards: '100 Primogems + 5 Adventurer\'s Experience + 50,000 Mora', status: 'Expired — April 5' }
+      ];
+
+      expiredCodes.forEach(code => {
+        const card = document.createElement('div');
+        card.className = 'code-card expired';
+
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <span class="code-status status-expired-tag">
+              <i class="fa-solid fa-circle" style="font-size:0.4rem;"></i> Expired
+            </span>
+          </div>
+          <div class="code-string-wrapper">
+            <span class="code-text">${code.code}</span>
+            <i class="fa-regular fa-clock code-copy-icon" style="color:var(--text-muted);"></i>
+          </div>
+          <div class="code-rewards" style="color:var(--text-muted);">
+            <i class="fa-solid fa-gift" style="color:var(--text-muted);"></i>
+            <span>${code.rewards}</span>
+          </div>
+          <div class="code-expiry">
+            <i class="fa-regular fa-calendar-xmark"></i>
+            <span>${code.status}</span>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    })();
+  </script>
+
+</body>
+</html>

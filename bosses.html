@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boss Guides — Teyvat Guide</title>
+  <meta name="description" content="Complete Genshin Impact boss strategies: Weekly Bosses (Stormterror, Childe, Signora, Raiden, Arlecchino) and World Bosses (Regisvines, Hypostases, and more).">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Boss image attempt handling ── */
+    .boss-icon-large {
+      width: 64px; height: 64px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; color: #fff; position: relative; overflow: hidden;
+    }
+    .boss-icon-large img {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; opacity: 0; transition: opacity 0.3s;
+      z-index: 2;
+    }
+    .boss-icon-large img.loaded { opacity: 1; }
+    .boss-icon-large .boss-fallback {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1;
+    }
+
+    /* ── Boss Card Styles ── */
+    .boss-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); overflow: hidden;
+      transition: all 0.35s var(--ease-out);
+      display: flex; flex-direction: column;
+    }
+    .boss-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    }
+    .boss-card-header-bar {
+      padding: 1.25rem 1.25rem 0.75rem;
+      display: flex; align-items: center; gap: 14px;
+      position: relative;
+    }
+    .boss-card-header-bar::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .boss-card-header-bar.weekly-bar::before {
+      background: linear-gradient(90deg, var(--gold), var(--gold-light), transparent);
+    }
+    .boss-card-header-bar.world-bar::before {
+      background: linear-gradient(90deg, var(--electro), var(--hydro), transparent);
+    }
+    .boss-meta { flex: 1; min-width: 0; }
+    .boss-meta h3 {
+      font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700;
+      color: var(--text-primary); line-height: 1.3;
+    }
+    .boss-meta .boss-sub {
+      font-size: 0.74rem; color: var(--text-muted); margin-top: 3px;
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .boss-type-badge {
+      display: inline-block; padding: 3px 10px; border-radius: var(--radius-full);
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .boss-type-badge.weekly {
+      background: rgba(201,169,110,0.15); color: var(--gold);
+      border: 1px solid var(--border-gold);
+    }
+    .boss-type-badge.world {
+      background: rgba(175,143,209,0.12); color: var(--electro);
+      border: 1px solid rgba(175,143,209,0.25);
+    }
+    .boss-resin-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: var(--radius-full);
+      background: rgba(100,140,255,0.1); border: 1px solid rgba(100,140,255,0.2);
+      color: #8aaeff; font-size: 0.7rem; font-weight: 600;
+    }
+    .boss-card-body {
+      padding: 0 1.25rem 1.25rem; flex: 1;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── Boss stat row ── */
+    .boss-stats-row {
+      display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 0.75rem;
+      font-size: 0.8rem; color: var(--text-secondary);
+    }
+    .boss-stats-row span { display: flex; align-items: center; gap: 5px; }
+    .boss-stats-row i { color: var(--text-muted); font-size: 0.7rem; width: 12px; text-align: center; }
+    .boss-element-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 50%; font-size: 0.6rem; color: #fff;
+    }
+
+    /* ── Element tags ── */
+    .elem-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 0.6rem; }
+    .elem-tag {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 10px; border-radius: var(--radius-full);
+      font-size: 0.7rem; font-weight: 600; color: #fff;
+    }
+    .elem-tag.avoid { opacity: 0.4; text-decoration: line-through; }
+
+    .boss-section-label {
+      font-size: 0.66rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-muted);
+      margin-bottom: 5px; margin-top: 0.6rem;
+    }
+
+    .boss-drops-text {
+      font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── Strategy block ── */
+    .boss-strategy {
+      background: rgba(255,255,255,0.018); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius); padding: 1rem;
+      font-size: 0.8rem; color: var(--text-secondary); line-height: 1.65;
+      flex: 1;
+    }
+    .boss-strategy .strat-phase {
+      display: block; color: var(--gold-light); font-weight: 700;
+      font-size: 0.76rem; margin-top: 0.5rem; margin-bottom: 0.15rem;
+      letter-spacing: 0.3px;
+    }
+    .boss-strategy .strat-phase:first-child { margin-top: 0; }
+    .boss-strategy .strat-tip {
+      display: flex; align-items: flex-start; gap: 6px;
+      margin-top: 0.5rem; padding: 8px 10px;
+      background: rgba(201,169,110,0.06); border-left: 2px solid var(--gold-dim);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.76rem; color: var(--text-primary);
+    }
+    .boss-strategy .strat-tip i { color: var(--gold); font-size: 0.68rem; margin-top: 2px; flex-shrink: 0; }
+
+    /* ── Artifact badge ── */
+    .boss-artifacts {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: var(--radius-full);
+      background: rgba(255,177,59,0.08); border: 1px solid rgba(255,177,59,0.18);
+      font-size: 0.7rem; color: var(--star5); margin-top: 0.5rem;
+    }
+    .boss-artifacts i { font-size: 0.62rem; }
+
+    /* ── Element filter chip colors ── */
+    .filter-chip.p-chip-pyro:hover, .filter-chip.p-chip-pyro.active-inline { border-color: var(--pyro); color: var(--pyro); background: rgba(239,121,56,0.1); }
+    .filter-chip.p-chip-hydro:hover, .filter-chip.p-chip-hydro.active-inline { border-color: var(--hydro); color: var(--hydro); background: rgba(76,194,241,0.1); }
+    .filter-chip.p-chip-anemo:hover, .filter-chip.p-chip-anemo.active-inline { border-color: var(--anemo); color: var(--anemo); background: rgba(116,194,168,0.1); }
+    .filter-chip.p-chip-electro:hover, .filter-chip.p-chip-electro.active-inline { border-color: var(--electro); color: var(--electro); background: rgba(175,143,209,0.1); }
+    .filter-chip.p-chip-dendro:hover, .filter-chip.p-chip-dendro.active-inline { border-color: var(--dendro); color: var(--dendro); background: rgba(165,214,62,0.1); }
+    .filter-chip.p-chip-cryo:hover, .filter-chip.p-chip-cryo.active-inline { border-color: var(--cryo); color: var(--cryo); background: rgba(159,214,227,0.1); }
+    .filter-chip.p-chip-geo:hover, .filter-chip.p-chip-geo.active-inline { border-color: var(--geo); color: var(--geo); background: rgba(250,183,46,0.1); }
+    .filter-chip.p-chip-none:hover, .filter-chip.p-chip-none.active-inline { border-color: var(--text-muted); color: var(--text-muted); background: rgba(255,255,255,0.04); }
+
+    /* ── No results ── */
+    .no-results {
+      text-align: center; padding: 3rem; color: var(--text-muted);
+      font-style: italic; grid-column: 1 / -1;
+    }
+    .no-results i { font-size: 2rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .boss-stats-row { flex-direction: column; gap: 3px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="starfield"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html" class="active">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero" style="min-height:38vh;padding-top:4rem;">
+    <div class="hero-content">
+      <span class="hero-badge">&#9876;&#65039; Enemy Intel</span>
+      <h1>Boss Guides</h1>
+      <p>Complete strategies for all Weekly Bosses and World Bosses. Learn attack patterns, team recommendations, elemental counters, and optimal farming approaches.</p>
+    </div>
+  </section>
+
+  <!-- ── Filter Bar ── -->
+  <section class="section" style="padding-top:0;padding-bottom:1.5rem;">
+    <div class="section-inner">
+      <div class="filter-bar" id="filterBar">
+        <input type="text" id="bossSearch" placeholder="Search bosses...">
+        <button class="filter-chip active" data-type="all">All</button>
+        <button class="filter-chip" data-type="Weekly">Weekly</button>
+        <button class="filter-chip" data-type="World">World</button>
+        <button class="filter-chip p-chip-pyro" data-element="pyro"><i class="fa-solid fa-fire"></i> Pyro</button>
+        <button class="filter-chip p-chip-hydro" data-element="hydro"><i class="fa-solid fa-droplet"></i> Hydro</button>
+        <button class="filter-chip p-chip-anemo" data-element="anemo"><i class="fa-solid fa-wind"></i> Anemo</button>
+        <button class="filter-chip p-chip-electro" data-element="electro"><i class="fa-solid fa-bolt"></i> Electro</button>
+        <button class="filter-chip p-chip-dendro" data-element="dendro"><i class="fa-solid fa-leaf"></i> Dendro</button>
+        <button class="filter-chip p-chip-cryo" data-element="cryo"><i class="fa-solid fa-snowflake"></i> Cryo</button>
+        <button class="filter-chip p-chip-geo" data-element="geo"><i class="fa-solid fa-mountain"></i> Geo</button>
+        <button class="filter-chip p-chip-none" data-element="none">Neutral</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Boss Grid ── -->
+  <section class="section" style="padding-top:0;">
+    <div class="section-inner">
+      <div class="grid-2" id="bossGrid"></div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+  <script>
+    /* ==================================================================
+       BOSSES PAGE — Image attempts, filtering, rich strategy rendering
+       ================================================================== */
+
+    /* ── Element data ── */
+    var EL = {
+      pyro:   { name:'Pyro',   color:'#ef7938', icon:'fa-fire' },
+      hydro:  { name:'Hydro',  color:'#4cc2f1', icon:'fa-droplet' },
+      anemo:  { name:'Anemo',  color:'#74c2a8', icon:'fa-wind' },
+      electro:{ name:'Electro',color:'#af8fd1', icon:'fa-bolt' },
+      dendro: { name:'Dendro', color:'#a5d63e', icon:'fa-leaf' },
+      cryo:   { name:'Cryo',   color:'#9fd6e3', icon:'fa-snowflake' },
+      geo:    { name:'Geo',    color:'#fab72e', icon:'fa-mountain' }
+    };
+
+    /* ── Region icons ── */
+    var regionIcons = {
+      'Mondstadt':'fa-feather-pointed', 'Liyue':'fa-mountain-sun',
+      'Inazuma':'fa-bolt', 'Sumeru':'fa-leaf', 'Fontaine':'fa-water',
+      'Dragonspine':'fa-snowflake'
+    };
+
+    /* ── Boss image URL mapping ──
+       Tries wiki CDN; on failure falls back to element icon.
+       Keys are the exact name from data.js BOSSES array. */
+    var bossImageMap = {
+      'Stormterror Dvalin':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Stormterror.png',
+      'Andrius (Wolf of the North)':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Andrius.png',
+      'Tartaglia (Childe)':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Childe.png',
+      'Azhdaha':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Azhdaha.png',
+      'La Signora':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/La_Signora.png',
+      'Raiden Shogun (Magatsu Mitake)':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Magatsu_Mitake_Narukami_no_Mikoto.png',
+      'Shouki no Kami (Scaramouche)':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Shouki_no_Kami.png',
+      'Guardian of Apep\'s Oasis':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Guardian_of_Apep\'s_Oasis.png',
+      'All-Devouring Narwhal':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/All-Devouring_Narwhal.png',
+      'The Knave (Arlecchino)':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/The_Knave.png',
+      'Cryo Regisvine':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Cryo_Regisvine.png',
+      'Pyro Regisvine':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Pyro_Regisvine.png',
+      'Electro Hypostasis':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Electro_Hypostasis.png',
+      'Anemo Hypostasis':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Anemo_Hypostasis.png',
+      'Geo Hypostasis':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Geo_Hypostasis.png',
+      'Hydro Hypostasis':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Hydro_Hypostasis.png',
+      'Pyro Hypostasis':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Pyro_Hypostasis.png',
+      'Dendro Hypostasis':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Dendro_Hypostasis.png',
+      'Cryo Hypostasis':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Cryo_Hypostasis.png',
+      'Maguu Kenki':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Maguu_Kenki.png',
+      'Perpetual Mechanical Array':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Perpetual_Mechanical_Array.png',
+      'Aeonblight Drake':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Aeonblight_Drake.png',
+      'Icewind Suite (Coppelius & Coppelias)':
+        'https://genshin-impact.fandom.com/wiki/Special:FilePath/Icewind_Suite.png'
+    };
+
+    /* ── Detailed strategies for every boss ── */
+    var STRATEGIES = {
+      'Stormterror Dvalin': '<span class="strat-phase">Phase 1 — Aerial Barrage</span>Dvalin circles the platform, unleashing wind blasts and Anemo orbs. Dodge perpendicular to his flight path — never run directly away. The orbs home slowly; sprint sideways to evade them. Ranged characters can chip damage during flight.<span class="strat-phase">Phase 2 — Claw Hold</span>Dvalin lands and grips the platform. Rush to the claw and unload all damage — melee characters shine here. When his neck drops, climb onto his back and target the glowing purple crystal. Breaking it staggers him for an extended damage phase.<span class="strat-phase">Phase 3 — Corrupted Breath</span>Dvalin breathes a sweeping beam across the platform. The floor cracks, creating Anemo-damage zones. Move to the opposite side immediately. The cracks persist — glide to the adjacent platform when yours becomes too hazardous.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: The crystal on Dvalin\'s neck takes increased damage from Pyro and Electro. Bring a bow character (Fischl, Yoimiya) to hit the crystal when melee access is blocked by floor damage zones.</span>',
+
+      'Andrius (Wolf of the North)': '<span class="strat-phase">Phase 1 — Cryo Wolf</span>Andrius circles the arena with lunging bites and tail sweeps. His tells are obvious: a low growl before a lunge, a crouch before a tail spin. Dodge INTO his lunges (i-frame through) rather than away. After each combo he pauses for 3-4 seconds — your punish window. He is immune to Cryo and Anemo damage. Watch for the icicle rain AoE: the ground glows blue briefly before ice falls.<span class="strat-phase">Phase 2 — Anemo Infusion (50% HP)</span>Andrius howls and merges Cryo with Anemo. New attacks: a wind-blade projectile (sidestep), a rushing charge covering half the arena (dodge laterally), and a spinning AoE that sucks you inward before exploding (sprint away from the center). He also summons smaller wolf spirits that dash across the field.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Andrius cannot be fought in co-op if someone has already claimed rewards. Bring a strong shielder (Zhongli, Diona) as his physical-Anemo combo attacks deal heavy chip damage. Do not bring Cryo DPS.</span>',
+
+      'Tartaglia (Childe)': '<span class="strat-phase">Phase 1 — Hydro Ranged</span>Childe fires Hydro arrows in spreads and charges a tracking whale shot (dodge when it is near). Stay close to bait his melee counter-slashes, which have long recovery. Do NOT get hit more than once: he applies a Riptide mark. Pyro and Electro rip through his Hydro shield.<span class="strat-phase">Phase 2 — Electro Delusion (70% HP)</span>Childe switches to Electro twin daggers, becoming faster. He lunges in zigzag patterns and charges a large lightning plunge. When the ground glows purple in a wide circle, he is about to slam — sprint to the edge. Maintain distance when he crosses his arms (counter stance).<span class="strat-phase">Phase 3 — Foul Legacy (40% HP)</span>Childe transforms into Abyssal armor. Massive AoE: spinning scythe (run clockwise), tracking lightning (keep moving), giant whale-nuke (run to the arena edge — center is death). If marked with a purple circle, cleanse it by touching the glowing barrier at the arena edge. Burst him quickly.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Cleanse Riptide marks by touching the arena wall. In Phase 3, the barrier at the edge removes all marks and grants brief invulnerability. Electro characters like Fischl and Raiden excel in all three phases.</span>',
+
+      'Azhdaha': '<span class="strat-phase">Element Infusion (Weekly Rotation)</span>Each week Azhdaha infuses with two of four elements: Pyro, Hydro, Cryo, or Electro. Check the domain door before entering to see which elements are active — this determines his RES and attacks. Build your team accordingly. Geo is always present, so Geo DPS is largely ineffective.<span class="strat-phase">Phase 1 — Stomp & Slam (100%–70%)</span>Azhdaha uses physical stomps, tail swipes, and leaping body slams. His attacks are slow but cover huge areas. The triple-stomp creates expanding shockwaves — jump over each wave with precise timing, or use burst i-frames to go through all three.<span class="strat-phase">Phase 2 — Elemental Barrage (70%–40%)</span>He begins using infused elemental attacks. Pyro: raining fireballs and lava pools. Hydro: water jets pushing you back. Cryo: ice spikes from the ground. Electro: lightning cages and homing orbs. Each leaves lingering hazard zones. Avoid DPS of resisted elements.<span class="strat-phase">Phase 3 — Absorption & Destruction (40%–0%)</span>Azhdaha digs underground and erupts with a massive elemental explosion. The screen darkens — run to the very edge of the arena. Afterward he enters rage mode with full RES to both infused elements. Use your strongest single-element DPS that is NOT resisted.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: A shielder is nearly mandatory. Zhongli\'s shield absorbs everything. If you lack one, bring a healer with fast ticks (Kokomi, Kuki). This is a marathon — manage stamina carefully.</span>',
+
+      'La Signora': '<span class="strat-phase">Phase 1 — Cryo Cocoon</span>Signora encases herself in ice. The room has a Sheer Cold meter — stand near the four heat lamps in the corners to reduce it. Destroy the ice cocoon with Pyro attacks — fast appliers (Bennett, Xiangling) break it faster. Signora floats and shoots Cryo projectiles; dodge while moving between heat sources.<span class="strat-phase">Transition — Crimson Witch Emerges</span>After the cocoon breaks, Signora sheds her ice form and the arena catches fire. The brazier lamps are destroyed. She becomes the Crimson Witch — fully Pyro-infused.<span class="strat-phase">Phase 2 — Crimson Witch</span>The room now has a Blazing Heat meter. Signora teleports rapidly, creates fire tornadoes that chase you, rains down meteor showers, and sweeps the arena with a flame whip. Destroy the four ice pillars she summons to vent heat. When she kneels (exhausted), unleash your strongest Hydro/Cryo DPS. Dodge fire tornadoes by running in wide circles.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Bring a Hydro character (Xingqiu, Yelan, Kokomi) for Phase 2 to Vaporize her Pyro form. Healers are extremely valuable since environmental damage is constant. Bennett\'s burst provides both healing and a cleanse.</span>',
+
+      'Raiden Shogun (Magatsu Mitake)': '<span class="strat-phase">Phase 1 — Shogun\'s Will (100%–70%)</span>The Raiden Shogun fights with polearm and Electro-infused slashes. Her charge attack (dashing forward with Electro trails) is heavily telegraphed. After three normal combos, she pauses — attack then. Bring Cryo or Pyro DPS. Electro and Hydro are strongly resisted. At ~75%, she summons the Baleful Shadowlord.<span class="strat-phase">Phase 2 — Baleful Shadowlord (70%–20%)</span>A massive Electro construct drains Energy from your party periodically. The Shadowlord attacks with sweeping sword beams, tracking Electro orbs, and a circular AoE cage. When a glowing Electro orb (Omen of Thunder) appears, IMMEDIATELY destroy it with elemental attacks — this restores Energy. Failure means massive damage.<span class="strat-phase">Phase 3 — Final Calamity (20%–0%)</span>The Shogun summons three Electro orbs (Flowers of Remembrance) surrounding the arena. When all three are full, she unleashes the one-hit kill "Musou no Hitotachi." You MUST destroy all three orbs with elemental reactions (Cryo and Pyro work best) before they finish charging. Once destroyed, she is stunned — use every burst you have.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Energy Recharge is critical. Characters with low burst costs (Bennett) or battery abilities (Raiden, Fischl) help immensely. Dendro bypasses her Electro RES for consistent Quicken damage.</span>',
+
+      'Shouki no Kami (Scaramouche)': '<span class="strat-phase">Phase 1 — Ground Assault</span>Scaramouche (in his giant mech) stomps and swipes with massive mechanical arms, fires laser sweeps, and missile barrages. Small floating robots drop green energy blocks — collect these to charge the Neo Akasha Terminal (the floating companion). When fully charged (4 blocks), activate the Terminal to fire a beam that staggers the boss and deals heavy damage.<span class="strat-phase">Phase 2 — Aerial Barrage (50% HP)</span>The mech takes flight and the floor becomes hazardous. The Neo Akasha Terminal floats with you — use it to shoot floating elemental turrets (Nirvana Engines). Each destroyed turret deals damage and removes a buff from the boss. When Scaramouche charges his ultimate (giant energy ball above the arena), use the fully-charged Terminal to interrupt it.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: The Neo Akasha Terminal is NOT optional — you cannot damage the boss effectively without it. Collect energy blocks aggressively in Phase 1 and shoot turrets immediately in Phase 2. Bow/catalyst characters collect remote blocks more easily.</span>',
+
+      'Guardian of Apep\'s Oasis': '<span class="strat-phase">Phase 1 — The Guardian (100%–60%)</span>The massive Dendro dragon attacks with sweeping tail strikes, vine eruptions from the ground, and a charging ram attack. Watch for the ground glowing green — vines will erupt there. High Dendro RES — avoid Dendro DPS. Pyro (Burning) deals bonus damage.<span class="strat-phase">Phase 2 — Inside Apep (60%–30%)</span>Your party is swallowed into Apep\'s inner dimension. Survive against waves of Proliferating Organisms (small fast enemies in groups). Killing them exposes the Heart of Oasis — a stationary weak point. Unload damage on the Heart while exposed. Prioritize AoE characters (Kazuha, Venti, Xiao).<span class="strat-phase">Phase 3 — Revival (30%–0%)</span>The Guardian reforms outside, now enraged with faster attacks: triple vine eruption and sweeping laser breath. However, it has reduced DEF. Use your strongest single-target abilities and finish the fight.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: AoE is king in Phase 2. Bring Xiangling, Kazuha, or Nilou Bloom teams to clear organisms quickly. The Heart of Oasis takes extra damage from Electro (Aggravate/Spread). Avoid pure-Dendro teams entirely.</span>',
+
+      'All-Devouring Narwhal': '<span class="strat-phase">Phase 1 — Surface Battle</span>The Narwhal breaches the arena like a massive whale, crashing with colossal splash damage — sprint to the edge when it leaps. It charges a massive energy shield periodically. You MUST break this shield using Pneuma/Ousia (Arkhe) attacks — Fontaine characters (Furina, Neuvillette, Lynette, Freminet) have built-in Arkhe attacks. The Narwhal fires Hydro cannonballs (sidestep), creates whirlpools (avoid glowing water circles), and tail-slaps (watch for the shadow).<span class="strat-phase">Phase 2 — Inner Dimension (when swallowed)</span>The Narwhal opens its mouth and sucks in nearby characters. Inside its stomach, face a shadow version of a random Fontaine enemy (usually a Mek). Defeat it quickly to escape — the longer you stay, the more corrosion damage you take. Characters with fast movement (Yelan, Sayu) excel here.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Bring at least one Fontaine character with Arkhe alignment. Furina is ideal — off-field damage AND Arkhe attacks. Dendro + Electro (Hyperbloom) teams tear through the Narwhal\'s Hydro nature. Cryo can freeze whirlpools for a safer arena.</span>',
+
+      'The Knave (Arlecchino)': '<span class="strat-phase">Phase 1 — The Knave\'s Dance (100%–50%)</span>Arlecchino is fast, aggressive, and applies Bond of Life (BoL) with almost every hit. BoL prevents healing and deals damage over time. The arena has glowing blood-red bonds on the floor — stepping on these CLEANSES your Bond of Life and provides a brief heal. You MUST manage BoL by rotating characters to the bonds. Arlecchino\'s pattern: triple scythe slash (dodge the third extended-range hit), a leaping plunge (watch the shadow), and a spinning AoE (she glows red briefly — run away). She teleports frequently.<span class="strat-phase">Phase 2 — Balemoon Rising (50%–0%)</span>Arlecchino enrages with a flaming scythe gaining massively extended reach. New attacks: a sweeping crescent slash covering 180 degrees (dodge INTO her, through the blade), homing blood butterflies (destroy with elemental attacks before they reach you), and "Balemoon Rising" — her ultimate levitating charge with a giant blood-moon orb (run to the absolute edge — center is a one-shot). After Balemoon Rising she is exhausted for 6 seconds — your main DPS window.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Healers are nearly useless — BoL blocks healing. Shielders (Zhongli, Layla) are FAR more valuable. Hydro characters (Neuvillette, Yelan, Furina) deal bonus damage against her Pyro form. Rotate characters frequently to spread BoL stacks. Coordinate blood-bond usage in co-op.</span>',
+
+      'Cryo Regisvine': '<span class="strat-phase">The Loop</span>The Cryo Regisvine follows a predictable cycle. It starts dormant with a glowing Cryo core at its base. Destroy the core with Pyro attacks — this stuns it for ~15 seconds. While stunned, the eye on its corolla (the flower head) opens — attack the eye for massively increased damage. After recovering, it slams the ground, creates an ice field, and re-forms the core. Repeat. Stun lock it by having Pyro abilities ready when the core reforms.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Bennett + Xiangling trivialize this fight. Bennett\'s Skill cooldown aligns perfectly with the core\'s vulnerability window. Amber\'s charged shots also work from range. Dodge the spinning laser by staying close to the base.</span>',
+
+      'Pyro Regisvine': '<span class="strat-phase">The Loop</span>Identical mechanics to Cryo Regisvine but with Pyro. Destroy the Pyro core at its base using Hydro attacks. While stunned, attack the eye on the corolla. After it recovers, it slams down creating a ring of fire and spinning fire beams. The core reforms and the cycle repeats. The spinning fire beam covers nearly the whole arena — sprint in the same direction as the beam and stay close to the boss to avoid the outer ring.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Xingqiu or Yelan\'s burst makes this extremely fast — their Hydro application destroys the core almost instantly. Barbara\'s normals also work. Do NOT bring Pyro DPS — near-immunity to Pyro damage.</span>',
+
+      'Electro Hypostasis': '<span class="strat-phase">Core Exposure Cycle</span>The Electro Hypostasis (Aleph) cycles through attack patterns: rock-paper-scissors slam, drill attack, and laser cage. After each pattern, it briefly exposes its core — your damage window. Attacks are well-telegraphed: fist = slam, scissors = sweep, palm = laser. The drill spins toward you (dodge laterally). The cage traps you (break one pillar to escape).<span class="strat-phase">Final Phase — 3 Prisms</span>When below ~5% HP, it splits into three Electro prisms at the arena edges. Destroy all three with elemental reactions before they regenerate. Pyro (Overloaded), Cryo (Superconduct), and Dendro (Quicken) are most effective. If even one prism survives, the boss regenerates significant HP. Use AoE to hit multiple prisms simultaneously.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Xiangling\'s Pyronado can hit all three prisms at once if positioned well. Dendro teams (Nahida, Tighnari) excel here. Do NOT bring Electro DPS — the Hypostasis is completely immune to Electro.</span>',
+
+      'Anemo Hypostasis': '<span class="strat-phase">Core Exposure Cycle</span>The Anemo Hypostasis (Beth) floats in the center of the arena. It attacks with: a vacuum pull (sprint away), a tornado barrage (dodge laterally), and an Anemo crystal rain (watch for shadows on the ground). It also drops wind orbs around the arena — collect these to ride updrafts that lift you to attack the airborne core. After each attack pattern the core descends briefly — your damage window.<span class="strat-phase">Final Phase — Wind Orbs</span>At critical HP, the boss scatters 4 wind orbs across the arena that slowly drift toward the center. You must collect ALL 4 before they converge to prevent a massive heal. Use movement skills (Sayu roll, Yelan sprint, Kazuha hold-E) to reach them quickly. Any element works for damage — the boss has no elemental immunity beyond high Anemo RES.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Avoid Anemo DPS — the Hypostasis has very high Anemo RES. Fast characters with mobility skills (Yelan, Sayu, Kazuha) make the final orb collection phase much easier. Catalyst and bow users can reach orbs across gaps.</span>',
+
+      'Geo Hypostasis': '<span class="strat-phase">Pillar Phase</span>The Geo Hypostasis sits atop a Geo pillar. It is invulnerable until you destroy the pillar it rests on. Use Claymore attacks, Geo abilities, or plunging attacks to break the pillar. Once the pillar is destroyed, the boss crashes to the ground and exposes its core — your damage window. It will re-form a new pillar and repeat. The boss also fires Geo projectiles and creates shockwaves.<span class="strat-phase">Final Phase — 3 Revival Pillars</span>At critical HP, three Geo pillars rise around the arena. The boss will revive and heal if all three stand. You MUST destroy all three pillars quickly. Claymore users (Noelle, Itto, Diluc) and Geo characters (Ningguang, Zhongli hold-E) are most effective. AoE Geo ults (Zhongli Q) can hit multiple pillars simultaneously.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Bring at least one Claymore or strong Geo character. Ningguang is excellent — her normal attacks and burst deal heavy damage to Geo constructs. Zhongli\'s hold-E instantly destroys two nearby pillars. Do not bring only non-Claymore physical attackers.</span>',
+
+      'Hydro Hypostasis': '<span class="strat-phase">Core Exposure Cycle</span>The Hydro Hypostasis (He) floats and attacks with: a leaping dolphin splash (dodge sideways), water jets from below (watch for glowing spots), and a rain of Hydro droplets. It periodically summons small water slimes that slowly move toward the boss — they HEAL it on contact, so kill them on sight. After each attack phase, the core is briefly exposed for damage.<span class="strat-phase">Final Phase — 3 Water Droplets</span>At critical HP, three large water droplets appear at the edges and slowly move toward the center. If they reach the center, the boss revives with significant HP. You must block their path or destroy them. Cryo attacks freeze the droplets in place (buying time), Dendro cores can block them, and any elemental damage destroys them. Destroy all three to win.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Cryo characters (Ayaka, Ganyu, Diona) can freeze both the boss and the final droplets. Dendro (Nahida, Collei) works well against the Hydro core. Do NOT bring Hydro DPS — the boss is immune. Kill slimes immediately — they are the #1 reason this fight drags on.</span>',
+
+      'Pyro Hypostasis': '<span class="strat-phase">Core Exposure Cycle</span>The Pyro Hypostasis (Ayin) attacks with: a rolling charge (dodge sideways), a fire breath sweep (run behind it), and a leaping slam that creates fire zones. The boss has a "shield" state where it is ignited and invulnerable. Apply Hydro attacks to extinguish the shield — this exposes the core. The ignition/extinguish cycle repeats throughout the fight. While ignited, the boss also regenerates HP slowly — extinguish quickly.<span class="strat-phase">Final Phase — 3 Fire Seeds</span>At critical HP, three fire seeds appear around the arena. They pulse and slowly charge up. You must apply Hydro to all three to extinguish them before they ignite — otherwise the boss revives. Hydro catalysts (Barbara, Kokomi) and Hydro-infused attacks (Xingqiu burst, Yelan burst) work best. AoE Hydro (Kokomi E, Ayato Q) can hit multiple seeds at once.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Bring a Hydro character with consistent application — Xingqiu and Yelan are ideal. Barbara\'s normal attacks work in a pinch and are free. Kokomi\'s jellyfish provides persistent AoE Hydro. Do NOT bring Pyro DPS — complete immunity. The ignite/extinguish cycle is the entire fight — manage it well.</span>',
+
+      'Dendro Hypostasis': '<span class="strat-phase">Core Exposure Cycle</span>The Dendro Hypostasis (Zayin) burrows underground and attacks with vine eruptions and sweeping tendrils. It has a unique mechanic: the boss is in a "dormant" state by default. Apply Electro to Quicken the boss — this forces it to expose its core and enables you to deal damage. While Quickened, the boss is also more vulnerable. Dendro + Electro (Quicken) is therefore crucial.<span class="strat-phase">Final Phase — 3 Vine Pillars</span>At critical HP, three vine pillars sprout around the arena. They are inert until you apply Dendro to them (this "awakens" them). Once awakened (green glow), apply Electro to destroy each one. If you fail to destroy all three, the boss revives. This requires both Dendro and Electro on your team — plan accordingly.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Bringing both Dendro AND Electro is mandatory for the final phase. A Dendro catalyst (Nahida) can awaken vines with normal attacks, and an Electro applier (Fischl, Kuki) destroys them. Pyro also deals good damage to the core. Do NOT bring pure Dendro DPS without Electro support.</span>',
+
+      'Cryo Hypostasis': '<span class="strat-phase">Core Exposure Cycle</span>The Cryo Hypostasis (Daleth) is found in Dragonspine. It attacks with: a spinning ice wheel charge (dodge sideways), an ice crystal rain (watch the ground), and a cryo shockwave. Similar to other Hypostases, it exposes its core after attack patterns. Pyro is highly effective for damaging the core. Watch for the Sheer Cold meter — the Dragonspine location means you take environmental Cryo damage constantly.<span class="strat-phase">Final Phase — Ice Fruits</span>At critical HP, the boss drops three large ice fruits (snowballs) that roll outward. You must use charged attacks or character skills to knock these fruits BACK toward the boss. Each fruit that hits the boss deals significant damage. If all three hit, the boss is destroyed. If you miss, it revives. Aim carefully — fruits track in a straight line. Bow charged shots and catalyst charged attacks work best.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Bring Pyro DPS (Hu Tao, Diluc, Klee) for maximum damage. The Sheer Cold meter is an additional hazard — bring a healer or use Warming Seelie/heat sources nearby. For the final phase, any character with a precise charged attack (bow, catalyst) can knock the fruits back. Use Pyro to melt the boss\'s Cryo shield.</span>',
+
+      'Maguu Kenki': '<span class="strat-phase">Fighting the Puppet</span>Maguu Kenki is a mechanical samurai with no elemental immunities but high Anemo RES. Its main attacks: a rapid three-slash combo (dodge the third delayed slash), a phantom dash (it teleports behind you — dodge forward when it disappears), a ground-slam AoE (jump or i-frame), and a wind blade projectile (sidestep). After a set of attacks, the Kenki pauses with its sword planted for 2-3 seconds — your main punish window.<span class="strat-phase">Phantom Summon (~70% HP)</span>At roughly 70% HP, the Kenki summons a phantom clone that mimics every attack, offset by about 1.5 seconds. The phantom cannot be damaged. This effectively doubles the dodging required. Position yourself so both the Kenki and its phantom are in front of you — their attacks cover a wide cone. The phantom disappears when the Kenki dies. Shielders (Zhongli, Diona) help reduce chip damage from the phantom.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Cryo and Pyro reactions (Melt) deal excellent damage since the Kenki\'s Cryo/Anemo affinity means it occasionally self-applies Cryo. The Kenki cannot be frozen or staggered. Use ranged characters (Ganyu, Yoimiya) to maintain consistent damage while safely dodging both the Kenki and its phantom.</span>',
+
+      'Perpetual Mechanical Array': '<span class="strat-phase">Main Array Phase</span>The PMA is a floating cube with high physical RES (70%) and no elemental immunities. It attacks with: a laser beam sweep (dodge through it), a rocket punch that extends and retracts (move sideways), a spinning blade charge (run perpendicular), and a ground pound AoE (sprint out). Between attacks, its core is exposed for damage.<span class="strat-phase">Sentinel Summon (~30% HP)</span>At roughly 30% HP, the PMA goes invulnerable and splits into four smaller Ruin machines: a crab, a jellyfish, a snake, and a cicada. One of these (marked with a golden glow) is the "Sentinel" — killing ONLY this one stuns the PMA and ends invulnerability. Killing any other machine wastes time. Focus fire the marked Sentinel immediately. Once the Sentinel dies, the PMA collapses for an extended damage window (~12 seconds).<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: The golden-marked Sentinel is always the one that spawns in a slightly different position from the others. Bring high single-target damage for the Sentinel phase. Elemental reactions work normally. Avoid physical DPS unless heavily invested — the PMA has 70% physical RES.</span>',
+
+      'Aeonblight Drake': '<span class="strat-phase">Aerial Phase</span>The Aeonblight Drake spawns in flight and stays airborne for most of the fight. Its wings have two glowing spots (one on each side). Hit these with charged shots from a bow character — destroying both wing spots causes the Drake to crash to the ground, stunned. While airborne, it fires missile barrages (sprint laterally), homing energy orbs (destroy them with attacks), and a ground-strafing laser (get behind it).<span class="strat-phase">Grounded Phase</span>Once grounded, the Drake uses sweeping tail attacks (stay near its side, not behind), a charging ram (dodge to the side), and a point-blank energy explosion (watch for the charging aura and run). After ~20 seconds, it takes off again. Wings regenerate. Repeat: shoot wings, ground, DPS.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: A bow character is NEARLY MANDATORY unless your team has extremely high ranged damage (Yae Miko, Wanderer). Fischl, Yelan, or Yoimiya make excellent choices. Do not use aimed-shot-reliant characters (Ganyu) unless you can hit moving wing spots consistently. Catalyst users can target wings but have shorter range.</span>',
+
+      'Icewind Suite (Coppelius & Coppelias)': '<span class="strat-phase">The Dancing Duelists</span>The Icewind Suite is a pair of clockwork dancers: Coppelius (male mek) and Coppelias (female mek). You only need to defeat one — their HP bar is shared. Coppelius is the aggressive melee: he spins with twin Cryo blades, lunges with a thrust, and performs a rising uppercut. Coppelias stays at range, firing Cryo fans and creating ice zones. Both apply Cryo constantly — manage the Cryo aura on your characters.<span class="strat-phase">Duet Mode</span>Periodically, the two meks join together for a coordinated attack. Coppelius charges across the arena while Coppelias rains down ice shards. The floor becomes covered in Cryo pools. Use Pyro abilities to melt ice zones and create safe footing. Fontaine characters with Pneuma alignment can stagger both meks simultaneously with Arkhe attacks. When one mek falls, the other enters "Encore" mode with faster, deadlier attacks. Focus one at a time.<span class="strat-tip"><i class="fa-solid fa-lightbulb"></i> Key: Pyro DPS (Bennett, Xiangling, Hu Tao) shred these Cryo meks. Bring Pyro resonance for the ATK boost. A shielder helps since the dual-boss format means attacks come from multiple angles. In co-op, split the team: 2 players on Coppelius, 2 on Coppelias.</span>'
+    };
+
+    /* ── Get strategy (detailed or data.js fallback) ── */
+    function getStrategy(boss) {
+      if (STRATEGIES[boss.name]) return STRATEGIES[boss.name];
+      if (boss.strat) return '<p>' + boss.strat + '</p>';
+      return '<p>Strategy information coming soon.</p>';
+    }
+
+    /* ── Render a single boss card ── */
+    function renderBossCard(boss) {
+      var isWeekly = boss.type === 'Weekly';
+      var barClass = isWeekly ? 'weekly-bar' : 'world-bar';
+      var typeClass = isWeekly ? 'weekly' : 'world';
+      var elKey = (boss.el || boss.element || 'none').toLowerCase();
+      var elData = EL[elKey] || { color:'#888', icon:'fa-star' };
+      var imgUrl = bossImageMap[boss.name] || '';
+
+      // Region icon
+      var rIcon = regionIcons[boss.region] || 'fa-location-dot';
+
+      // Recommended elements
+      var recHTML = '';
+      if (boss.rec && boss.rec.length > 0) {
+        var tags = boss.rec.map(function(r) {
+          var rKey = r.replace(/[^a-zA-Z]/g,'').toLowerCase();
+          var rEl = EL[rKey];
+          if (!rEl) {
+            // try "Any" or "Claymore" etc
+            return '<span class="elem-tag" style="background:rgba(255,255,255,0.08);color:#ccc;">' + r + '</span>';
+          }
+          return '<span class="elem-tag" style="background:' + rEl.color + '33;color:' + rEl.color + ';"><i class="fa-solid ' + rEl.icon + '" style="font-size:0.55rem;"></i> ' + r + '</span>';
+        });
+        recHTML = '<div class="boss-section-label"><i class="fa-solid fa-circle-check" style="color:var(--success);margin-right:4px;"></i> Recommended Elements</div><div class="elem-tags">' + tags.join('') + '</div>';
+      }
+
+      // Avoid elements
+      var avoidHTML = '';
+      if (boss.av && boss.av.length > 0) {
+        var aTags = boss.av.map(function(a) {
+          var aKey = a.replace(/[^a-zA-Z]/g,'').toLowerCase();
+          var aEl = EL[aKey];
+          if (!aEl) {
+            return '<span class="elem-tag avoid" style="background:rgba(255,255,255,0.04);color:#666;">' + a + '</span>';
+          }
+          return '<span class="elem-tag avoid" style="background:' + aEl.color + '22;color:' + aEl.color + ';"><i class="fa-solid ' + aEl.icon + '" style="font-size:0.55rem;"></i> ' + a + '</span>';
+        });
+        avoidHTML = '<div class="boss-section-label"><i class="fa-solid fa-circle-xmark" style="color:var(--danger);margin-right:4px;"></i> Avoid</div><div class="elem-tags">' + aTags.join('') + '</div>';
+      }
+
+      // Drops
+      var dropsHTML = '';
+      if (boss.drops) {
+        dropsHTML = '<div class="boss-section-label"><i class="fa-solid fa-box-open" style="color:var(--gold);margin-right:4px;"></i> Key Drops</div><div class="boss-drops-text">' + boss.drops + '</div>';
+      }
+
+      // Artifacts (weekly only)
+      var artHTML = '';
+      if (boss.art) {
+        artHTML = '<div class="boss-artifacts"><i class="fa-solid fa-scroll"></i> Artifacts: ' + boss.art + '</div>';
+      }
+
+      // Build card HTML
+      var card = document.createElement('div');
+      card.className = 'boss-card reveal';
+
+      // Element display name
+      var elDisplay = elKey === 'none' ? 'Physical' : (elData.name || boss.element);
+
+      card.innerHTML =
+        '<div class="boss-card-header-bar ' + barClass + '">' +
+          '<div class="boss-icon-large" style="background:radial-gradient(circle at 30% 30%, ' + elData.color + 'cc, ' + elData.color + '44);box-shadow:0 0 16px ' + elData.color + '33;">' +
+            '<img src="' + imgUrl + '" alt="' + boss.name + '" loading="lazy" onerror="this.remove()" onload="this.classList.add(\'loaded\')">' +
+            '<div class="boss-fallback"><i class="fa-solid ' + elData.icon + '"></i></div>' +
+          '</div>' +
+          '<div class="boss-meta">' +
+            '<h3>' + boss.name + '</h3>' +
+            '<div class="boss-sub">' +
+              '<span class="boss-type-badge ' + typeClass + '">' + boss.type + '</span>' +
+              '<span class="boss-resin-badge"><i class="fa-solid fa-bolt"></i> ' + (boss.resin || boss.res || '40') + ' Resin</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="boss-card-body">' +
+          '<div class="boss-stats-row">' +
+            '<span><i class="fa-solid ' + rIcon + '"></i> <strong>' + boss.region + '</strong></span>' +
+            '<span><span class="boss-element-icon" style="background:' + elData.color + ';"><i class="fa-solid ' + elData.icon + '"></i></span> <strong>' + elDisplay + '</strong></span>' +
+          '</div>' +
+          recHTML +
+          avoidHTML +
+          dropsHTML +
+          '<div class="boss-section-label"><i class="fa-solid fa-book-skull" style="color:var(--text-muted);margin-right:4px;"></i> Strategy</div>' +
+          '<div class="boss-strategy">' + getStrategy(boss) + '</div>' +
+          artHTML +
+        '</div>';
+
+      // Reveal animation
+      var obs = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+      obs.observe(card);
+
+      return card;
+    }
+
+    /* ── Render all boss cards ── */
+    var grid = document.getElementById('bossGrid');
+    var currentType = 'all';
+    var currentElement = '';
+    var searchQuery = '';
+
+    function applyFilters() {
+      var filtered = BOSSES;
+
+      if (currentType !== 'all') {
+        filtered = filtered.filter(function(b) { return b.type === currentType; });
+      }
+      if (currentElement) {
+        filtered = filtered.filter(function(b) {
+          return (b.el || b.element || '').toLowerCase() === currentElement.toLowerCase();
+        });
+      }
+      if (searchQuery.trim()) {
+        var q = searchQuery.trim().toLowerCase();
+        filtered = filtered.filter(function(b) {
+          return b.name.toLowerCase().indexOf(q) > -1 ||
+            (b.region && b.region.toLowerCase().indexOf(q) > -1) ||
+            (b.drops && b.drops.toLowerCase().indexOf(q) > -1) ||
+            (b.element || b.el || '').toLowerCase().indexOf(q) > -1 ||
+            b.type.toLowerCase().indexOf(q) > -1;
+        });
+      }
+
+      grid.innerHTML = '';
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="no-results"><i class="fa-solid fa-dragon"></i><p>No bosses match your filters. Try a different search or adjust the filters above.</p></div>';
+        return;
+      }
+
+      filtered.forEach(function(boss) {
+        grid.appendChild(renderBossCard(boss));
+      });
+    }
+
+    /* ── Filter chip event binding ── */
+    document.querySelectorAll('.filter-chip[data-type]').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        document.querySelectorAll('.filter-chip[data-type]').forEach(function(c) { c.classList.remove('active'); });
+        chip.classList.add('active');
+        currentType = chip.dataset.type;
+        applyFilters();
+      });
+    });
+
+    document.querySelectorAll('.filter-chip[data-element]').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var el = chip.dataset.element;
+        if (currentElement === el) {
+          currentElement = '';
+          chip.classList.remove('active-inline');
+        } else {
+          document.querySelectorAll('.filter-chip[data-element]').forEach(function(c) { c.classList.remove('active-inline'); });
+          currentElement = el;
+          chip.classList.add('active-inline');
+        }
+        applyFilters();
+      });
+    });
+
+    var searchInput = document.getElementById('bossSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        searchQuery = searchInput.value;
+        applyFilters();
+      });
+    }
+
+    /* ── Initial render ── */
+    applyFilters();
+  </script>
+
+  <!-- ── Shared behaviours ── -->
+  <script>
+    /* ── Starfield ── */
+    (function() {
+      var canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var stars = [];
+      var STAR_COUNT = 200;
+
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      function initStars() {
+        stars = [];
+        for (var i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < stars.length; i++) {
+          var s = stars[i];
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          var hsl = s.hue > 0
+            ? 'hsla(' + s.hue + ', 60%, 70%, ' + s.alpha + ')'
+            : 'rgba(200,200,220,' + s.alpha + ')';
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      window.addEventListener('resize', function() { resize(); initStars(); });
+      resize(); initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ── Nav scroll ── */
+    (function() {
+      var nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', function() { nav.classList.toggle('scrolled', window.scrollY > 10); });
+    })();
+
+    /* ── Mobile nav toggle ── */
+    (function() {
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        links.classList.toggle('open');
+        var icon = toggle.querySelector('i');
+        if (icon) { icon.classList.toggle('fa-bars'); icon.classList.toggle('fa-xmark'); }
+      });
+    })();
+  </script>
+
+</body>
+</html>

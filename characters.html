@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Characters — Teyvat Guide</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== CHARACTERS PAGE SPECIFIC ===== */
+
+    /* Hero */
+    .hero-mini {
+      position: relative; z-index: 1; text-align: center;
+      padding: 3rem 2rem 2rem;
+    }
+    .hero-mini::before {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-mini-content { position: relative; z-index: 2; max-width: 650px; margin: 0 auto; }
+    .hero-mini h1 {
+      font-family: 'Cinzel', serif; font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 900; line-height: 1.2; letter-spacing: 1px;
+      background: linear-gradient(180deg, #fff 0%, var(--gold-light) 40%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-mini p { font-size: 1.05rem; color: var(--text-secondary); margin-top: 0.8rem; }
+
+    /* Stats bar */
+    .stats-bar {
+      text-align: center; font-size: 0.82rem; color: var(--text-muted);
+      margin-bottom: 1.5rem; letter-spacing: 0.5px;
+    }
+    .stats-bar span { color: var(--gold); font-weight: 600; }
+
+    /* Filter bar wrapper */
+    .filter-section { padding: 0 2rem 1rem; max-width: var(--max-width); margin: 0 auto; }
+
+    /* Enhanced char-card detail */
+    .char-card-detail {
+      display: none; padding: 0 1rem 1rem; border-top: 1px solid var(--border-subtle);
+      margin-top: 0.75rem; animation: fadeInUp 0.35s var(--ease-out);
+    }
+    .char-card.expanded .char-card-detail { display: block; }
+    .char-card-detail p {
+      font-size: 0.78rem; color: var(--text-secondary); margin: 3px 0; line-height: 1.5;
+    }
+    .char-card-detail p strong { color: var(--text-primary); font-weight: 600; }
+
+    /* Image fallback */
+    .char-img-fallback {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; font-weight: 900; color: #fff; z-index: 1; pointer-events: none;
+    }
+
+    /* No results */
+    .no-results {
+      text-align: center; padding: 3rem; color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+    .no-results i { font-size: 2.5rem; margin-bottom: 1rem; display: block; color: var(--border-subtle); }
+    .no-results p { font-size: 1rem; }
+
+    /* Expanded card full-width */
+    .char-card.expanded {
+      border-color: var(--border-active);
+      box-shadow: 0 0 0 1px var(--border-active), 0 16px 48px rgba(0,0,0,0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-mini { padding: 2rem 1rem 1.5rem; }
+      .filter-section { padding: 0 1rem 1rem; }
+      .filter-bar { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Starfield Canvas -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ====== NAVIGATION ====== -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <div class="nav-dropdown">
+        <a href="characters.html" class="active">Characters ▾</a>
+        <div class="nav-dropdown-menu">
+          <a href="characters.html">All Characters</a>
+          <a href="characters.html#filter-pyro">Pyro</a>
+          <a href="characters.html#filter-hydro">Hydro</a>
+          <a href="characters.html#filter-anemo">Anemo</a>
+          <a href="characters.html#filter-electro">Electro</a>
+          <a href="characters.html#filter-dendro">Dendro</a>
+          <a href="characters.html#filter-cryo">Cryo</a>
+          <a href="characters.html#filter-geo">Geo</a>
+        </div>
+      </div>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="teams.html">Teams</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools ▾</a>
+        <div class="nav-dropdown-menu">
+          <a href="resin-timer.html">Resin Timer</a>
+          <a href="primo-calc.html">Primogem Calculator</a>
+          <a href="damage-calc.html">Damage Calculator</a>
+          <a href="ascension-planner.html">Ascension Planner</a>
+          <a href="wish-sim.html">Wish Simulator</a>
+        </div>
+      </div>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ====== HERO ====== -->
+  <section class="hero-mini">
+    <div class="hero-mini-content">
+      <div class="hero-badge">Character Database</div>
+      <h1>Character Database</h1>
+      <p>All playable characters with optimal builds, weapons, and artifacts.</p>
+    </div>
+  </section>
+
+  <!-- ====== STATS BAR ====== -->
+  <div class="section">
+    <div class="section-inner">
+      <div class="stats-bar" id="statsBar">Loading characters...</div>
+
+      <!-- ====== FILTER BAR ====== -->
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Search characters by name...">
+      </div>
+      <div class="filter-bar" id="elementFilters">
+        <button class="filter-chip active" data-filter="element" data-value="all">All Elements</button>
+        <button class="filter-chip" data-filter="element" data-value="pyro"><i class="fa-solid fa-fire" style="color:var(--pyro);margin-right:4px;"></i>Pyro</button>
+        <button class="filter-chip" data-filter="element" data-value="hydro"><i class="fa-solid fa-droplet" style="color:var(--hydro);margin-right:4px;"></i>Hydro</button>
+        <button class="filter-chip" data-filter="element" data-value="anemo"><i class="fa-solid fa-wind" style="color:var(--anemo);margin-right:4px;"></i>Anemo</button>
+        <button class="filter-chip" data-filter="element" data-value="electro"><i class="fa-solid fa-bolt" style="color:var(--electro);margin-right:4px;"></i>Electro</button>
+        <button class="filter-chip" data-filter="element" data-value="dendro"><i class="fa-solid fa-leaf" style="color:var(--dendro);margin-right:4px;"></i>Dendro</button>
+        <button class="filter-chip" data-filter="element" data-value="cryo"><i class="fa-solid fa-snowflake" style="color:var(--cryo);margin-right:4px;"></i>Cryo</button>
+        <button class="filter-chip" data-filter="element" data-value="geo"><i class="fa-solid fa-mountain" style="color:var(--geo);margin-right:4px;"></i>Geo</button>
+      </div>
+      <div class="filter-bar" id="rarityFilters">
+        <button class="filter-chip active" data-filter="rarity" data-value="all">All Rarities</button>
+        <button class="filter-chip" data-filter="rarity" data-value="5">5&#x2605;</button>
+        <button class="filter-chip" data-filter="rarity" data-value="4">4&#x2605;</button>
+      </div>
+      <div class="filter-bar" id="weaponFilters">
+        <button class="filter-chip active" data-filter="weapon" data-value="all">All Weapons</button>
+        <button class="filter-chip" data-filter="weapon" data-value="Sword">Sword</button>
+        <button class="filter-chip" data-filter="weapon" data-value="Claymore">Claymore</button>
+        <button class="filter-chip" data-filter="weapon" data-value="Polearm">Polearm</button>
+        <button class="filter-chip" data-filter="weapon" data-value="Bow">Bow</button>
+        <button class="filter-chip" data-filter="weapon" data-value="Catalyst">Catalyst</button>
+      </div>
+
+      <!-- ====== CHARACTER GRID ====== -->
+      <div class="grid-4" id="characterGrid"></div>
+    </div>
+  </div>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer">
+    <div class="footer-logo">Teyvat Guide</div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="teams.html">Teams</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made resource for Genshin Impact. Not affiliated with or endorsed by HoYoverse.
+      All game assets and data belong to their respective owners.
+    </p>
+  </footer>
+
+  <!-- ====== SCRIPTS ====== -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+  <script>
+    (function() {
+      // ============================================================
+      // 1. STARFIELD BACKGROUND
+      // ============================================================
+      const canvas = document.getElementById('starfield');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        function resizeCanvas() {
+          canvas.width = window.innerWidth;
+          canvas.height = document.documentElement.scrollHeight;
+        }
+        function initStars(count) {
+          stars = [];
+          for (let i = 0; i < count; i++) {
+            stars.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              r: Math.random() * 1.6 + 0.3,
+              a: Math.random(),
+              speed: Math.random() * 0.008 + 0.003
+            });
+          }
+        }
+        function drawStars() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          stars.forEach(s => {
+            s.a += s.speed;
+            if (s.a > 1) s.a = 0;
+            const alpha = Math.sin(s.a * Math.PI);
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(201,169,110,${alpha * 0.5})`;
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          requestAnimationFrame(drawStars);
+        }
+        resizeCanvas();
+        initStars(200);
+        drawStars();
+        window.addEventListener('resize', () => {
+          resizeCanvas();
+          initStars(200);
+        });
+        // Update canvas height on scroll for full-page starfield
+        let lastH = document.documentElement.scrollHeight;
+        setInterval(() => {
+          const h = document.documentElement.scrollHeight;
+          if (h !== lastH) { lastH = h; canvas.height = h; initStars(200); }
+        }, 2000);
+      }
+
+      // ============================================================
+      // 2. NAV SCROLL
+      // ============================================================
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
+      });
+
+      // ============================================================
+      // 3. MOBILE NAV TOGGLE
+      // ============================================================
+      const navToggle = document.getElementById('navToggle');
+      const navLinks = document.getElementById('navLinks');
+      if (navToggle) {
+        navToggle.addEventListener('click', () => {
+          navLinks.classList.toggle('open');
+        });
+      }
+
+      // ============================================================
+      // 4. DOM REFS
+      // ============================================================
+      const grid = document.getElementById('characterGrid');
+      const statsBar = document.getElementById('statsBar');
+      const searchInput = document.getElementById('searchInput');
+
+      // ============================================================
+      // 5. FILTER STATE
+      // ============================================================
+      let filters = { element: 'all', rarity: 'all', weapon: 'all', search: '' };
+
+      // ============================================================
+      // 6. HELPER FUNCTIONS
+      // ============================================================
+      function getElData(key) {
+        return (typeof ELEMENTS !== 'undefined' && ELEMENTS[key]) ? ELEMENTS[key] : null;
+      }
+
+      function getElementColor(elKey) {
+        const el = getElData(elKey);
+        return el ? el.color : '#555';
+      }
+
+      function getElementIcon(elKey) {
+        const el = getElData(elKey);
+        return el ? el.icon : 'fa-question';
+      }
+
+      function getElementName(elKey) {
+        const el = getElData(elKey);
+        return el ? el.name : elKey;
+      }
+
+      function getImageUrl(name) {
+        // Replace spaces with underscores for Enka CDN
+        return 'https://enka.network/ui/UI_AvatarIcon_Side_' + name.replace(/\s+/g, '_') + '.png';
+      }
+
+      function buildStars(count) {
+        return '★'.repeat(count);
+      }
+
+      // ============================================================
+      // 7. RENDER A SINGLE CHARACTER CARD
+      // ============================================================
+      function buildCharCard(ch) {
+        const el = ch.el;
+        const elColor = getElementColor(el);
+        const elIcon = getElementIcon(el);
+        const elName = getElementName(el);
+        const imgUrl = getImageUrl(ch.name);
+        const initial = ch.name.charAt(0).toUpperCase();
+
+        // Talent priority as string
+        const talentsStr = (ch.tal && Array.isArray(ch.tal)) ? ch.tal.join(' → ') : '';
+
+        // Materials
+        const mat = ch.mat || {};
+        const bossMat = mat.boss || '';
+        const localMat = mat.local || '';
+        const commonMat = mat.com || '';
+        const bookMat = mat.bk || '';
+        const matsStr = [bossMat, localMat, commonMat, bookMat].filter(Boolean).join(' / ');
+
+        const div = document.createElement('div');
+        div.className = 'char-card';
+        div.setAttribute('data-name', ch.name);
+        div.setAttribute('data-el', el);
+        div.setAttribute('data-st', ch.st);
+        div.setAttribute('data-wp', ch.wp);
+        div.setAttribute('onclick', 'expandCard(this)');
+        div.style.cursor = 'pointer';
+
+        div.innerHTML =
+          '<div class="char-card-top">' +
+            '<div class="char-card-img" style="background:' + elColor + ';">' +
+              charImgHTML(ch.name, elColor) +
+            '</div>' +
+          '</div>' +
+          '<div class="char-card-body">' +
+            '<h3>' + ch.name + '</h3>' +
+            '<span class="element-badge" style="background:' + elColor + ';"><i class="fa-solid ' + elIcon + '"></i> ' + elName + '</span>' +
+            '<p class="role">' + (ch.role || '') + '</p>' +
+          '</div>' +
+          '<div class="char-card-detail">' +
+            '<p><strong>Weapon:</strong> ' + (ch.wep || '—') + '</p>' +
+            '<p><strong>Alt:</strong> ' + (ch.wepA || '—') + '</p>' +
+            '<p><strong>Artifact:</strong> ' + (ch.art || '—') + '</p>' +
+            '<p><strong>Stats:</strong> ' + (ch.sa || '—') + ' / ' + (ch.gob || '—') + ' / ' + (ch.cir || '—') + '</p>' +
+            '<p><strong>Talents:</strong> ' + (talentsStr || '—') + '</p>' +
+            '<p><strong>Materials:</strong> ' + (matsStr || '—') + '</p>' +
+          '</div>';
+
+        return div;
+      }
+
+      // ============================================================
+      // 8. RENDER ALL CHARACTERS
+      // ============================================================
+      function renderAllCharacters() {
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        if (typeof CHARACTERS === 'undefined' || !CHARACTERS.length) {
+          grid.innerHTML = '<div class="no-results"><i class="fa-solid fa-exclamation-triangle"></i><p>Character data failed to load. Please check data.js.</p></div>';
+          if (statsBar) statsBar.innerHTML = 'Showing <span>0</span> of <span>0</span> characters';
+          return;
+        }
+
+        CHARACTERS.forEach(function(ch) {
+          const card = buildCharCard(ch);
+          grid.appendChild(card);
+        });
+
+        applyFilters();
+      }
+
+      // ============================================================
+      // 9. APPLY FILTERS
+      // ============================================================
+      function applyFilters() {
+        if (!grid) return;
+        const cards = grid.querySelectorAll('.char-card');
+        let visible = 0;
+
+        cards.forEach(function(card) {
+          let show = true;
+
+          // Element filter
+          if (filters.element !== 'all' && card.getAttribute('data-el') !== filters.element) {
+            show = false;
+          }
+
+          // Rarity filter
+          if (filters.rarity !== 'all' && card.getAttribute('data-st') !== filters.rarity) {
+            show = false;
+          }
+
+          // Weapon type filter
+          if (filters.weapon !== 'all' && card.getAttribute('data-wp') !== filters.weapon) {
+            show = false;
+          }
+
+          // Search filter (by name)
+          if (filters.search && card.getAttribute('data-name').toLowerCase().indexOf(filters.search.toLowerCase()) === -1) {
+            show = false;
+          }
+
+          card.style.display = show ? '' : 'none';
+          if (show) visible++;
+        });
+
+        // Update stats bar
+        const total = typeof CHARACTERS !== 'undefined' ? CHARACTERS.length : cards.length;
+        if (statsBar) {
+          statsBar.innerHTML = 'Showing <span>' + visible + '</span> of <span>' + total + '</span> characters';
+        }
+
+        // No results message
+        let noMsg = grid.querySelector('.no-results');
+        if (visible === 0) {
+          if (!noMsg) {
+            noMsg = document.createElement('div');
+            noMsg.className = 'no-results';
+            noMsg.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i><p>No characters match your filters.</p>';
+            grid.appendChild(noMsg);
+          }
+        } else if (noMsg) {
+          noMsg.remove();
+        }
+      }
+
+      // ============================================================
+      // 10. FILTER CHIP CLICK HANDLERS
+      // ============================================================
+      document.querySelectorAll('.filter-chip').forEach(function(chip) {
+        chip.addEventListener('click', function() {
+          const filterType = this.getAttribute('data-filter');
+          const filterValue = this.getAttribute('data-value');
+
+          // Deactivate siblings in the same filter group
+          const parent = this.parentElement;
+          parent.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+          this.classList.add('active');
+
+          // Update filter state
+          filters[filterType] = filterValue;
+
+          applyFilters();
+        });
+      });
+
+      // ============================================================
+      // 11. SEARCH INPUT HANDLER
+      // ============================================================
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          filters.search = searchInput.value.trim();
+          applyFilters();
+        });
+      }
+
+      // ============================================================
+      // 12. CARD EXPAND / COLLAPSE (global function for onclick)
+      // ============================================================
+      window.expandCard = function(card) {
+        const isExpanded = card.classList.contains('expanded');
+
+        // Close all other expanded cards
+        document.querySelectorAll('.char-card.expanded').forEach(function(c) {
+          if (c !== card) c.classList.remove('expanded');
+        });
+
+        if (isExpanded) {
+          card.classList.remove('expanded');
+        } else {
+          card.classList.add('expanded');
+          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      };
+
+      // ============================================================
+      // 13. HASH-BASED FILTER NAVIGATION
+      // ============================================================
+      function handleHashFilter() {
+        const hash = window.location.hash.replace('#filter-', '');
+        if (hash && typeof ELEMENTS !== 'undefined' && ELEMENTS[hash]) {
+          filters.element = hash;
+          document.querySelectorAll('#elementFilters .filter-chip').forEach(function(c) {
+            c.classList.remove('active');
+            if (c.getAttribute('data-value') === hash) c.classList.add('active');
+          });
+        }
+      }
+      window.addEventListener('hashchange', function() {
+        handleHashFilter();
+        applyFilters();
+      });
+
+      // ============================================================
+      // 14. INITIAL RENDER
+      // ============================================================
+      renderAllCharacters();
+      // Apply hash filter AFTER cards are rendered
+      handleHashFilter();
+      applyFilters();
+
+    })();
+  </script>
+</body>
+</html>

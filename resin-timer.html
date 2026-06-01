@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resin Timer — Teyvat Guide</title>
+  <meta name="description" content="Track your Genshin Impact Original Resin regeneration, plan daily spending, and manage Condensed Resin — never cap again.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Hero Resin Orb ── */
+    .resin-hero {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+    }
+    .resin-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .resin-hero-badge {
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: var(--radius-full);
+      background: rgba(201,169,110,0.1);
+      border: 1px solid var(--border-gold);
+      color: var(--gold);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .resin-hero h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(180deg, #fff 0%, var(--gold-light) 40%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Circular Progress Ring + Orb ── */
+    .resin-orb-wrapper {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 2rem auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .resin-orb-ring {
+      position: absolute;
+      top: 0; left: 0;
+      width: 220px;
+      height: 220px;
+      transform: rotate(-90deg);
+    }
+    .resin-orb-ring-bg {
+      fill: none;
+      stroke: var(--border-subtle);
+      stroke-width: 6;
+    }
+    .resin-orb-ring-fill {
+      fill: none;
+      stroke: var(--hydro);
+      stroke-width: 6;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.75s var(--ease-out), stroke 0.6s var(--ease-out);
+      filter: drop-shadow(0 0 6px var(--hydro-glow));
+    }
+    .resin-orb-ring-fill.capped {
+      stroke: var(--geo);
+      filter: drop-shadow(0 0 6px var(--geo-glow));
+    }
+    .resin-orb {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, rgba(76,194,241,0.35), rgba(20,80,140,0.55));
+      box-shadow: 0 0 60px var(--hydro-glow), 0 0 120px rgba(76,194,241,0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      border: 3px solid rgba(76,194,241,0.4);
+      animation: resinPulse 3s ease-in-out infinite;
+      transition: box-shadow 0.6s var(--ease-out), border-color 0.6s var(--ease-out), background 0.6s var(--ease-out);
+    }
+    .resin-orb.capped {
+      box-shadow: 0 0 60px var(--geo-glow), 0 0 120px rgba(250,183,46,0.15);
+      border-color: rgba(250,183,46,0.4);
+      background: radial-gradient(circle at 40% 35%, rgba(250,183,46,0.35), rgba(140,100,20,0.55));
+    }
+    .resin-orb-number {
+      font-family: 'Orbitron', monospace;
+      font-size: 3.5rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(76,194,241,0.6);
+      line-height: 1;
+      transition: text-shadow 0.6s var(--ease-out), transform 0.25s var(--ease-spring);
+    }
+    .resin-orb-number.pop {
+      transform: scale(1.15);
+    }
+    .resin-orb.capped .resin-orb-number {
+      text-shadow: 0 0 30px rgba(250,183,46,0.6);
+    }
+    .resin-orb-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .resin-orb-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .resin-orb-icon {
+      font-size: 1.3rem;
+      color: var(--hydro);
+      margin-bottom: 4px;
+      transition: color 0.6s var(--ease-out);
+    }
+    .resin-orb.capped .resin-orb-icon {
+      color: var(--geo);
+    }
+    @keyframes resinPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+
+    /* ── Resin Rate Bar ── */
+    .resin-rate-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+    .resin-rate-bar .rate-icon {
+      color: var(--hydro);
+      font-size: 0.9rem;
+    }
+    .resin-rate-bar strong {
+      color: var(--text-primary);
+    }
+
+    /* ── Resin Controls ── */
+    .resin-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      margin: 1.5rem 0;
+    }
+    .resin-slider-wrap {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .resin-slider-wrap input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-subtle);
+      outline: none;
+      cursor: pointer;
+    }
+    .resin-slider-wrap input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--hydro);
+      border: 2px solid #fff;
+      box-shadow: 0 0 12px var(--hydro-glow);
+      cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .resin-slider-wrap input[type="range"].capped::-webkit-slider-thumb {
+      background: var(--geo);
+      box-shadow: 0 0 12px var(--geo-glow);
+    }
+    .resin-slider-wrap .slider-value {
+      width: 44px;
+      text-align: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+    .resin-btn-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .resin-input-group {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      overflow: hidden;
+    }
+    .resin-input-group input {
+      width: 72px;
+      padding: 12px 8px;
+      text-align: center;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: 'Orbitron', monospace;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    .resin-input-group input::-webkit-outer-spin-button,
+    .resin-input-group input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .resin-input-group button {
+      padding: 12px 16px;
+      border: none;
+      background: rgba(255,255,255,0.03);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 700;
+      transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .resin-input-group button:hover {
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.06);
+    }
+    .quick-btn {
+      padding: 12px 20px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-gold);
+      background: transparent;
+      color: var(--gold-light);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      font-family: 'DM Sans', sans-serif;
+    }
+    .quick-btn:hover {
+      background: rgba(201,169,110,0.12);
+      border-color: var(--gold);
+      transform: translateY(-1px);
+    }
+    .quick-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* ── Countdown Display ── */
+    .countdown-display {
+      text-align: center;
+      margin: 0.5rem 0 1rem;
+    }
+    .countdown-time {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 2px;
+    }
+    .countdown-time .unit {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin: 0 3px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .countdown-cap {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.4rem;
+    }
+    .countdown-cap strong {
+      color: var(--gold-light);
+    }
+
+    /* ── Resin Fill Bar ── */
+    .resin-fill-bar-wrap {
+      max-width: 420px;
+      margin: 0 auto 1rem;
+    }
+    .resin-fill-bar {
+      height: 8px;
+      background: var(--border-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .resin-fill-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--hydro), #3090c0);
+      transition: width 0.75s var(--ease-out);
+      position: relative;
+    }
+    .resin-fill-fill.capped {
+      background: linear-gradient(90deg, var(--geo), #c09020);
+    }
+    .resin-fill-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Planner Section ── */
+    .planner-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .planner-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .checklist-card,
+    .priority-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.35s var(--ease-out);
+    }
+    .checklist-card:hover,
+    .priority-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    }
+    .checklist-card h3,
+    .priority-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .checklist-card h3 i,
+    .priority-card h3 i {
+      color: var(--gold);
+      font-size: 0.95rem;
+    }
+
+    /* ── Checklist Items ── */
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      border: 1px solid transparent;
+    }
+    .checklist-item:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .checklist-item + .checklist-item {
+      margin-top: 2px;
+    }
+    .checklist-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 2px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.25s var(--ease-out);
+      font-size: 0.6rem;
+      color: transparent;
+    }
+    .checklist-item.checked .checklist-checkbox {
+      background: var(--success);
+      border-color: var(--success);
+      color: #fff;
+    }
+    .checklist-item.checked .checklist-label {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .checklist-label {
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      font-weight: 500;
+      flex: 1;
+      transition: color 0.2s;
+    }
+    .checklist-reward {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* ── Priority List ── */
+    .priority-list {
+      counter-reset: priority;
+    }
+    .priority-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 12px;
+      border-radius: var(--radius-sm);
+      transition: all 0.2s;
+      counter-increment: priority;
+      border: 1px solid transparent;
+    }
+    .priority-item:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .priority-item + .priority-item {
+      margin-top: 2px;
+    }
+    .priority-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(201,169,110,0.1);
+      border: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gold);
+      font-family: 'Orbitron', monospace;
+    }
+    .priority-item:nth-child(1) .priority-num {
+      background: rgba(239,121,56,0.12);
+      border-color: rgba(239,121,56,0.4);
+      color: var(--pyro);
+    }
+    .priority-item:nth-child(2) .priority-num {
+      background: rgba(175,143,209,0.12);
+      border-color: rgba(175,143,209,0.4);
+      color: var(--electro);
+    }
+    .priority-item:nth-child(3) .priority-num {
+      background: rgba(76,194,241,0.12);
+      border-color: rgba(76,194,241,0.4);
+      color: var(--hydro);
+    }
+    .priority-item:nth-child(4) .priority-num {
+      background: rgba(165,214,62,0.12);
+      border-color: rgba(165,214,62,0.4);
+      color: var(--dendro);
+    }
+    .priority-body h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .priority-body p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .priority-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    .badge-resin { background: rgba(76,194,241,0.12); color: var(--hydro); }
+    .badge-discount { background: rgba(76,175,80,0.12); color: var(--success); }
+    .badge-current { background: rgba(175,143,209,0.12); color: var(--electro); }
+
+    /* ── Condensed Resin Section ── */
+    .condensed-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      transition: all 0.35s var(--ease-out);
+    }
+    .condensed-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    }
+    .condensed-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, rgba(76,194,241,0.3), rgba(20,80,140,0.4));
+      box-shadow: 0 0 30px var(--hydro-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--hydro);
+      flex-shrink: 0;
+      border: 2px solid rgba(76,194,241,0.35);
+    }
+    .condensed-info {
+      flex: 1;
+      min-width: 200px;
+    }
+    .condensed-info h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.35rem;
+    }
+    .condensed-info p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .condensed-converter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .condensed-converter input {
+      width: 64px;
+      padding: 10px 6px;
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: 'Orbitron', monospace;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .condensed-converter input:focus {
+      border-color: var(--hydro);
+    }
+    .condensed-result {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--hydro);
+      min-width: 90px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .condensed-card {
+        flex-direction: column;
+        text-align: center;
+      }
+      .condensed-converter {
+        flex-direction: column;
+      }
+      .resin-orb-wrapper {
+        width: 180px;
+        height: 180px;
+      }
+      .resin-orb-ring {
+        width: 180px;
+        height: 180px;
+      }
+      .resin-orb {
+        width: 140px;
+        height: 140px;
+      }
+      .resin-orb-number {
+        font-size: 2.6rem;
+      }
+    }
+
+    /* ── Reset daily button ── */
+    .reset-daily-btn {
+      margin-top: 0.75rem;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .reset-daily-btn:hover {
+      color: var(--danger);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html" class="active"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="resin-hero">
+    <div class="resin-hero-content">
+      <span class="resin-hero-badge">
+        <i class="fa-solid fa-hourglass-half" style="margin-right:6px;"></i>Resource Tracker
+      </span>
+      <h1>Resin Timer</h1>
+
+      <!-- Resin Orb with Circular Progress Ring -->
+      <div class="resin-orb-wrapper">
+        <svg class="resin-orb-ring" viewBox="0 0 220 220" id="resinRingSvg">
+          <circle class="resin-orb-ring-bg" cx="110" cy="110" r="104"/>
+          <circle class="resin-orb-ring-fill" id="resinRingFill" cx="110" cy="110" r="104"
+            stroke-dasharray="653.45" stroke-dashoffset="130.69"/>
+        </svg>
+        <div class="resin-orb" id="resinOrb">
+          <i class="fa-solid fa-droplet resin-orb-icon" id="resinOrbIcon"></i>
+          <span class="resin-orb-number" id="resinOrbNumber">160</span>
+          <span class="resin-orb-label">Original Resin</span>
+          <span class="resin-orb-sub" id="resinOrbSub">of 200</span>
+        </div>
+      </div>
+
+      <!-- Resin Rate Info -->
+      <div class="resin-rate-bar">
+        <i class="fa-solid fa-clock rate-icon"></i>
+        <span>1 Resin every <strong>8 minutes</strong></span>
+        <span style="margin:0 4px;color:var(--text-muted);">&middot;</span>
+        <span>Full refill in <strong>~26h 40m</strong></span>
+      </div>
+
+      <!-- Controls -->
+      <div class="resin-controls">
+        <!-- Range Slider (0-200) -->
+        <div class="resin-slider-wrap">
+          <span style="font-size:0.72rem;color:var(--text-muted);">0</span>
+          <input type="range" id="resinSlider" min="0" max="200" value="160" oninput="setResinFromSlider()">
+          <span style="font-size:0.72rem;color:var(--text-muted);">200</span>
+          <span class="slider-value" id="sliderValue">160</span>
+        </div>
+
+        <!-- Quick Buttons + Number Input -->
+        <div class="resin-btn-row">
+          <button class="quick-btn" onclick="adjustResin(-20)" title="Subtract 20 Resin">
+            <i class="fa-solid fa-minus" style="margin-right:4px;"></i>20
+          </button>
+          <div class="resin-input-group">
+            <button onclick="adjustResin(-1)" title="-1">&minus;</button>
+            <input type="number" id="resinInput" value="160" min="0" max="200" onchange="setResinFromInput()" oninput="validateResinInput()">
+            <button onclick="adjustResin(1)" title="+1">+</button>
+          </div>
+          <button class="quick-btn" onclick="adjustResin(20)" title="Add 20 Resin">
+            <i class="fa-solid fa-plus" style="margin-right:4px;"></i>20
+          </button>
+        </div>
+      </div>
+
+      <!-- Resin Fill Bar -->
+      <div class="resin-fill-bar-wrap">
+        <div class="resin-fill-bar">
+          <div class="resin-fill-fill" id="resinFillBar" style="width:80%;"></div>
+        </div>
+        <div class="resin-fill-labels">
+          <span>0</span>
+          <span>50</span>
+          <span>100</span>
+          <span>150</span>
+          <span id="resinCapLabel">200</span>
+        </div>
+      </div>
+
+      <!-- Countdown -->
+      <div class="countdown-display" id="countdownDisplay">
+        <span class="countdown-time" id="countdownTime">
+          <span id="countdownH">00</span><span class="unit">h</span>
+          <span id="countdownM">00</span><span class="unit">m</span>
+        </span>
+        <div class="countdown-cap" id="countdownCapText">
+          Will cap at <strong>--</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Daily Resin Planner ── -->
+  <section class="section reveal">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Daily Planner</span>
+        <h2>Daily Resin Planner</h2>
+        <p>Track your daily routine and prioritize resin spending for maximum account progress.</p>
+      </div>
+      <div class="planner-grid">
+        <!-- Daily Checklist -->
+        <div class="checklist-card">
+          <h3><i class="fa-solid fa-list-check"></i> Daily Checklist</h3>
+          <div class="checklist-item" data-key="commissions" onclick="toggleChecklist(this)">
+            <span class="checklist-checkbox"><i class="fa-solid fa-check"></i></span>
+            <span class="checklist-label">Daily Commissions</span>
+            <span class="checklist-reward"><i class="fa-solid fa-star" style="color:var(--gold-dim);margin-right:2px;"></i>60 Primo</span>
+          </div>
+          <div class="checklist-item" data-key="expeditions" onclick="toggleChecklist(this)">
+            <span class="checklist-checkbox"><i class="fa-solid fa-check"></i></span>
+            <span class="checklist-label">Expeditions</span>
+            <span class="checklist-reward"><i class="fa-solid fa-gem" style="color:var(--text-muted);margin-right:2px;"></i>Ore / Mora</span>
+          </div>
+          <div class="checklist-item" data-key="teapot" onclick="toggleChecklist(this)">
+            <span class="checklist-checkbox"><i class="fa-solid fa-check"></i></span>
+            <span class="checklist-label">Teapot (Realm Currency)</span>
+            <span class="checklist-reward"><i class="fa-solid fa-coins" style="color:var(--gold-dim);margin-right:2px;"></i>Coin</span>
+          </div>
+          <button class="reset-daily-btn" onclick="resetDailyChecklist()">
+            <i class="fa-solid fa-arrows-rotate" style="margin-right:4px;"></i>Reset All (New Day)
+          </button>
+        </div>
+
+        <!-- Spending Priority -->
+        <div class="priority-card">
+          <h3><i class="fa-solid fa-arrow-down-wide-short"></i> Spending Priority</h3>
+          <div class="priority-list">
+            <div class="priority-item">
+              <span class="priority-num">1</span>
+              <div class="priority-body">
+                <h4>Weekly Bosses</h4>
+                <p>First 3 claims at 30 Resin each (50% discount). Billet drops and talent materials make this top priority.</p>
+                <span class="priority-badge badge-discount">3&times; Discounted</span>
+                <span class="priority-badge badge-resin">30&ndash;90 Resin</span>
+              </div>
+            </div>
+            <div class="priority-item">
+              <span class="priority-num">2</span>
+              <div class="priority-body">
+                <h4>Talent / Weapon Domains</h4>
+                <p>Farm on the day when your target materials are available. Check the in-game domain schedule before spending.</p>
+                <span class="priority-badge badge-current" id="todayDomainBadge" style="display:none;">Today's Drop</span>
+                <span class="priority-badge badge-resin">20 Resin</span>
+              </div>
+            </div>
+            <div class="priority-item">
+              <span class="priority-num">3</span>
+              <div class="priority-body">
+                <h4>Artifact Domains</h4>
+                <p>The long-term resin sink. Prioritize efficient domains where both 4-piece sets are useful for your roster.</p>
+                <span class="priority-badge badge-resin">20 Resin</span>
+              </div>
+            </div>
+            <div class="priority-item">
+              <span class="priority-num">4</span>
+              <div class="priority-body">
+                <h4>Ley Lines</h4>
+                <p>Only run these if you urgently need Mora or EXP books. Otherwise save resin for the events above and wait for double-reward overflow periods.</p>
+                <span class="priority-badge badge-resin">20 Resin</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Condensed Resin ── -->
+  <section class="section reveal" style="background:rgba(255,255,255,0.01);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Crafting</span>
+        <h2>Condensed Resin Converter</h2>
+        <p>Convert 40 Original Resin into 1 Condensed Resin. Hold up to 5 at a time.</p>
+      </div>
+      <div class="condensed-card">
+        <div class="condensed-icon">
+          <i class="fa-solid fa-flask"></i>
+        </div>
+        <div class="condensed-info">
+          <h3>Condensed Resin</h3>
+          <p>Spend 40 Resin + 1 Crystal Core at any Crafting Bench. Doubles domain rewards &mdash; essentially saves time while burning resin twice as fast. Maximum 5 can be held at once.</p>
+        </div>
+        <div class="condensed-converter">
+          <input type="number" id="condensedInput" value="0" min="0" max="5" onchange="updateCondensed()" oninput="updateCondensed()" placeholder="0">
+          <span style="color:var(--text-secondary);font-size:0.85rem;">&times; 40 =</span>
+          <span class="condensed-result" id="condensedResult">0 Resin</span>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:1rem;font-size:0.78rem;color:var(--text-muted);">
+        <i class="fa-solid fa-circle-info" style="color:var(--hydro);margin-right:4px;"></i>
+        You can hold up to <strong style="color:var(--text-primary);">5</strong> Condensed Resin at once.
+        <span style="margin:0 4px;">&middot;</span>
+        Max 5 = 200 Resin stored
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <!-- ── Scripts ── -->
+  <script>
+    /* ===== Starfield Canvas Animation ===== */
+    (function() {
+      const canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const STAR_COUNT = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          const hsl = s.hue > 0
+            ? `hsla(${s.hue}, 60%, 70%, ${s.alpha})`
+            : `rgba(200,200,220,${s.alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', () => { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ===== Scroll Reveal (IntersectionObserver) ===== */
+    (function() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    })();
+
+    /* ===== Navigation Scroll Effect ===== */
+    (function() {
+      const nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+    })();
+
+    /* ===== Mobile Nav Toggle ===== */
+    (function() {
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', () => {
+        links.classList.toggle('open');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-bars');
+          icon.classList.toggle('fa-xmark');
+        }
+      });
+    })();
+
+    /* ================================
+       RESIN TIMER LOGIC
+       ================================ */
+
+    const RESIN_MAX = 200;
+    const MINUTES_PER_RESIN = 8;
+    const MS_PER_RESIN = MINUTES_PER_RESIN * 60 * 1000;
+
+    // ── State ──
+    let currentResin = 160;
+    let lastUpdateTime = Date.now();
+    let countdownInterval = null;
+
+    // ── DOM refs ──
+    const resinOrb         = document.getElementById('resinOrb');
+    const resinOrbNumber   = document.getElementById('resinOrbNumber');
+    const resinOrbIcon     = document.getElementById('resinOrbIcon');
+    const resinInput       = document.getElementById('resinInput');
+    const resinSlider      = document.getElementById('resinSlider');
+    const sliderValue      = document.getElementById('sliderValue');
+    const resinFillBar     = document.getElementById('resinFillBar');
+    const resinRingFill    = document.getElementById('resinRingFill');
+    const countdownH       = document.getElementById('countdownH');
+    const countdownM       = document.getElementById('countdownM');
+    const countdownCapText = document.getElementById('countdownCapText');
+    const resinCapLabel    = document.getElementById('resinCapLabel');
+
+    // ── Circular progress ring constant ──
+    const RING_RADIUS = 104;
+    const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS; // ~653.45
+
+    // ── Load from localStorage ──
+    function loadState() {
+      const saved = localStorage.getItem('teyvat_resin_state');
+      if (saved) {
+        try {
+          const state = JSON.parse(saved);
+          currentResin = state.resin;
+          lastUpdateTime = state.lastUpdate || Date.now();
+
+          // Simulate resin regen since last visit
+          const elapsedMs = Date.now() - lastUpdateTime;
+          const regenAmount = Math.floor(elapsedMs / MS_PER_RESIN);
+          if (regenAmount > 0 && currentResin < RESIN_MAX) {
+            currentResin = Math.min(RESIN_MAX, currentResin + regenAmount);
+            if (currentResin < RESIN_MAX) {
+              lastUpdateTime = lastUpdateTime + regenAmount * MS_PER_RESIN;
+            } else {
+              lastUpdateTime = Date.now();
+            }
+          }
+        } catch (e) {
+          currentResin = 160;
+          lastUpdateTime = Date.now();
+        }
+      }
+    }
+
+    function saveState() {
+      const state = {
+        resin: currentResin,
+        lastUpdate: lastUpdateTime
+      };
+      localStorage.setItem('teyvat_resin_state', JSON.stringify(state));
+    }
+
+    // ── Calculate time until full ──
+    function getTimeUntilFull() {
+      if (currentResin >= RESIN_MAX) return 0;
+      const remainingResin = RESIN_MAX - currentResin;
+      return remainingResin * MS_PER_RESIN;
+    }
+
+    function getCapDateTime() {
+      if (currentResin >= RESIN_MAX) return null;
+      return new Date(Date.now() + getTimeUntilFull());
+    }
+
+    // ── Format: "Xh Xm" (hours and minutes, no seconds) ──
+    function formatDurationHrMin(ms) {
+      if (ms <= 0) return { h: 0, m: 0 };
+      const totalMinutes = Math.max(0, Math.ceil(ms / 60000));
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      return { h: hours, m: minutes };
+    }
+
+    function pad2(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function formatDateTime(date) {
+      if (!date) return 'Now';
+      const now = new Date();
+      const isToday = date.toDateString() === now.toDateString();
+      const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (isToday) {
+        return 'Today at ' + timeStr;
+      }
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      if (date.toDateString() === tomorrow.toDateString()) {
+        return 'Tomorrow at ' + timeStr;
+      }
+      return date.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' at ' + timeStr;
+    }
+
+    // ── Update UI ──
+    function updateUI() {
+      // Clamp
+      currentResin = Math.max(0, Math.min(RESIN_MAX, currentResin));
+
+      // Orb number bounce animation
+      const prevNum = resinOrbNumber.textContent;
+      if (prevNum !== String(currentResin)) {
+        resinOrbNumber.classList.add('pop');
+        setTimeout(() => { resinOrbNumber.classList.remove('pop'); }, 280);
+      }
+      resinOrbNumber.textContent = currentResin;
+
+      // Orb capped state
+      const isCapped = currentResin >= RESIN_MAX;
+      resinOrb.classList.toggle('capped', isCapped);
+      if (isCapped) {
+        resinOrbIcon.className = 'fa-solid fa-gem resin-orb-icon';
+        resinOrbIcon.style.color = '';
+      } else {
+        resinOrbIcon.className = 'fa-solid fa-droplet resin-orb-icon';
+      }
+
+      // Number input
+      resinInput.value = currentResin;
+
+      // Range slider
+      resinSlider.value = currentResin;
+      resinSlider.classList.toggle('capped', isCapped);
+      sliderValue.textContent = currentResin;
+
+      // Linear fill bar
+      const pct = (currentResin / RESIN_MAX) * 100;
+      resinFillBar.style.width = pct + '%';
+      resinFillBar.classList.toggle('capped', isCapped);
+      resinCapLabel.textContent = RESIN_MAX;
+
+      // Circular progress ring
+      const ringOffset = RING_CIRCUMFERENCE - (currentResin / RESIN_MAX) * RING_CIRCUMFERENCE;
+      resinRingFill.setAttribute('stroke-dashoffset', ringOffset);
+      resinRingFill.classList.toggle('capped', isCapped);
+
+      // Countdown
+      const timeMs = getTimeUntilFull();
+      if (timeMs > 0) {
+        const dur = formatDurationHrMin(timeMs);
+        countdownH.textContent = pad2(dur.h);
+        countdownM.textContent = pad2(dur.m);
+        const capDate = getCapDateTime();
+        countdownCapText.innerHTML = 'Will cap at <strong>' + formatDateTime(capDate) + '</strong>';
+      } else {
+        countdownH.textContent = '00';
+        countdownM.textContent = '00';
+        countdownCapText.innerHTML = '<strong style="color:var(--geo);">Resin is capped!</strong>';
+      }
+
+      // Save
+      saveState();
+    }
+
+    // ── Regen tick (runs every second for smooth countdown) ──
+    function tick() {
+      if (currentResin < RESIN_MAX) {
+        const elapsedMs = Date.now() - lastUpdateTime;
+        const regenAmount = Math.floor(elapsedMs / MS_PER_RESIN);
+        if (regenAmount > 0) {
+          currentResin = Math.min(RESIN_MAX, currentResin + regenAmount);
+          lastUpdateTime = lastUpdateTime + regenAmount * MS_PER_RESIN;
+          if (currentResin >= RESIN_MAX) {
+            lastUpdateTime = Date.now();
+          }
+        }
+      }
+      updateUI();
+    }
+
+    // ── Set resin manually ──
+    function setResin(value) {
+      currentResin = Math.max(0, Math.min(RESIN_MAX, parseInt(value) || 0));
+      lastUpdateTime = Date.now();
+      updateUI();
+    }
+
+    function setResinFromInput() {
+      setResin(parseInt(resinInput.value) || 0);
+    }
+
+    function validateResinInput() {
+      let val = parseInt(resinInput.value);
+      if (isNaN(val) || val < 0) resinInput.value = 0;
+      if (val > RESIN_MAX) resinInput.value = RESIN_MAX;
+    }
+
+    function setResinFromSlider() {
+      setResin(parseInt(resinSlider.value));
+    }
+
+    function adjustResin(delta) {
+      const newVal = currentResin + delta;
+      setResin(newVal);
+    }
+
+    // ── Condensed Resin ──
+    function updateCondensed() {
+      const input = document.getElementById('condensedInput');
+      const result = document.getElementById('condensedResult');
+      let val = parseInt(input.value) || 0;
+      val = Math.max(0, Math.min(5, val));
+      input.value = val;
+      const resinCost = val * 40;
+      result.textContent = resinCost + ' Resin';
+      localStorage.setItem('teyvat_condensed_count', val);
+    }
+
+    function loadCondensed() {
+      const saved = localStorage.getItem('teyvat_condensed_count');
+      const input = document.getElementById('condensedInput');
+      if (saved) {
+        const val = Math.max(0, Math.min(5, parseInt(saved) || 0));
+        input.value = val;
+        updateCondensed();
+      }
+    }
+
+    // ── Daily Checklist (localStorage, per-date auto-reset) ──
+    function getChecklistState() {
+      const saved = localStorage.getItem('teyvat_daily_checklist');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          const savedDate = data.date || '';
+          const today = new Date().toDateString();
+          if (savedDate !== today) {
+            return {}; // New day
+          }
+          return data.checks || {};
+        } catch (e) {
+          return {};
+        }
+      }
+      return {};
+    }
+
+    function saveChecklistState(checks) {
+      const data = {
+        date: new Date().toDateString(),
+        checks: checks
+      };
+      localStorage.setItem('teyvat_daily_checklist', JSON.stringify(data));
+    }
+
+    function toggleChecklist(el) {
+      const key = el.getAttribute('data-key');
+      const checks = getChecklistState();
+      if (checks[key]) {
+        delete checks[key];
+        el.classList.remove('checked');
+      } else {
+        checks[key] = true;
+        el.classList.add('checked');
+      }
+      saveChecklistState(checks);
+    }
+
+    function loadChecklist() {
+      const checks = getChecklistState();
+      document.querySelectorAll('.checklist-item').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (checks[key]) {
+          el.classList.add('checked');
+        } else {
+          el.classList.remove('checked');
+        }
+      });
+    }
+
+    function resetDailyChecklist() {
+      localStorage.removeItem('teyvat_daily_checklist');
+      document.querySelectorAll('.checklist-item').forEach(el => {
+        el.classList.remove('checked');
+      });
+    }
+
+    // ── Today's talent/weapon domain day indicator ──
+    function updateTodayDomainBadge() {
+      const badge = document.getElementById('todayDomainBadge');
+      if (!badge) return;
+      // Genshin domain rotation — Sunday has all available
+      const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const today = dayNames[new Date().getDay()];
+      // We always show "available" since some material is always farmable on any day
+      badge.style.display = 'inline-block';
+      if (today === 'Sunday') {
+        badge.textContent = 'All Available';
+        badge.className = 'priority-badge badge-discount';
+      } else {
+        badge.textContent = 'Today: ' + today;
+        badge.className = 'priority-badge badge-current';
+      }
+    }
+
+    // ── Initialize ──
+    function init() {
+      loadState();
+      updateUI();
+      updateTodayDomainBadge();
+      loadChecklist();
+      loadCondensed();
+      countdownInterval = setInterval(tick, 1000);
+    }
+
+    // Expose to global scope for inline onclick
+    window.adjustResin = adjustResin;
+    window.setResinFromInput = setResinFromInput;
+    window.setResinFromSlider = setResinFromSlider;
+    window.validateResinInput = validateResinInput;
+    window.toggleChecklist = toggleChecklist;
+    window.resetDailyChecklist = resetDailyChecklist;
+    window.updateCondensed = updateCondensed;
+
+    init();
+  </script>
+
+</body>
+</html>

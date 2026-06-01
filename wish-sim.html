@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wish Simulator — Teyvat Guide</title>
+  <meta name="description" content="Interactive Genshin Impact wish simulator with accurate pity mechanics, character portraits, and shooting-star effects.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ============================================================
+       WISH SIMULATOR — Page Styles
+       ============================================================ */
+
+    .wish-page { position: relative; z-index: 1; padding: 1.5rem 2rem 3rem; max-width: 1300px; margin: 0 auto; }
+
+    /* ── Page Title ── */
+    .wish-title {
+      text-align: center; margin-bottom: 1.8rem;
+    }
+    .wish-title h1 {
+      font-family: 'Cinzel', serif; font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 900; letter-spacing: 1px;
+      background: linear-gradient(180deg, #fff, var(--gold-light), var(--gold));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .wish-title p { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+
+    /* ============================================================
+       PRIMOGEM BAR
+       ============================================================ */
+    .primo-bar {
+      display: flex; align-items: center; justify-content: center; gap: 14px;
+      padding: 14px 24px; margin-bottom: 1.5rem;
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); flex-wrap: wrap;
+    }
+    .primo-icon {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: linear-gradient(135deg, #4cc2f1, #2b8cbe);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: #fff;
+      box-shadow: 0 0 20px rgba(76,194,241,0.45);
+    }
+    .primo-count {
+      font-family: 'Cinzel', serif; font-size: 1.7rem; font-weight: 900;
+      background: linear-gradient(135deg, #fff, #c0e8ff);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; min-width: 100px; text-align: center;
+      transition: all 0.3s var(--ease-out);
+    }
+    .primo-deduct {
+      animation: primoPop 0.5s var(--ease-spring);
+    }
+    @keyframes primoPop {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.2); color: #f44336; -webkit-text-fill-color: #f44336; }
+      100% { transform: scale(1); }
+    }
+    .primo-cost {
+      font-size: 0.8rem; color: var(--text-muted);
+      background: var(--bg-input); padding: 4px 14px; border-radius: var(--radius-full);
+    }
+    .primo-reset {
+      background: transparent; border: 1px solid var(--border-subtle);
+      color: var(--text-muted); padding: 7px 16px; border-radius: var(--radius-full);
+      font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+    }
+    .primo-reset:hover { border-color: var(--gold-dim); color: var(--gold-light); }
+
+    /* ============================================================
+       TWO-PANEL LAYOUT
+       ============================================================ */
+    .wish-layout {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 980px) {
+      .wish-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ============================================================
+       LEFT PANEL — Wish Area
+       ============================================================ */
+    .wish-left {
+      display: flex; flex-direction: column; gap: 1.25rem;
+    }
+
+    /* ── Banner Selector ── */
+    .banner-selector {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .banner-btn {
+      flex: 1; min-width: 140px; padding: 13px 18px; border-radius: var(--radius);
+      border: 1.5px solid var(--border-subtle); background: var(--bg-card);
+      color: var(--text-secondary); font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all 0.3s var(--ease-out);
+      letter-spacing: 0.4px; display: flex; align-items: center; gap: 8px;
+      justify-content: center;
+    }
+    .banner-btn:hover { border-color: var(--gold-dim); color: var(--text-primary); }
+    .banner-btn.active {
+      border-color: var(--gold); color: var(--gold-light);
+      background: rgba(201,169,110,0.08); box-shadow: 0 0 20px rgba(201,169,110,0.12);
+    }
+    .banner-btn-icon { font-size: 1rem; }
+
+    /* ── Featured Display ── */
+    .featured-display {
+      padding: 0.9rem 1.2rem; background: var(--bg-card);
+      border: 1px solid var(--border-subtle); border-radius: var(--radius);
+    }
+    .featured-label {
+      font-size: 0.68rem; text-transform: uppercase; letter-spacing: 2.5px;
+      color: var(--gold); margin-bottom: 0.5rem; text-align: center;
+    }
+    .featured-items { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .featured-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.82rem; font-weight: 600;
+    }
+    .featured-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ── Wish Stage ── */
+    .wish-stage {
+      position: relative; min-height: 400px; border-radius: var(--radius-xl);
+      background: radial-gradient(ellipse at center, #1a1a3a 0%, #0d0d20 70%);
+      border: 2px solid var(--border-subtle); overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.5s, box-shadow 0.5s;
+    }
+    .wish-stage.gold-flash {
+      border-color: var(--star5);
+      box-shadow: 0 0 70px rgba(255,177,59,0.35), 0 0 120px rgba(255,177,59,0.1);
+    }
+    .wish-stage.purple-flash {
+      border-color: var(--star4);
+      box-shadow: 0 0 45px rgba(182,135,200,0.28);
+    }
+    .wish-stage.blue-flash {
+      border-color: rgba(90,143,176,0.5);
+      box-shadow: 0 0 30px rgba(90,143,176,0.15);
+    }
+
+    /* Shooting star canvas overlay */
+    #shootingCanvas {
+      position: absolute; inset: 0; pointer-events: none; z-index: 10;
+    }
+
+    /* Wish gate circle */
+    .wish-gate {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 180px; height: 180px; border-radius: 50%;
+      border: 2px solid rgba(201,169,110,0.18);
+      background: radial-gradient(circle, rgba(201,169,110,0.04) 0%, transparent 70%);
+      pointer-events: none; z-index: 2; transition: all 0.8s;
+    }
+    .wish-gate::before {
+      content: ''; position: absolute; inset: -45px; border-radius: 50%;
+      border: 1px solid rgba(201,169,110,0.07);
+      animation: gatePulse 3s ease-in-out infinite;
+    }
+    @keyframes gatePulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.12); opacity: 0.7; }
+    }
+    .wish-gate .gate-star {
+      position: absolute; width: 3px; height: 3px; background: var(--gold-light);
+      border-radius: 50%; animation: gateStarTwinkle 2s ease-in-out infinite;
+    }
+    @keyframes gateStarTwinkle {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50% { opacity: 1; transform: scale(2); }
+    }
+    .wish-gate.gate-active {
+      border-color: rgba(255,177,59,0.55) !important;
+      box-shadow: 0 0 55px rgba(255,177,59,0.35) !important;
+    }
+
+    /* Result cards container */
+    .wish-results {
+      position: relative; z-index: 5; display: flex; flex-wrap: wrap;
+      gap: 10px; justify-content: center; padding: 2rem 1.5rem;
+      max-width: 680px;
+    }
+
+    /* Individual wish result card */
+    .wish-card {
+      width: 100px; padding: 12px 8px 14px; border-radius: var(--radius);
+      text-align: center; position: relative; cursor: default;
+      transition: transform 0.25s var(--ease-out);
+    }
+    .wish-card.card-reveal {
+      animation: cardAppear 0.55s var(--ease-spring) both;
+    }
+    .wish-card:hover { transform: translateY(-5px); z-index: 10; }
+    .wish-card.star5 {
+      background: linear-gradient(180deg, rgba(255,177,59,0.2) 0%, rgba(255,140,0,0.08) 100%);
+      border: 2px solid var(--star5);
+      box-shadow: 0 0 32px rgba(255,177,59,0.32), 0 8px 28px rgba(0,0,0,0.35);
+    }
+    .wish-card.star4 {
+      background: linear-gradient(180deg, rgba(182,135,200,0.2) 0%, rgba(140,80,180,0.06) 100%);
+      border: 2px solid var(--star4);
+      box-shadow: 0 0 22px rgba(182,135,200,0.28), 0 6px 20px rgba(0,0,0,0.28);
+    }
+    .wish-card.star3 {
+      background: linear-gradient(180deg, rgba(90,143,176,0.14) 0%, rgba(60,100,130,0.04) 100%);
+      border: 1px solid rgba(90,143,176,0.35);
+      box-shadow: 0 0 10px rgba(90,143,176,0.1);
+    }
+    .wish-card .card-img-wrap {
+      width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 8px;
+      position: relative; overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; color: #fff;
+    }
+    .wish-card .card-img-wrap img {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; display: none;
+    }
+    .wish-card .card-img-wrap img.loaded { display: block; }
+    .wish-card .card-img-wrap img.loaded + .card-img-icon { display: none; }
+    .wish-card.star5 .card-img-wrap {
+      width: 66px; height: 66px;
+      box-shadow: 0 0 22px rgba(255,177,59,0.55); border-color: var(--star5);
+    }
+    .wish-card.star4 .card-img-wrap {
+      box-shadow: 0 0 16px rgba(182,135,200,0.45); border-color: var(--star4);
+    }
+    .wish-card .card-name {
+      font-size: 0.74rem; font-weight: 700; color: var(--text-primary);
+      line-height: 1.2; margin-bottom: 3px; word-break: break-word;
+    }
+    .wish-card .card-type {
+      font-size: 0.62rem; color: var(--text-muted);
+    }
+    .wish-card .card-stars {
+      font-size: 0.58rem; letter-spacing: 1px; margin-top: 4px;
+    }
+    .wish-card.star5 .card-stars { color: var(--star5); }
+    .wish-card.star4 .card-stars { color: var(--star4); }
+    .wish-card.star3 .card-stars { color: var(--star3); }
+
+    @keyframes cardAppear {
+      from { opacity: 0; transform: scale(0.25) translateY(50px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* ── 5★ character spotlight (big reveal) ── */
+    .spotlight-overlay {
+      position: absolute; inset: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; pointer-events: none;
+    }
+    .spotlight-img-wrap {
+      width: 140px; height: 140px; border-radius: 50%;
+      border: 3px solid var(--star5);
+      box-shadow: 0 0 60px rgba(255,177,59,0.6), 0 0 120px rgba(255,177,59,0.25);
+      overflow: hidden; position: relative;
+      animation: spotlightReveal 2.2s var(--ease-out) forwards;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; color: #fff;
+    }
+    .spotlight-img-wrap img {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; display: none;
+    }
+    .spotlight-img-wrap img.loaded { display: block; }
+    .spotlight-img-wrap img.loaded ~ .spotlight-icon { display: none; }
+    .spotlight-name {
+      font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 900;
+      color: var(--star5); margin-top: 10px;
+      animation: spotlightReveal 2.2s var(--ease-out) forwards;
+      text-shadow: 0 0 30px rgba(255,177,59,0.5);
+    }
+    @keyframes spotlightReveal {
+      0% { opacity: 0; transform: scale(0.2); }
+      15% { opacity: 1; transform: scale(1.15); }
+      30% { opacity: 1; transform: scale(1); }
+      85% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.85); }
+    }
+
+    /* Empty state */
+    .wish-placeholder {
+      position: relative; z-index: 5; text-align: center; color: var(--text-muted);
+    }
+    .wish-placeholder i { font-size: 3rem; color: var(--gold-dim); margin-bottom: 1rem; display: block; }
+    .wish-placeholder p { font-size: 0.95rem; }
+
+    /* ── Pull Buttons ── */
+    .pull-actions {
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .btn-pull {
+      flex: 1; min-width: 160px; padding: 16px 32px; border-radius: var(--radius-full);
+      font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 700;
+      letter-spacing: 1.5px; border: none; cursor: pointer;
+      transition: all 0.35s var(--ease-out);
+      position: relative; overflow: hidden; text-transform: uppercase;
+    }
+    .btn-pull::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+      pointer-events: none;
+    }
+    .btn-pull:disabled {
+      opacity: 0.35; cursor: not-allowed; transform: none !important; filter: grayscale(0.5);
+    }
+    .btn-pull-x1 {
+      background: linear-gradient(135deg, #7b4fbf, #4a2e7a, #6b3fa0);
+      color: #e0d0ff; box-shadow: 0 6px 28px rgba(120,60,200,0.4);
+    }
+    .btn-pull-x1:hover:not(:disabled) {
+      transform: translateY(-3px); box-shadow: 0 10px 38px rgba(120,60,200,0.55);
+    }
+    .btn-pull-x10 {
+      background: linear-gradient(135deg, var(--gold), #b8943a, #8a6b20);
+      color: #1a1000; box-shadow: 0 6px 28px rgba(201,169,110,0.45);
+    }
+    .btn-pull-x10:hover:not(:disabled) {
+      transform: translateY(-3px); box-shadow: 0 12px 42px rgba(201,169,110,0.6);
+    }
+    .btn-pull-cost {
+      display: block; font-family: 'DM Sans', sans-serif; font-size: 0.68rem;
+      font-weight: 500; letter-spacing: 0.5px; opacity: 0.8; margin-top: 2px;
+      text-transform: none;
+    }
+
+    /* No primos overlay */
+    .no-primos-overlay {
+      position: absolute; inset: 0; z-index: 20;
+      background: rgba(6,6,15,0.85); display: flex;
+      align-items: center; justify-content: center; border-radius: var(--radius-xl);
+      flex-direction: column; gap: 1rem;
+    }
+    .no-primos-overlay p {
+      font-family: 'Cinzel', serif; font-size: 1.2rem; color: var(--text-secondary);
+    }
+
+    /* ============================================================
+       RIGHT PANEL — Stats & History
+       ============================================================ */
+    .wish-right {
+      display: flex; flex-direction: column; gap: 1.25rem;
+    }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius); padding: 1rem 0.9rem; text-align: center;
+      transition: all 0.3s;
+    }
+    .stat-card:hover { border-color: var(--border-active); }
+    .stat-card.span-2 { grid-column: 1 / -1; }
+    .stat-value {
+      font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 900; letter-spacing: 1px;
+    }
+    .stat-value.gold { color: var(--star5); }
+    .stat-value.purple { color: var(--star4); }
+    .stat-value.blue { color: var(--star3); }
+    .stat-label {
+      font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 1px; margin-top: 3px;
+    }
+
+    /* Luck rating */
+    .luck-rating {
+      display: flex; align-items: center; gap: 3px; justify-content: center; margin-top: 4px;
+    }
+    .luck-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--border-subtle); transition: all 0.3s;
+    }
+    .luck-dot.lit { background: var(--star5); box-shadow: 0 0 6px var(--star5); }
+
+    /* Pity bar */
+    .pity-bar-wrap { margin-top: 6px; }
+    .pity-bar-label {
+      display: flex; justify-content: space-between; font-size: 0.64rem;
+      color: var(--text-muted); margin-bottom: 2px;
+    }
+    .pity-bar {
+      height: 6px; background: var(--border-subtle); border-radius: 3px; overflow: hidden;
+    }
+    .pity-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold-light));
+      transition: width 0.4s var(--ease-out);
+    }
+    .pity-fill.soft { background: linear-gradient(90deg, var(--warning), var(--star5)); }
+    .pity-fill.hard { background: linear-gradient(90deg, var(--danger), var(--star5)); animation: pulse-glow 0.8s infinite; }
+
+    /* 4★ pity mini bar */
+    .pity4-bar-wrap { margin-top: 4px; }
+    .pity4-bar-label {
+      display: flex; justify-content: space-between; font-size: 0.6rem;
+      color: var(--text-muted); margin-bottom: 1px;
+    }
+    .pity4-bar {
+      height: 4px; background: var(--border-subtle); border-radius: 2px; overflow: hidden;
+    }
+    .pity4-fill {
+      height: 100%; border-radius: 2px;
+      background: linear-gradient(90deg, #8a5fae, var(--star4));
+      transition: width 0.35s var(--ease-out);
+    }
+
+    /* Guarantee badge */
+    .guarantee-display {
+      display: flex; align-items: center; gap: 8px; justify-content: center; margin-top: 4px;
+    }
+    .guarantee-badge {
+      display: inline-block; padding: 3px 12px; border-radius: var(--radius-full);
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .guarantee-badge.on {
+      background: rgba(255,177,59,0.18); color: var(--star5); border: 1px solid rgba(255,177,59,0.35);
+    }
+    .guarantee-badge.off {
+      background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid var(--border-subtle);
+    }
+    .guarantee-badge.na {
+      background: rgba(255,255,255,0.02); color: var(--text-muted); border: 1px solid var(--border-subtle);
+      font-weight: 500;
+    }
+
+    /* ── Pull History ── */
+    .history-panel {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); padding: 1.25rem; flex: 1;
+    }
+    .history-panel h3 {
+      font-family: 'Cinzel', serif; font-size: 1rem; margin-bottom: 0.75rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .history-header-row {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;
+    }
+    .history-header-row h3 { margin-bottom: 0; }
+    .history-export {
+      background: transparent; border: 1px solid var(--border-subtle);
+      color: var(--text-muted); padding: 4px 10px; border-radius: var(--radius-full);
+      font-size: 0.68rem; cursor: pointer; transition: all 0.2s;
+    }
+    .history-export:hover { border-color: var(--gold-dim); color: var(--gold-light); }
+    .history-list { display: flex; flex-direction: column; gap: 4px; max-height: 440px; overflow-y: auto; }
+    .history-item {
+      display: flex; align-items: center; gap: 9px; padding: 7px 10px;
+      border-radius: var(--radius-sm); background: rgba(255,255,255,0.02);
+      font-size: 0.78rem; transition: background 0.2s;
+    }
+    .history-item:hover { background: rgba(255,255,255,0.05); }
+    .history-rarity {
+      width: 24px; height: 24px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-size: 0.62rem;
+      font-weight: 700; flex-shrink: 0;
+    }
+    .history-rarity.r5 { background: var(--star5); color: #1a1000; box-shadow: 0 0 8px rgba(255,177,59,0.4); }
+    .history-rarity.r4 { background: var(--star4); color: #fff; box-shadow: 0 0 6px rgba(182,135,200,0.3); }
+    .history-rarity.r3 { background: var(--star3); color: #fff; }
+    .history-name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-type { color: var(--text-muted); font-size: 0.65rem; }
+    .history-pullnum { color: var(--text-muted); font-size: 0.66rem; flex-shrink: 0; }
+    .history-empty { text-align: center; color: var(--text-muted); padding: 2.5rem 0; font-size: 0.82rem; }
+
+    /* ── Animations ── */
+    .spark-particle {
+      position: absolute; pointer-events: none; z-index: 30; border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#" class="active">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html" style="color:var(--gold-light);"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Main Content ── -->
+  <main class="wish-page">
+
+    <!-- Title -->
+    <div class="wish-title">
+      <h1>Wish Simulator</h1>
+      <p>Test your luck with accurate pity mechanics and character portraits. No real Primogems harmed.</p>
+    </div>
+
+    <!-- Primogem Counter -->
+    <div class="primo-bar">
+      <div class="primo-icon"><i class="fa-solid fa-star"></i></div>
+      <span class="primo-count" id="primoCount">28,800</span>
+      <span class="primo-cost"><i class="fa-solid fa-star" style="font-size:0.6rem;color:var(--star5);"></i> 160 per pull</span>
+      <button class="primo-reset" id="resetBtn" title="Refill Primogems & Reset Stats">
+        <i class="fa-solid fa-arrows-rotate"></i> Reset All
+      </button>
+    </div>
+
+    <!-- Two-Panel Layout -->
+    <div class="wish-layout">
+
+      <!-- ========== LEFT PANEL ========== -->
+      <div class="wish-left">
+
+        <!-- Banner Selector -->
+        <div class="banner-selector">
+          <button class="banner-btn active" data-banner="character" id="bannerChar">
+            <i class="fa-solid fa-user-group banner-btn-icon" style="color:var(--gold);"></i> Character Event
+          </button>
+          <button class="banner-btn" data-banner="weapon" id="bannerWeapon">
+            <i class="fa-solid fa-gavel banner-btn-icon" style="color:var(--gold-dim);"></i> Weapon Event
+          </button>
+          <button class="banner-btn" data-banner="standard" id="bannerStd">
+            <i class="fa-solid fa-globe banner-btn-icon" style="color:var(--gold-dim);"></i> Standard
+          </button>
+        </div>
+
+        <!-- Featured Display -->
+        <div class="featured-display" id="featuredDisplay">
+          <div class="featured-label">✦ Featured Items ✦</div>
+          <div class="featured-items" id="featuredItems"></div>
+        </div>
+
+        <!-- Wish Stage -->
+        <div class="wish-stage" id="wishStage">
+          <canvas id="shootingCanvas"></canvas>
+          <div class="wish-gate" id="wishGate">
+            <div class="gate-star" style="top:18%;left:48%;"></div>
+            <div class="gate-star" style="top:48%;left:22%;animation-delay:0.5s;"></div>
+            <div class="gate-star" style="top:72%;left:58%;animation-delay:1s;"></div>
+            <div class="gate-star" style="top:32%;left:76%;animation-delay:1.5s;"></div>
+            <div class="gate-star" style="top:55%;left:80%;animation-delay:0.7s;"></div>
+            <div class="gate-star" style="top:80%;left:30%;animation-delay:1.8s;"></div>
+          </div>
+          <div class="wish-results" id="wishResults">
+            <div class="wish-placeholder">
+              <i class="fa-solid fa-star"></i>
+              <p>Choose a banner and make a wish...</p>
+            </div>
+          </div>
+          <div class="no-primos-overlay" id="noPrimosOverlay" style="display:none;">
+            <p><i class="fa-solid fa-circle-exclamation" style="color:var(--warning);"></i> Not enough Primogems!</p>
+            <button class="btn btn-primary btn-sm" id="refillBtn">Refill 28,800 Primogems</button>
+          </div>
+        </div>
+
+        <!-- Pull Buttons -->
+        <div class="pull-actions">
+          <button class="btn-pull btn-pull-x1" id="btnPull1">
+            <i class="fa-solid fa-star"></i> Wish x1
+            <span class="btn-pull-cost">160 Primogems</span>
+          </button>
+          <button class="btn-pull btn-pull-x10" id="btnPull10">
+            <i class="fa-solid fa-stars"></i> Wish x10
+            <span class="btn-pull-cost">1,600 Primogems</span>
+          </button>
+        </div>
+
+      </div><!-- /wish-left -->
+
+      <!-- ========== RIGHT PANEL ========== -->
+      <div class="wish-right">
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="statTotal" style="color:var(--text-primary);">0</div>
+            <div class="stat-label">Total Pulls</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statPity" style="color:var(--text-primary);">0</div>
+            <div class="stat-label">5★ Pity Counter</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value gold" id="stat5">0</div>
+            <div class="stat-label">5★ Pulls</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value purple" id="stat4">0</div>
+            <div class="stat-label">4★ Pulls</div>
+          </div>
+          <!-- Pity bar (full width) -->
+          <div class="stat-card span-2">
+            <div class="stat-label">5★ Pity Progress</div>
+            <div class="pity-bar-wrap">
+              <div class="pity-bar-label"><span>0</span><span>74 soft</span><span>90 hard</span></div>
+              <div class="pity-bar"><div class="pity-fill" id="pityFill" style="width:0%;"></div></div>
+            </div>
+            <div class="pity4-bar-wrap" style="margin-top:8px;">
+              <div class="pity4-bar-label"><span>4★ Pity</span><span id="pity4Label">0 / 10</span></div>
+              <div class="pity4-bar"><div class="pity4-fill" id="pity4Fill" style="width:0%;"></div></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="statLuck" style="color:var(--text-secondary);font-size:1.05rem;">--</div>
+            <div class="stat-label">Luck Rating</div>
+            <div class="luck-rating" id="luckDots">
+              <span class="luck-dot"></span><span class="luck-dot"></span><span class="luck-dot"></span>
+              <span class="luck-dot"></span><span class="luck-dot"></span>
+            </div>
+          </div>
+          <div class="stat-card" id="guaranteeCard">
+            <div class="stat-label">5★ Guarantee</div>
+            <div class="guarantee-display">
+              <span class="guarantee-badge off" id="guaranteeBadge">50/50</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pull History -->
+        <div class="history-panel">
+          <div class="history-header-row">
+            <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--gold);"></i> Pull History</h3>
+            <span style="font-size:0.68rem;color:var(--text-muted);" id="historyCount">Last 30</span>
+          </div>
+          <div class="history-list" id="historyList">
+            <div class="history-empty">No wishes yet. Start pulling!</div>
+          </div>
+        </div>
+
+      </div><!-- /wish-right -->
+
+    </div><!-- /wish-layout -->
+  </main>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+    </p>
+  </footer>
+
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+
+  <!-- ── Wish Simulator Script ── -->
+  <script>
+  (function() {
+    /* ================================================================
+       STARFIELD BACKGROUND
+       ================================================================ */
+    (function() {
+      const canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const STAR_COUNT = 200;
+
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2, alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          const hsl = s.hue > 0
+            ? `hsla(${s.hue}, 60%, 70%, ${s.alpha})`
+            : `rgba(200,200,220,${s.alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      window.addEventListener('resize', () => { resize(); initStars(); });
+      resize(); initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ================================================================
+       NAV SCROLL + MOBILE TOGGLE
+       ================================================================ */
+    (function() {
+      const nav = document.getElementById('navbar');
+      if (nav) {
+        window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 10));
+      }
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      if (toggle && links) {
+        toggle.addEventListener('click', () => {
+          links.classList.toggle('open');
+          const icon = toggle.querySelector('i');
+          if (icon) { icon.classList.toggle('fa-bars'); icon.classList.toggle('fa-xmark'); }
+        });
+      }
+    })();
+
+    /* ================================================================
+       CHARACTER IMAGE HELPERS
+       Maps display names to Enka Network icon filenames.
+       Falls back to element-colored icon on load failure.
+       ================================================================ */
+    const CHAR_ICON_MAP = {
+      // Pyro
+      'Arlecchino': 'Arlecchino',
+      'Hu Tao': 'Hutao',
+      'Diluc': 'Diluc',
+      'Yoimiya': 'Yoimiya',
+      'Klee': 'Klee',
+      'Lyney': 'Lyney',
+      'Dehya': 'Dehya',
+      'Bennett': 'Bennett',
+      'Xiangling': 'Xiangling',
+      'Gaming': 'Gaming',
+      'Chevreuse': 'Chevreuse',
+      'Thoma': 'Thoma',
+      'Yanfei': 'Yanfei',
+      'Xinyan': 'Xinyan',
+      'Amber': 'Amber',
+      // Hydro
+      'Furina': 'Furina',
+      'Neuvillette': 'Neuvillette',
+      'Yelan': 'Yelan',
+      'Kamisato Ayato': 'Ayato',
+      'Nilou': 'Nilou',
+      'Tartaglia': 'Tartaglia',
+      'Sangonomiya Kokomi': 'Kokomi',
+      'Mona': 'Mona',
+      'Barbara': 'Barbara',
+      'Xingqiu': 'Xingqiu',
+      'Candace': 'Candace',
+      'Sigewinne': 'Sigewinne',
+      // Anemo
+      'Xiao': 'Xiao',
+      'Venti': 'Venti',
+      'Wanderer': 'Wanderer',
+      'Kaedehara Kazuha': 'Kazuha',
+      'Jean': 'Jean',
+      'Xianyun': 'Xianyun',
+      'Sucrose': 'Sucrose',
+      'Faruzan': 'Faruzan',
+      'Lynette': 'Lynette',
+      'Shikanoin Heizou': 'Heizou',
+      'Sayu': 'Sayu',
+      // Electro
+      'Raiden Shogun': 'Shougun',
+      'Yae Miko': 'Yae',
+      'Cyno': 'Cyno',
+      'Keqing': 'Keqing',
+      'Clorinde': 'Clorinde',
+      'Fischl': 'Fischl',
+      'Kuki Shinobu': 'Shinobu',
+      'Beidou': 'Beidou',
+      'Kujou Sara': 'Sara',
+      'Razor': 'Razor',
+      'Lisa': 'Lisa',
+      'Dori': 'Dori',
+      // Dendro
+      'Nahida': 'Nahida',
+      'Alhaitham': 'Alhaitham',
+      'Baizhu': 'Baizhu',
+      'Tighnari': 'Tighnari',
+      'Emilie': 'Emilie',
+      'Yaoyao': 'Yaoyao',
+      'Kirara': 'Kirara',
+      'Collei': 'Collei',
+      'Kaveh': 'Kaveh',
+      // Cryo
+      'Ganyu': 'Ganyu',
+      'Shenhe': 'Shenhe',
+      'Ayaka': 'Ayaka',
+      'Kamisato Ayaka': 'Ayaka',
+      'Eula': 'Eula',
+      'Wriothesley': 'Wriothesley',
+      'Qiqi': 'Qiqi',
+      'Charlotte': 'Charlotte',
+      'Rosaria': 'Rosaria',
+      'Diona': 'Diona',
+      'Layla': 'Layla',
+      'Chongyun': 'Chongyun',
+      'Kaeya': 'Kaeya',
+      'Mika': 'Mika',
+      'Freminet': 'Freminet',
+      // Geo
+      'Zhongli': 'Zhongli',
+      'Albedo': 'Albedo',
+      'Arataki Itto': 'Itto',
+      'Navia': 'Navia',
+      'Chiori': 'Chiori',
+      'Gorou': 'Gorou',
+      'Yun Jin': 'Yunjin',
+      'Noelle': 'Noelle',
+      'Ningguang': 'Ningguang',
+    };
+
+    const IMG_CDN_BASE = 'https://enka.network/ui/';
+    // Alternate: 'https://api.ambr.top/assets/UI/'
+
+    function getCharIconName(name) {
+      if (CHAR_ICON_MAP[name]) return CHAR_ICON_MAP[name];
+      // Fallback: remove spaces, special chars
+      return name.replace(/[^a-zA-Z]/g, '');
+    }
+
+    function getCharImageUrl(name) {
+      const iconName = getCharIconName(name);
+      // Try Side portrait first (better aspect for circles)
+      return IMG_CDN_BASE + 'UI_AvatarIcon_Side_' + iconName + '.png';
+    }
+
+    function tryLoadCharImage(imgEl, charName, fallbackFn) {
+      if (!charName) { if (fallbackFn) fallbackFn(); return; }
+      const url = getCharImageUrl(charName);
+      imgEl.src = url;
+      imgEl.onload = function() {
+        imgEl.classList.add('loaded');
+      };
+      imgEl.onerror = function() {
+        // Try alternate URL pattern without _Side_
+        const altUrl = IMG_CDN_BASE + 'UI_AvatarIcon_' + getCharIconName(charName) + '.png';
+        imgEl.src = altUrl;
+        imgEl.onerror = function() {
+          if (fallbackFn) fallbackFn();
+        };
+      };
+    }
+
+    /* ================================================================
+       ELEMENT DATA
+       ================================================================ */
+    const ELEMENT_ICONS = {
+      pyro: 'fa-fire', hydro: 'fa-droplet', anemo: 'fa-wind',
+      electro: 'fa-bolt', dendro: 'fa-leaf', cryo: 'fa-snowflake', geo: 'fa-mountain'
+    };
+    const ELEMENT_COLORS = {
+      pyro: '#ef7938', hydro: '#4cc2f1', anemo: '#74c2a8', electro: '#af8fd1',
+      dendro: '#a5d63e', cryo: '#9fd6e3', geo: '#fab72e'
+    };
+
+    /* ================================================================
+       DATA PREPARATION - Build wish pools from data.js
+       Uses `.st` property for star rating (data.js convention).
+       ================================================================ */
+    // Normalize character data
+    const ALL_CHARS = (typeof CHARACTERS !== 'undefined' ? CHARACTERS : []).map(c => ({
+      ...c,
+      stars: c.st || c.stars || 5,
+      weaponType: c.wp || c.weapon,
+    }));
+
+    // Normalize weapon data
+    const ALL_WEAPONS = (typeof WEAPONS !== 'undefined' ? WEAPONS : []).map(w => ({
+      ...w,
+      stars: w.st || w.stars || 3,
+      weaponType: w.type,
+    }));
+
+    const chars5 = ALL_CHARS.filter(c => c.stars === 5);
+    const chars4 = ALL_CHARS.filter(c => c.stars === 4);
+
+    // Standard 5★ characters
+    const standard5Names = ['Diluc','Keqing','Jean','Mona','Qiqi','Tighnari','Dehya'];
+    const standard5 = chars5.filter(c => standard5Names.includes(c.name));
+
+    // Featured 5★ for character event
+    const featured5Names = ['Furina','Arlecchino'];
+    const featured5 = chars5.filter(c => featured5Names.includes(c.name));
+
+    // Featured 4★ for character event
+    const featured4Names = ['Bennett','Xiangling','Fischl'];
+    const featured4 = chars4.filter(c => featured4Names.includes(c.name));
+
+    // 5★ weapons
+    const weapons5 = ALL_WEAPONS.filter(w => w.stars === 5);
+    const featuredWeapon5Names = ['Splendor of Tranquil Waters','Crimson Moon\'s Semblance'];
+    const featuredWeapons5 = weapons5.filter(w => featuredWeapon5Names.includes(w.name));
+    const standardWeapons5 = weapons5.filter(w => !featuredWeapon5Names.includes(w.name));
+
+    // 4★ weapons
+    const weapons4 = ALL_WEAPONS.filter(w => w.stars === 4);
+
+    // 3★ weapons pool
+    const weapons3 = [
+      { name:'Cool Steel', weaponType:'Sword' },
+      { name:'Harbinger of Dawn', weaponType:'Sword' },
+      { name:'Skyrider Sword', weaponType:'Sword' },
+      { name:'Dark Iron Sword', weaponType:'Sword' },
+      { name:'Black Tassel', weaponType:'Polearm' },
+      { name:'Halberd', weaponType:'Polearm' },
+      { name:'White Tassel', weaponType:'Polearm' },
+      { name:'Debate Club', weaponType:'Claymore' },
+      { name:'Bloodtainted Greatsword', weaponType:'Claymore' },
+      { name:'Ferrous Shadow', weaponType:'Claymore' },
+      { name:'Raven Bow', weaponType:'Bow' },
+      { name:'Slingshot', weaponType:'Bow' },
+      { name:'Recurve Bow', weaponType:'Bow' },
+      { name:'Sharpshooter\'s Oath', weaponType:'Bow' },
+      { name:'Emerald Orb', weaponType:'Catalyst' },
+      { name:'Magic Guide', weaponType:'Catalyst' },
+      { name:'Thrilling Tales of Dragon Slayers', weaponType:'Catalyst' },
+      { name:'Otherworldly Story', weaponType:'Catalyst' },
+    ];
+
+    // Build pools per banner
+    const pools = {
+      character: {
+        fiveFeatured: featured5.length > 0 ? featured5 : chars5.slice(0, 2),
+        fiveStandard: standard5.length > 0 ? standard5 : chars5.slice(2, 8),
+        fourFeatured: featured4.length > 0 ? featured4 : chars4.slice(0, 3),
+        fourStandard: chars4.filter(c => !featured4Names.includes(c.name)),
+        fourWeapons: weapons4.slice(0, 6),
+        three: weapons3,
+        featured5Names: featured5Names,
+        featured4Names: featured4Names,
+        label: 'Character Event Wish',
+        guaranteeActive: true,
+      },
+      weapon: {
+        fiveFeatured: featuredWeapons5.length > 0 ? featuredWeapons5 : weapons5.slice(0, 2),
+        fiveStandard: standardWeapons5.slice(0, 8),
+        fourWeapons: weapons4.length > 0 ? weapons4 : [],
+        fourChars: chars4.slice(0, 8),
+        three: weapons3,
+        featured5Names: featuredWeapon5Names,
+        label: 'Weapon Event Wish',
+        guaranteeActive: true,
+      },
+      standard: {
+        fiveAll: standard5.concat(
+          weapons5.filter(w => ['Aquila Favonia','Primordial Jade Winged-Spear','Wolf\'s Gravestone','Skyward Harp','Lost Prayer to the Sacred Winds'].some(n => w.name.includes(n)))
+        ),
+        fourAll: chars4.concat(weapons4.slice(0, 5)),
+        three: weapons3,
+        featured5Names: standard5Names,
+        label: 'Standard Wish',
+        guaranteeActive: false,
+      }
+    };
+
+    // Ensure every pool has at least some items
+    function ensurePool(pool) {
+      if (pool.fiveFeatured && pool.fiveFeatured.length === 0) {
+        pool.fiveFeatured = chars5.slice(0, 2);
+      }
+      if (pool.fiveStandard && pool.fiveStandard.length === 0) {
+        pool.fiveStandard = chars5.slice(2, 8);
+      }
+      if (pool.fiveAll && pool.fiveAll.length === 0) {
+        pool.fiveAll = chars5.slice(0, 6);
+      }
+      if (pool.fourAll && pool.fourAll.length === 0) {
+        pool.fourAll = chars4.slice(0, 8);
+      }
+      if (pool.fourFeatured && pool.fourFeatured.length === 0) {
+        pool.fourFeatured = chars4.slice(0, 3);
+      }
+      if (pool.fourStandard && pool.fourStandard.length === 0) {
+        pool.fourStandard = chars4.slice(3, 12);
+      }
+      if (pool.fourWeapons && pool.fourWeapons.length === 0) {
+        pool.fourWeapons = weapons4.slice(0, 6);
+      }
+      if (pool.fourChars && pool.fourChars.length === 0) {
+        pool.fourChars = chars4.slice(0, 8);
+      }
+      if (!pool.three || pool.three.length === 0) {
+        pool.three = weapons3;
+      }
+    }
+    ensurePool(pools.character);
+    ensurePool(pools.weapon);
+    ensurePool(pools.standard);
+
+    /* ================================================================
+       STATE
+       ================================================================ */
+    const state = {
+      banner: 'character',
+      primogems: 28800,
+      totalPulls: 0,
+      pity5: 0,
+      pity4: 0,
+      count5: 0,
+      count4: 0,
+      count3: 0,
+      guaranteed: false,
+      history: [],
+      animating: false,
+    };
+
+    /* ================================================================
+       DOM REFS
+       ================================================================ */
+    const $ = (id) => document.getElementById(id);
+    const primoCount = $('primoCount');
+    const wishStage = $('wishStage');
+    const wishResults = $('wishResults');
+    const wishGate = $('wishGate');
+    const noPrimosOverlay = $('noPrimosOverlay');
+    const shootingCanvas = $('shootingCanvas');
+    const shootingCtx = shootingCanvas.getContext('2d');
+    const btnPull1 = $('btnPull1');
+    const btnPull10 = $('btnPull10');
+    const historyList = $('historyList');
+    const featuredItems = $('featuredItems');
+    const guaranteeBadge = $('guaranteeBadge');
+    const resetBtn = $('resetBtn');
+    const refillBtn = $('refillBtn');
+    const historyCountEl = $('historyCount');
+
+    // Shooting star animation state
+    let shootingStars = [];
+    let shootingAnimId = null;
+
+    function resizeShootingCanvas() {
+      const rect = wishStage.getBoundingClientRect();
+      shootingCanvas.width = rect.width;
+      shootingCanvas.height = rect.height;
+    }
+
+    /* ================================================================
+       SHOOTING STAR CANVAS ANIMATION
+       ================================================================ */
+    function spawnShootingStar() {
+      const w = shootingCanvas.width || 600;
+      const h = shootingCanvas.height || 400;
+      shootingStars.push({
+        x: Math.random() * w * 0.5,
+        y: Math.random() * h * 0.25,
+        vx: 7 + Math.random() * 10,
+        vy: 4 + Math.random() * 7,
+        life: 1,
+        decay: 0.006 + Math.random() * 0.012,
+        size: 1.8 + Math.random() * 3,
+        trail: [],
+        hue: Math.random() < 0.3 ? 42 : 0,
+      });
+    }
+
+    function spawnShootingStars(count) {
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => spawnShootingStar(), i * 70);
+      }
+    }
+
+    function animateShootingStars() {
+      shootingCtx.clearRect(0, 0, shootingCanvas.width, shootingCanvas.height);
+      for (let i = shootingStars.length - 1; i >= 0; i--) {
+        const s = shootingStars[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.life -= s.decay;
+        s.trail.push({ x: s.x, y: s.y, life: s.life });
+        if (s.trail.length > 35) s.trail.shift();
+
+        // Draw trail
+        for (let j = 0; j < s.trail.length; j++) {
+          const t = s.trail[j];
+          const alpha = (j / s.trail.length) * s.life * 0.6;
+          if (alpha <= 0) continue;
+          const color = s.hue > 0
+            ? `hsla(${s.hue}, 80%, 70%, ${alpha})`
+            : `rgba(255,220,150,${alpha})`;
+          shootingCtx.beginPath();
+          shootingCtx.arc(t.x, t.y, s.size * (j / s.trail.length) * 0.7, 0, Math.PI * 2);
+          shootingCtx.fillStyle = color;
+          shootingCtx.fill();
+        }
+
+        // Draw head
+        if (s.life > 0) {
+          const headColor = s.hue > 0
+            ? `hsla(${s.hue}, 70%, 90%, ${Math.min(1, s.life * 1.5)})`
+            : `rgba(255,255,240,${Math.min(1, s.life * 1.5)})`;
+          shootingCtx.beginPath();
+          shootingCtx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          shootingCtx.fillStyle = headColor;
+          shootingCtx.fill();
+          // Glow
+          const glow = shootingCtx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size * 5);
+          const glowBase = s.hue > 0 ? `hsla(${s.hue}, 70%, 70%, ` : 'rgba(255,220,150,';
+          glow.addColorStop(0, glowBase + (s.life * 0.5) + ')');
+          glow.addColorStop(1, glowBase + '0)');
+          shootingCtx.beginPath();
+          shootingCtx.arc(s.x, s.y, s.size * 5, 0, Math.PI * 2);
+          shootingCtx.fillStyle = glow;
+          shootingCtx.fill();
+        }
+        if (s.life <= 0) shootingStars.splice(i, 1);
+      }
+      if (shootingStars.length > 0) {
+        shootingAnimId = requestAnimationFrame(animateShootingStars);
+      } else {
+        shootingAnimId = null;
+      }
+    }
+
+    function triggerShootingStars() {
+      spawnShootingStars(16);
+      if (!shootingAnimId) {
+        shootingAnimId = requestAnimationFrame(animateShootingStars);
+      }
+    }
+
+    /* ================================================================
+       PULL LOGIC
+       ================================================================ */
+    function get5StarRate(pity) {
+      if (pity >= 90) return 1;
+      if (pity >= 74) {
+        const softPulls = pity - 73;
+        return Math.min(1, 0.006 + softPulls * 0.06);
+      }
+      return 0.006;
+    }
+
+    function get4StarRate(pity) {
+      if (pity >= 10) return 1;
+      return 0.051;
+    }
+
+    function determineRarity() {
+      const r5 = Math.random();
+      const r4 = Math.random();
+      const rate5 = get5StarRate(state.pity5);
+      const rate4 = get4StarRate(state.pity4);
+
+      if (r5 < rate5) return 5;
+      if (r4 < rate4) return 4;
+      return 3;
+    }
+
+    function pickFrom(arr) {
+      if (!arr || arr.length === 0) {
+        // Emergency fallback: return a generic 3★ weapon
+        return { name: 'Dull Blade', rarity: 3, isCharacter: false, weaponType: 'Sword' };
+      }
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function selectItem(rarity) {
+      const pool = pools[state.banner];
+
+      if (rarity === 5) {
+        if (state.banner === 'character') {
+          let isFeatured;
+          if (state.guaranteed) {
+            isFeatured = true;
+            state.guaranteed = false;
+          } else {
+            if (Math.random() < 0.5) {
+              isFeatured = true;
+              state.guaranteed = false;
+            } else {
+              isFeatured = false;
+              state.guaranteed = true;
+            }
+          }
+          const source = isFeatured ? pool.fiveFeatured : pool.fiveStandard;
+          const char = pickFrom(source);
+          return { ...char, rarity: 5, isCharacter: true, isFeatured };
+        } else if (state.banner === 'weapon') {
+          let isFeatured;
+          if (state.guaranteed) {
+            isFeatured = true;
+            state.guaranteed = false;
+          } else {
+            if (Math.random() < 0.75) {
+              isFeatured = true;
+              state.guaranteed = false;
+            } else {
+              isFeatured = false;
+              state.guaranteed = true;
+            }
+          }
+          const source = isFeatured ? pool.fiveFeatured : pool.fiveStandard;
+          const weapon = pickFrom(source);
+          return { ...weapon, rarity: 5, isCharacter: false, isFeatured };
+        } else {
+          const item = pickFrom(pool.fiveAll);
+          return { ...item, rarity: 5, isCharacter: !!item.el || !!item.element, isFeatured: false };
+        }
+      }
+
+      if (rarity === 4) {
+        if (state.banner === 'character') {
+          if (Math.random() < 0.5 && pool.fourFeatured && pool.fourFeatured.length > 0) {
+            const char = pickFrom(pool.fourFeatured);
+            return { ...char, rarity: 4, isCharacter: true };
+          } else {
+            if (Math.random() < 0.5 && pool.fourStandard && pool.fourStandard.length > 0) {
+              return { ...pickFrom(pool.fourStandard), rarity: 4, isCharacter: true };
+            } else if (pool.fourWeapons && pool.fourWeapons.length > 0) {
+              return { ...pickFrom(pool.fourWeapons), rarity: 4, isCharacter: false };
+            } else {
+              return { ...pickFrom(pool.fourStandard), rarity: 4, isCharacter: true };
+            }
+          }
+        } else if (state.banner === 'weapon') {
+          if (Math.random() < 0.5 && pool.fourWeapons && pool.fourWeapons.length > 0) {
+            return { ...pickFrom(pool.fourWeapons), rarity: 4, isCharacter: false };
+          } else if (pool.fourChars && pool.fourChars.length > 0) {
+            return { ...pickFrom(pool.fourChars), rarity: 4, isCharacter: true };
+          } else {
+            return { ...pickFrom(pool.fourWeapons), rarity: 4, isCharacter: false };
+          }
+        } else {
+          const item = pickFrom(pool.fourAll);
+          return { ...item, rarity: 4, isCharacter: !!item.el || !!item.element };
+        }
+      }
+
+      // 3★
+      const w3 = pickFrom(pool.three);
+      return { ...w3, rarity: 3, isCharacter: false };
+    }
+
+    function generateSinglePull() {
+      const rarity = determineRarity();
+      const item = selectItem(rarity);
+
+      // Update pity counters
+      if (rarity === 5) {
+        state.pity5 = 0;
+        state.pity4++;
+        state.count5++;
+      } else if (rarity === 4) {
+        state.pity5++;
+        state.pity4 = 0;
+        state.count4++;
+      } else {
+        state.pity5++;
+        state.pity4++;
+        state.count3++;
+      }
+
+      state.totalPulls++;
+      state.primogems -= 160;
+      state.history.unshift({ ...item, pullNumber: state.totalPulls });
+      if (state.history.length > 50) state.history.pop();
+
+      return item;
+    }
+
+    /* ================================================================
+       ANIMATION & DISPLAY
+       ================================================================ */
+
+    function createWishCard(item, delay) {
+      const card = document.createElement('div');
+      const rarityClass = 'star' + item.rarity;
+      card.className = 'wish-card ' + rarityClass;
+      card.style.animationDelay = delay + 'ms';
+
+      const isChar = item.isCharacter && (item.el || item.element);
+      const elKey = item.el || item.element;
+      const elColor = ELEMENT_COLORS[elKey] || '#888';
+      const elIcon = ELEMENT_ICONS[elKey] || 'fa-star';
+
+      let imgHtml = '';
+      if (isChar) {
+        imgHtml = `
+          <div class="card-img-wrap" style="background:radial-gradient(circle at 40% 40%, ${elColor}, ${elColor}44);">
+            <img src="" alt="${item.name}" data-char-name="${item.name}">
+            <span class="card-img-icon"><i class="fa-solid ${elIcon}"></i></span>
+          </div>`;
+      } else {
+        imgHtml = `
+          <div class="card-img-wrap" style="background:radial-gradient(circle at 40% 40%, #888, #444);">
+            <span class="card-img-icon"><i class="fa-solid fa-gavel"></i></span>
+          </div>`;
+      }
+
+      const starsStr = item.rarity === 5 ? '★★★★★' : item.rarity === 4 ? '★★★★' : '★★★';
+      const typeLabel = isChar
+        ? (elKey ? elKey.charAt(0).toUpperCase() + elKey.slice(1) : '') + (item.weaponType ? ' ' + item.weaponType : '')
+        : (item.weaponType || item.type || 'Weapon');
+      const fTag = item.isFeatured && item.rarity === 5 ? ' <span style="color:var(--star5);font-size:0.55rem;">RATE-UP</span>' : '';
+
+      card.innerHTML = `
+        ${imgHtml}
+        <div class="card-name">${item.name}</div>
+        <div class="card-type">${typeLabel}${fTag}</div>
+        <div class="card-stars">${starsStr}</div>
+      `;
+
+      // If character, lazy-load the portrait image
+      if (isChar) {
+        const img = card.querySelector('img');
+        if (img) {
+          tryLoadCharImage(img, item.name);
+        }
+      }
+
+      return card;
+    }
+
+    function flashStage(rarity) {
+      wishStage.classList.remove('gold-flash', 'purple-flash', 'blue-flash');
+      void wishStage.offsetWidth;
+      if (rarity === 5) {
+        wishStage.classList.add('gold-flash');
+        setTimeout(() => wishStage.classList.remove('gold-flash'), 1400);
+      } else if (rarity >= 4) {
+        wishStage.classList.add('purple-flash');
+        setTimeout(() => wishStage.classList.remove('purple-flash'), 800);
+      } else {
+        wishStage.classList.add('blue-flash');
+        setTimeout(() => wishStage.classList.remove('blue-flash'), 500);
+      }
+    }
+
+    function sparkBurst(count, golden) {
+      const stage = wishStage;
+      const rect = stage.getBoundingClientRect();
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'spark-particle';
+        const size = 3 + Math.random() * 7;
+        const x = rect.width / 2 + (Math.random() - 0.5) * 300;
+        const y = rect.height / 2 + (Math.random() - 0.5) * 220;
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 50 + Math.random() * 120;
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist - 30;
+        const colors = golden
+          ? ['#ffb13b','#ffd700','#ffe08a','#fff','#ffaa00','#ffec80']
+          : ['#b687c8','#d4a8e8','#e8d0f8','#fff','#c9a0e0','#a070c0'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        particle.style.cssText = `
+          left: ${x}px; top: ${y}px;
+          width: ${size}px; height: ${size}px;
+          background: ${color};
+          box-shadow: 0 0 ${size * 2.5}px ${color};
+        `;
+        stage.appendChild(particle);
+
+        const startTime = performance.now();
+        const duration = 600 + Math.random() * 900;
+        function animParticle(ts) {
+          const elapsed = ts - startTime;
+          const t = Math.min(1, elapsed / duration);
+          const ease = 1 - Math.pow(1 - t, 3);
+          particle.style.transform = `translate(${dx * ease}px, ${dy * ease}px) scale(${1 - t * 0.6})`;
+          particle.style.opacity = 1 - t;
+          if (t < 1) {
+            requestAnimationFrame(animParticle);
+          } else {
+            particle.remove();
+          }
+        }
+        requestAnimationFrame(animParticle);
+      }
+    }
+
+    function showSpotlight(item) {
+      // Remove existing spotlight
+      const existing = wishStage.querySelector('.spotlight-overlay');
+      if (existing) existing.remove();
+
+      if (item.rarity !== 5 || !item.isCharacter) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'spotlight-overlay';
+
+      const elKey = item.el || item.element;
+      const elColor = ELEMENT_COLORS[elKey] || '#888';
+      const elIcon = ELEMENT_ICONS[elKey] || 'fa-star';
+
+      overlay.innerHTML = `
+        <div class="spotlight-img-wrap" style="background:radial-gradient(circle at 40% 40%, ${elColor}, ${elColor}33);">
+          <img src="" alt="${item.name}" data-char-name="${item.name}">
+          <span class="spotlight-icon"><i class="fa-solid ${elIcon}"></i></span>
+        </div>
+        <div class="spotlight-name">${item.name}</div>
+      `;
+
+      wishStage.appendChild(overlay);
+
+      // Load character image
+      const img = overlay.querySelector('img');
+      if (img) {
+        tryLoadCharImage(img, item.name);
+      }
+
+      // Remove after animation
+      setTimeout(() => {
+        if (overlay.parentNode) overlay.remove();
+      }, 2300);
+    }
+
+    function displayResults(items) {
+      wishResults.innerHTML = '';
+      const has5 = items.some(i => i.rarity === 5);
+      const has4 = items.some(i => i.rarity >= 4);
+      const maxRarity = has5 ? 5 : has4 ? 4 : 3;
+
+      // Sort: 5★ first, then 4★, then 3★
+      const sorted = [...items].sort((a, b) => b.rarity - a.rarity);
+
+      sorted.forEach((item, idx) => {
+        const card = createWishCard(item, idx * 55);
+        card.classList.add('card-reveal');
+        wishResults.appendChild(card);
+      });
+
+      flashStage(maxRarity);
+
+      if (has5) {
+        triggerShootingStars();
+        sparkBurst(35, true);
+        wishGate.classList.add('gate-active');
+        setTimeout(() => wishGate.classList.remove('gate-active'), 2200);
+
+        // Spotlight for first 5★ character
+        const first5 = sorted.find(i => i.rarity === 5 && i.isCharacter);
+        if (first5) {
+          setTimeout(() => showSpotlight(first5), 300);
+        }
+      } else if (has4) {
+        sparkBurst(16, false);
+      }
+    }
+
+    /* ================================================================
+       UI UPDATES
+       ================================================================ */
+    function formatNumber(n) {
+      return n.toLocaleString('en-US');
+    }
+
+    function updateStats() {
+      $('statTotal').textContent = formatNumber(state.totalPulls);
+      $('stat5').textContent = state.count5;
+      $('stat4').textContent = state.count4;
+      $('statPity').textContent = state.pity5;
+
+      // 5★ Pity bar
+      const pityPct = Math.min(100, (state.pity5 / 90) * 100);
+      const pityFill = $('pityFill');
+      pityFill.style.width = pityPct + '%';
+      pityFill.classList.remove('soft', 'hard');
+      if (state.pity5 >= 89) pityFill.classList.add('hard');
+      else if (state.pity5 >= 74) pityFill.classList.add('soft');
+
+      // Pity bar labels
+      const pityBarLabelSpans = document.querySelectorAll('.pity-bar-label span');
+      if (pityBarLabelSpans.length > 1) {
+        // label shows "current / 74 soft / 90 hard"
+      }
+
+      // 4★ Pity bar
+      const pity4Pct = Math.min(100, (state.pity4 / 10) * 100);
+      $('pity4Fill').style.width = pity4Pct + '%';
+      $('pity4Label').textContent = state.pity4 + ' / 10';
+
+      // Luck rating
+      updateLuckRating();
+
+      // Guarantee badge
+      if (pools[state.banner].guaranteeActive) {
+        $('guaranteeCard').style.display = '';
+        if (state.guaranteed) {
+          guaranteeBadge.className = 'guarantee-badge on';
+          guaranteeBadge.textContent = 'Guaranteed';
+          guaranteeBadge.setAttribute('data-tooltip', 'Next 5★ is guaranteed rate-up');
+        } else {
+          guaranteeBadge.className = 'guarantee-badge off';
+          guaranteeBadge.textContent = '50/50';
+          guaranteeBadge.setAttribute('data-tooltip', 'Next 5★ has 50% chance of rate-up');
+        }
+      } else {
+        $('guaranteeCard').style.display = '';
+        guaranteeBadge.className = 'guarantee-badge na';
+        guaranteeBadge.textContent = 'N/A';
+        guaranteeBadge.setAttribute('data-tooltip', 'Standard banner has no guarantee system');
+      }
+
+      // History
+      renderHistory();
+    }
+
+    function updateLuckRating() {
+      const expected5 = state.totalPulls * 0.016;
+      const actual = state.count5;
+      let rating, color, dots;
+      if (state.totalPulls === 0) {
+        rating = '--';
+        color = 'var(--text-secondary)';
+        dots = 0;
+      } else if (actual > expected5 * 1.6) {
+        rating = 'Extremely Lucky!';
+        color = 'var(--star5)';
+        dots = 5;
+      } else if (actual > expected5 * 1.2) {
+        rating = 'Lucky';
+        color = 'var(--gold-light)';
+        dots = 4;
+      } else if (actual > expected5 * 0.7) {
+        rating = 'Average';
+        color = 'var(--text-primary)';
+        dots = 3;
+      } else if (actual > expected5 * 0.35) {
+        rating = 'Unlucky';
+        color = 'var(--text-muted)';
+        dots = 2;
+      } else if (state.totalPulls > 20) {
+        rating = 'Cursed...';
+        color = 'var(--danger)';
+        dots = 1;
+      } else {
+        rating = 'Pull more...';
+        color = 'var(--text-secondary)';
+        dots = 0;
+      }
+      const luckEl = $('statLuck');
+      luckEl.textContent = rating;
+      luckEl.style.color = color;
+
+      const luckDots = $('luckDots').querySelectorAll('.luck-dot');
+      luckDots.forEach((d, i) => {
+        if (i < dots) {
+          d.classList.add('lit');
+        } else {
+          d.classList.remove('lit');
+        }
+      });
+    }
+
+    function renderHistory() {
+      const display = state.history.slice(0, 30);
+      historyCountEl.textContent = 'Last ' + Math.min(30, state.history.length);
+      if (display.length === 0) {
+        historyList.innerHTML = '<div class="history-empty">No wishes yet. Start pulling!</div>';
+        return;
+      }
+      historyList.innerHTML = display.map(h => {
+        const rClass = 'r' + h.rarity;
+        const isChar = h.isCharacter && (h.el || h.element);
+        const typeLabel = isChar
+          ? ((h.el || h.element || '').charAt(0).toUpperCase() + (h.el || h.element || '').slice(1))
+          : (h.weaponType || h.type || 'Weapon');
+        return `
+          <div class="history-item">
+            <span class="history-rarity ${rClass}">${h.rarity}★</span>
+            <span class="history-name" title="${h.name}">${h.name}</span>
+            <span class="history-type">${typeLabel}</span>
+            <span class="history-pullnum">#${h.pullNumber}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updatePrimoDisplay() {
+      primoCount.textContent = formatNumber(state.primogems);
+    }
+
+    function updateButtons() {
+      const canPull1 = state.primogems >= 160 && !state.animating;
+      const canPull10 = state.primogems >= 1600 && !state.animating;
+      btnPull1.disabled = !canPull1;
+      btnPull10.disabled = !canPull10;
+
+      if (state.primogems < 160 && !state.animating) {
+        noPrimosOverlay.style.display = 'flex';
+      } else {
+        noPrimosOverlay.style.display = 'none';
+      }
+    }
+
+    function updateFeatured() {
+      const pool = pools[state.banner];
+      let html = '';
+      if (pool.fiveFeatured && pool.fiveFeatured.length > 0) {
+        pool.fiveFeatured.forEach(item => {
+          const elColor = (item.el || item.element) ? ELEMENT_COLORS[item.el || item.element] : '#ffb13b';
+          html += `<div class="featured-item">
+            <span class="featured-dot" style="background:${elColor};box-shadow:0 0 8px ${elColor};"></span>
+            <span style="color:var(--star5);">5★</span> ${item.name}
+          </div>`;
+        });
+      }
+      if (pool.fourFeatured && pool.fourFeatured.length > 0) {
+        pool.fourFeatured.forEach(item => {
+          const elColor = (item.el || item.element) ? ELEMENT_COLORS[item.el || item.element] : '#b687c8';
+          html += `<div class="featured-item">
+            <span class="featured-dot" style="background:${elColor};box-shadow:0 0 6px ${elColor};"></span>
+            <span style="color:var(--star4);">4★</span> ${item.name}
+          </div>`;
+        });
+      }
+      if (!html && pool.fiveAll) {
+        pool.fiveAll.slice(0, 4).forEach(item => {
+          html += `<div class="featured-item">
+            <span class="featured-dot" style="background:#ffb13b;box-shadow:0 0 8px #ffb13b;"></span>
+            ${item.name}
+          </div>`;
+        });
+        html += `<div class="featured-item" style="color:var(--text-muted);font-size:0.75rem;">...and more</div>`;
+      }
+      featuredItems.innerHTML = html || '<span style="color:var(--text-muted);font-size:0.82rem;">All standard items</span>';
+    }
+
+    function updateAllUI() {
+      updatePrimoDisplay();
+      updateButtons();
+      updateStats();
+      updateFeatured();
+    }
+
+    /* ================================================================
+       PULL EXECUTION
+       ================================================================ */
+    function executePull(count) {
+      if (state.animating) return;
+      if (state.primogems < count * 160) {
+        primoCount.classList.add('primo-deduct');
+        setTimeout(() => primoCount.classList.remove('primo-deduct'), 500);
+        return;
+      }
+
+      state.animating = true;
+      updateButtons();
+      wishGate.classList.remove('gate-active');
+
+      const results = [];
+      for (let i = 0; i < count; i++) {
+        results.push(generateSinglePull());
+      }
+
+      displayResults(results);
+
+      if (count > 1) {
+        // Stagger card reveals
+        const cards = wishResults.querySelectorAll('.wish-card');
+        cards.forEach((card) => {
+          card.style.animation = 'none';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.25) translateY(50px)';
+        });
+        let revealed = 0;
+        const INTERVAL = 180;
+        function revealNext() {
+          if (revealed < cards.length) {
+            const card = cards[revealed];
+            card.style.animation = 'cardAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both';
+            card.style.animationDelay = '0ms';
+            card.style.opacity = '';
+            card.style.transform = '';
+            revealed++;
+            setTimeout(revealNext, INTERVAL);
+          } else {
+            finishAnimation();
+          }
+        }
+        setTimeout(revealNext, 120);
+      } else {
+        setTimeout(() => finishAnimation(), 500);
+      }
+
+      function finishAnimation() {
+        updatePrimoDisplay();
+        updateStats();
+        state.animating = false;
+        updateButtons();
+      }
+
+      // Animate primo count deduction
+      primoCount.classList.add('primo-deduct');
+      setTimeout(() => primoCount.classList.remove('primo-deduct'), 500);
+      updatePrimoDisplay();
+      updateStats();
+    }
+
+    /* ================================================================
+       BANNER SWITCHING
+       ================================================================ */
+    function switchBanner(banner) {
+      state.banner = banner;
+      if (banner === 'standard') state.guaranteed = false;
+
+      document.querySelectorAll('.banner-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`[data-banner="${banner}"]`).classList.add('active');
+
+      wishResults.innerHTML = `
+        <div class="wish-placeholder">
+          <i class="fa-solid fa-star"></i>
+          <p>Choose a banner and make a wish...</p>
+        </div>
+      `;
+      wishStage.classList.remove('gold-flash', 'purple-flash', 'blue-flash');
+      wishGate.classList.remove('gate-active');
+
+      updateAllUI();
+    }
+
+    /* ================================================================
+       RESET
+       ================================================================ */
+    function resetAll() {
+      state.primogems = 28800;
+      state.totalPulls = 0;
+      state.pity5 = 0;
+      state.pity4 = 0;
+      state.count5 = 0;
+      state.count4 = 0;
+      state.count3 = 0;
+      state.guaranteed = false;
+      state.history = [];
+      state.animating = false;
+
+      wishResults.innerHTML = `
+        <div class="wish-placeholder">
+          <i class="fa-solid fa-star"></i>
+          <p>Choose a banner and make a wish...</p>
+        </div>
+      `;
+      wishStage.classList.remove('gold-flash', 'purple-flash', 'blue-flash');
+      wishGate.classList.remove('gate-active');
+      noPrimosOverlay.style.display = 'none';
+
+      updateAllUI();
+    }
+
+    /* ================================================================
+       EVENT LISTENERS
+       ================================================================ */
+    btnPull1.addEventListener('click', () => executePull(1));
+    btnPull10.addEventListener('click', () => executePull(10));
+
+    $('bannerChar').addEventListener('click', () => switchBanner('character'));
+    $('bannerWeapon').addEventListener('click', () => switchBanner('weapon'));
+    $('bannerStd').addEventListener('click', () => switchBanner('standard'));
+
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Reset all stats and refill Primogems to 28,800?')) {
+        resetAll();
+      }
+    });
+    refillBtn.addEventListener('click', () => {
+      state.primogems = 28800;
+      updateAllUI();
+      noPrimosOverlay.style.display = 'none';
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') { e.preventDefault(); executePull(1); }
+      if (e.code === 'Enter' && !e.shiftKey) { e.preventDefault(); executePull(10); }
+    });
+
+    // Resize shooting canvas
+    window.addEventListener('resize', resizeShootingCanvas);
+    setTimeout(resizeShootingCanvas, 400);
+
+    /* ================================================================
+       INIT
+       ================================================================ */
+    updateAllUI();
+    resizeShootingCanvas();
+  })();
+  </script>
+
+</body>
+</html>

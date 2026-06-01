@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guides — Teyvat Guide</title>
+  <meta name="description" content="Genshin Impact beginner guide, elemental reactions explained, and progression roadmap with daily farming schedules.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Shared data -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+
+  <style>
+    /* ── Guides Hero ── */
+    .guides-hero {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 4rem 2rem 2.5rem;
+    }
+    .guides-hero::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .guides-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+    .guides-hero h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: 1px;
+      background: linear-gradient(180deg, #fff 0%, var(--gold-light) 40%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+    }
+    .guides-hero p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    /* ── Section Wrapper ── */
+    .guides-content {
+      position: relative;
+      z-index: 1;
+      padding: 1rem 2rem 4rem;
+    }
+    .guides-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+    }
+
+    /* ── Tab Navigation ── */
+    .guides-tabs {
+      display: flex;
+      gap: 2px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 2.5rem;
+      overflow-x: auto;
+    }
+    .guides-tab-btn {
+      padding: 12px 28px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guides-tab-btn i {
+      font-size: 0.9rem;
+    }
+    .guides-tab-btn:hover {
+      color: var(--text-primary);
+    }
+    .guides-tab-btn.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+    .guides-tab-panel {
+      display: none;
+    }
+    .guides-tab-panel.active {
+      display: block;
+      animation: fadeInUp 0.45s var(--ease-out);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Accordion Cards (Beginner Guide) ── */
+    .accordion-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .accordion-card:hover {
+      border-color: var(--border-active);
+    }
+    .accordion-card.open {
+      border-color: var(--border-active);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+    }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 1.2rem 1.5rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .accordion-header:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .accordion-step-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(201,169,110,0.12);
+      border: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+    .accordion-card.open .accordion-step-num {
+      background: var(--gold);
+      color: #111;
+      box-shadow: 0 0 18px rgba(201,169,110,0.35);
+    }
+    .accordion-title-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+    .accordion-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.3px;
+    }
+    .accordion-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0;
+    }
+    .accordion-chevron {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      transition: transform 0.35s var(--ease-out);
+      flex-shrink: 0;
+    }
+    .accordion-card.open .accordion-chevron {
+      transform: rotate(180deg);
+      color: var(--gold);
+    }
+    .accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s var(--ease-out), padding 0.45s var(--ease-out);
+    }
+    .accordion-card.open .accordion-body {
+      max-height: 800px;
+    }
+    .accordion-body-inner {
+      padding: 0 1.5rem 1.5rem;
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.75;
+    }
+    .accordion-body-inner p {
+      margin: 0 0 0.75rem;
+    }
+    .accordion-body-inner p:last-child {
+      margin-bottom: 0;
+    }
+    .accordion-body-inner ul {
+      list-style: disc;
+      padding-left: 1.5rem;
+      margin: 0.5rem 0 0.75rem;
+    }
+    .accordion-body-inner ul li {
+      margin-bottom: 0.35rem;
+    }
+    .accordion-body-inner .highlight {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+    .accordion-ar-badge {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: var(--radius-full);
+      background: rgba(201,169,110,0.08);
+      border: 1px solid var(--border-gold);
+      color: var(--gold);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-left: 8px;
+      white-space: nowrap;
+    }
+    .accordion-tips {
+      background: rgba(201,169,110,0.04);
+      border: 1px solid rgba(201,169,110,0.1);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+    }
+    .accordion-tips i {
+      color: var(--gold);
+      margin-right: 6px;
+    }
+
+    /* ── Reaction Cards ── */
+    .reaction-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+    .reaction-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.35s var(--ease-out);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .reaction-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    }
+    .reaction-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .reaction-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+    .reaction-type-badge {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+    .reaction-type-badge.amplifying {
+      background: rgba(239,121,56,0.12);
+      color: var(--pyro);
+      border-color: rgba(239,121,56,0.3);
+    }
+    .reaction-type-badge.additive {
+      background: rgba(165,214,62,0.12);
+      color: var(--dendro);
+      border-color: rgba(165,214,62,0.3);
+    }
+    .reaction-type-badge.transformative {
+      background: rgba(116,194,168,0.12);
+      color: var(--anemo);
+      border-color: rgba(116,194,168,0.3);
+    }
+    .reaction-type-badge.aura {
+      background: rgba(175,143,209,0.12);
+      color: var(--electro);
+      border-color: rgba(175,143,209,0.3);
+    }
+    .reaction-type-badge.shield {
+      background: rgba(250,183,46,0.12);
+      color: var(--geo);
+      border-color: rgba(250,183,46,0.3);
+    }
+    .reaction-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .reaction-el-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .reaction-multiplier {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      background: rgba(201,169,110,0.08);
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(201,169,110,0.15);
+      display: inline-block;
+    }
+    .reaction-description {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      flex: 1;
+    }
+    .reaction-tips {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 10px;
+    }
+    .reaction-tips i {
+      color: var(--gold);
+      margin-right: 4px;
+    }
+
+    /* ── Progression Tab ── */
+    .progression-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 900px) {
+      .progression-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Weekly Checklist */
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      transition: all 0.3s var(--ease-out);
+      cursor: pointer;
+      user-select: none;
+    }
+    .checklist-item:hover {
+      border-color: var(--border-active);
+    }
+    .checklist-check {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.3s;
+      color: transparent;
+      font-size: 0.75rem;
+    }
+    .checklist-item.checked .checklist-check {
+      background: var(--gold);
+      color: #111;
+      box-shadow: 0 0 10px rgba(201,169,110,0.3);
+    }
+    .checklist-item.checked .checklist-label {
+      text-decoration: line-through;
+      opacity: 0.55;
+    }
+    .checklist-label {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      transition: all 0.3s;
+    }
+    .checklist-reset {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-top: 8px;
+      text-align: right;
+      transition: color 0.2s;
+    }
+    .checklist-reset:hover {
+      color: var(--gold-light);
+    }
+
+    /* Farming Schedule Table */
+    .farming-table-wrap {
+      overflow-x: auto;
+    }
+    .farming-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .farming-table thead th {
+      padding: 12px 16px;
+      text-align: left;
+      color: var(--gold);
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border-bottom: 2px solid var(--border-gold);
+      background: rgba(201,169,110,0.04);
+      white-space: nowrap;
+    }
+    .farming-table tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+    .farming-table tbody tr:hover td {
+      background: rgba(255,255,255,0.015);
+    }
+    .farming-table .day-col {
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      text-transform: capitalize;
+    }
+    .farming-table .today-row td {
+      background: rgba(201,169,110,0.06);
+    }
+    .farming-table .today-row .day-col {
+      color: var(--gold-light);
+    }
+    .farming-tag {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      margin: 2px 3px;
+    }
+    .farming-tag.talent {
+      background: rgba(175,143,209,0.15);
+      color: var(--electro);
+      border: 1px solid rgba(175,143,209,0.25);
+    }
+    .farming-tag.weapon {
+      background: rgba(250,183,46,0.15);
+      color: var(--geo);
+      border: 1px solid rgba(250,183,46,0.25);
+    }
+    .farming-tag.sunday {
+      background: rgba(76,194,241,0.15);
+      color: var(--hydro);
+      border: 1px solid rgba(76,194,241,0.25);
+    }
+
+    /* Resin Priority */
+    .resin-priority-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .resin-priority-item {
+      display: flex;
+      gap: 16px;
+      padding: 1rem 1.2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      transition: all 0.3s var(--ease-out);
+      align-items: flex-start;
+    }
+    .resin-priority-item:hover {
+      border-color: var(--border-active);
+      transform: translateX(4px);
+    }
+    .resin-rank {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(201,169,110,0.12);
+      border: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .resin-rank.top {
+      background: var(--gold);
+      color: #111;
+      box-shadow: 0 0 12px rgba(201,169,110,0.3);
+    }
+    .resin-priority-info h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+    .resin-priority-info p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .resin-priority-header {
+      margin-bottom: 1.5rem;
+    }
+    .resin-priority-header h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+    }
+    .resin-priority-header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Sub-section Headings ── */
+    .guide-section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .guide-section-title i {
+      color: var(--gold);
+      font-size: 1rem;
+    }
+    .guide-section-divider {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gold-dim), transparent);
+      margin-bottom: 2rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .reaction-grid {
+        grid-template-columns: 1fr;
+      }
+      .guides-tab-btn {
+        padding: 10px 16px;
+        font-size: 0.8rem;
+      }
+      .progression-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html" class="active">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="guides-hero reveal">
+    <div class="guides-hero-content">
+      <span class="hero-badge">&#10022; Learn &amp; Master Teyvat</span>
+      <h1>Guides</h1>
+      <p>
+        From your first steps in Mondstadt to the deepest floors of Spiral Abyss.
+        Every mechanic, every reaction, every farming route &mdash; explained clearly.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── Main Content ── -->
+  <section class="guides-content">
+    <div class="guides-inner">
+
+      <!-- Tab Buttons -->
+      <div class="guides-tabs" id="guideTabs">
+        <button class="guides-tab-btn active" data-tab="beginner">
+          <i class="fa-solid fa-book-open"></i> Beginner Guide
+        </button>
+        <button class="guides-tab-btn" data-tab="reactions">
+          <i class="fa-solid fa-flask"></i> Elemental Reactions
+        </button>
+        <button class="guides-tab-btn" data-tab="progression">
+          <i class="fa-solid fa-chart-line"></i> Progression Route
+        </button>
+      </div>
+
+      <!-- =============================== -->
+      <!-- Tab 1: Beginner Guide (Accordion) -->
+      <!-- =============================== -->
+      <div class="guides-tab-panel active" id="panel-beginner">
+        <p style="color:var(--text-secondary);font-size:0.92rem;margin-bottom:1.5rem;text-align:center;">
+          A step-by-step roadmap from Adventure Rank 1 all the way to endgame. Click each stage to expand for detailed tips.
+        </p>
+        <div id="beginnerAccordion">
+          <!-- Rendered by JS from BEGINNER_GUIDE_STEPS -->
+        </div>
+      </div>
+
+      <!-- =============================== -->
+      <!-- Tab 2: Elemental Reactions -->
+      <!-- =============================== -->
+      <div class="guides-tab-panel" id="panel-reactions">
+        <p style="color:var(--text-secondary);font-size:0.92rem;margin-bottom:1.5rem;text-align:center;">
+          All 12 elemental reactions, their damage formulas, and optimal combat usage.
+        </p>
+        <div class="reaction-grid" id="reactionGrid">
+          <!-- Rendered by JS from REACTIONS -->
+        </div>
+      </div>
+
+      <!-- =============================== -->
+      <!-- Tab 3: Progression -->
+      <!-- =============================== -->
+      <div class="guides-tab-panel" id="panel-progression">
+        <div class="progression-grid">
+
+          <!-- Left Column: Farming Schedule + Weekly Checklist -->
+          <div>
+            <div class="guide-section-title">
+              <i class="fa-solid fa-calendar-week"></i> Daily Farming Schedule
+            </div>
+            <div class="guide-section-divider"></div>
+            <div class="farming-table-wrap" id="farmingTableWrap">
+              <!-- Rendered by JS from FARMING_SCHEDULE -->
+            </div>
+
+            <div style="margin-top:2.5rem;">
+              <div class="guide-section-title">
+                <i class="fa-solid fa-clipboard-check"></i> Weekly Checklist
+              </div>
+              <div class="guide-section-divider"></div>
+              <div class="checklist" id="weeklyChecklist">
+                <!-- Rendered by JS -->
+              </div>
+              <div class="checklist-reset" id="checklistReset">
+                <i class="fa-solid fa-rotate"></i> Reset All
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Resin Spending Priority -->
+          <div>
+            <div class="guide-section-title">
+              <i class="fa-solid fa-hourglass-half"></i> Resin Spending Priority
+            </div>
+            <div class="guide-section-divider"></div>
+            <div class="resin-priority-header">
+              <h3>Most Efficient Use of Original Resin</h3>
+              <p>Priority order for spending your daily resin to maximize account progression speed.</p>
+            </div>
+            <div class="resin-priority-list" id="resinPriorityList">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <!-- ============================================================= -->
+  <!-- SCRIPTS -->
+  <!-- ============================================================= -->
+  <script>
+    /* ===== BEGINNER GUIDE STEPS (inline data) ===== */
+    var BEGINNER_GUIDE_STEPS = [
+      {
+        title: "AR 1–15: Welcome to Teyvat",
+        ar: "AR 1–15",
+        content: "Your journey begins in Mondstadt. Follow the Archon Quest prologue to unlock the core game systems. <br><br>" +
+          "<span class='highlight'>Key Objectives:</span>" +
+          "<ul>" +
+            "<li>Complete the Mondstadt Archon Quest (Prologue, Acts I–III) to unlock the full map.</li>" +
+            "<li>Unlock all Statues of the Seven in Mondstadt for map visibility and stamina.</li>" +
+            "<li>Open chests, collect Anemoculi, and activate Teleport Waypoints as you explore.</li>" +
+            "<li>Use your starting characters: the Traveler (Anemo), Amber, Kaeya, and Lisa cover all early puzzles.</li>" +
+            "<li>Ascend your Traveler to level 20 as soon as possible &mdash; it is free and unlocks wishes.</li>" +
+          "</ul>" +
+          "<div class='accordion-tips'><i class='fa-solid fa-lightbulb'></i> <strong>Tip:</strong> Do NOT spend Fragile Resin before AR 45. Save every single one. Do NOT level every character evenly &mdash; focus on one main DPS and one healer.</div>",
+        tips: "Do NOT spend Fragile Resin before AR 45. Save every single one. Focus on one main DPS and one healer."
+      },
+      {
+        title: "AR 16–25: Expanding Horizons",
+        ar: "AR 16–25",
+        content: "You now have access to co-op mode and daily commissions. Your world is opening up. <br><br>" +
+          "<span class='highlight'>Key Objectives:</span>" +
+          "<ul>" +
+            "<li>Unlock Daily Commissions (AR 12) &mdash; do them every single day. They are your primary source of Primogems and AR EXP.</li>" +
+            "<li>Begin the Liyue Archon Quest. The Geo region is massive and introduces new puzzle types.</li>" +
+            "<li>Start clearing Domains for talent books and weapon materials. Early domains: Forsaken Rift (Mondstadt) and Cecilia Garden.</li>" +
+            "<li>Collect your free Xiangling from Spiral Abyss Floor 3-3 &mdash; she is a top-tier Pyro sub-DPS that remains meta forever.</li>" +
+            "<li>Unlock the Serenitea Pot (AR 28 quest) for passive resources: realm currency buys resin, EXP books, and artifact EXP.</li>" +
+            "<li>Always spend your Original Resin before it caps at 160 &mdash; use it on Mora or EXP Ley Lines if you have nothing else.</li>" +
+          "</ul>" +
+          "<div class='accordion-tips'><i class='fa-solid fa-lightbulb'></i> <strong>Tip:</strong> Xiangling is free and one of the best characters in the game. Level her Burst. Do NOT sleep on the Catch polearm (obtainable via fishing in Inazuma) &mdash; it is her best F2P weapon.</div>",
+        tips: "Xiangling is free and one of the best characters in the game. The Catch is her best F2P weapon."
+      },
+      {
+        title: "AR 26–35: Building Your First Team",
+        ar: "AR 26–35",
+        content: "You should now have a handful of characters from wishes. This is where team-building begins. <br><br>" +
+          "<span class='highlight'>Key Objectives:</span>" +
+          "<ul>" +
+            "<li>Choose a main DPS and invest heavily: level them to 60/70, level their weapon to 70, and level their relevant talents to 6.</li>" +
+            "<li>Form your first functioning team comp: 1 Main DPS + 1 Sub-DPS + 1 Support + 1 Healer/Shielder.</li>" +
+            "<li>Start farming talent book domains on the correct days (refer to the Progression Route tab for the schedule).</li>" +
+            "<li>Level important 4-star supports: Bennett, Xingqiu, Sucrose, and Fischl are account-defining characters.</li>" +
+            "<li>Explore Dragonspine when you are ready &mdash; the Festering Desire sword (if available) is excellent on Furina and supports.</li>" +
+            "<li>Begin gathering character ascension materials (world boss drops and local specialties) for your main team.</li>" +
+          "</ul>" +
+          "<div class='accordion-tips'><i class='fa-solid fa-lightbulb'></i> <strong>Tip:</strong> Bennett, Xingqiu, Xiangling, and Sucrose form the core of almost every meta team. If you have them, invest in them first. A well-built 4-star team clears content faster than an under-invested 5-star team.</div>",
+        tips: "Bennett, Xingqiu, Xiangling, and Sucrose are core meta characters. Invest in 4-stars before spreading resources thin on 5-stars."
+      },
+      {
+        title: "AR 36–44: The Mid-Game Grind",
+        ar: "AR 36–44",
+        content: "World level increases make enemies tougher. This is where proper builds begin to matter. <br><br>" +
+          "<span class='highlight'>Key Objectives:</span>" +
+          "<ul>" +
+            "<li>Ascend your main DPS to 70/80. Weapon to 80. Talents to 8 on your main damage abilities.</li>" +
+            "<li>Start equipping proper artifact sets (even 4-star pieces with correct main stats). Do NOT farm artifact domains yet &mdash; use Boss and chest drops.</li>" +
+            "<li>For your main DPS, prioritize: correct main stat sands/goblet/circlet > set bonus > substats. A 4-star ATK% sands with correct set beats a 5-star DEF% off-piece.</li>" +
+            "<li>Clear as much Spiral Abyss as you can. Floors 1-8 are one-time rewards and do not reset &mdash; prioritize them for free Primogems and a free 4-star character.</li>" +
+            "<li>Complete major world quest chains: each region has long quest lines that unlock areas, bosses, and mechanics.</li>" +
+            "<li>Start marking artifact investigation spots on your map for daily artifact EXP farming routes.</li>" +
+          "</ul>" +
+          "<div class='accordion-tips'><i class='fa-solid fa-lightbulb'></i> <strong>Tip:</strong> Do not farm artifact domains before AR 45. The guaranteed 5-star drop at the highest domain level is when farming becomes efficient. Pre-AR 45, use Gladiator/Wanderer pieces from bosses.</div>",
+        tips: "Do NOT farm artifact domains before AR 45. Use Gladiator/Wanderer pieces from world bosses. Main stat > Set bonus > Substats."
+      },
+      {
+        title: "AR 45–50: Entering the Endgame",
+        ar: "AR 45–50",
+        content: "You have reached the most important milestone. Artifact domains now guarantee a 5-star drop. <br><br>" +
+          "<span class='highlight'>Key Objectives:</span>" +
+          "<ul>" +
+            "<li>Start spending Fragile Resin on artifact domains. Prioritize resin-efficient domains: Spire of Solitary Enlightenment (Deepwood/Gilded) and Momiji-Dyed Court (Emblem/Shimenawa).</li>" +
+            "<li>Farm until your main DPS has a full 5-star set with correct main stats. Accept mid-tier substats &mdash; chasing perfect artifacts too early wastes resin.</li>" +
+            "<li>Level your main team to 80/90 and relevant talents to 9. Crown (level 10) only your main DPS's most important talent.</li>" +
+            "<li>Begin building a second team for Spiral Abyss floors 9-12. Even a budget Hyperbloom team (Dendro MC + Barbara + Kuki + Flex) can clear Floor 12.</li>" +
+            "<li>Complete all Story Quests and Hangout Events &mdash; they unlock weekly boss domains and provide Primogems.</li>" +
+            "<li>Level your Serenitea Pot to Trust Rank 10 for maximum realm currency generation.</li>" +
+          "</ul>" +
+          "<div class='accordion-tips'><i class='fa-solid fa-lightbulb'></i> <strong>Tip:</strong> Hyperbloom is the most resin-efficient team archetype. Kuki Shinobu at level 90 with full EM (Gilded Dreams or Flower of Paradise Lost) and an off-field Hydro + Dendro pair can clear Abyss Floor 12 with minimal artifact investment.</div>",
+        tips: "Hyperbloom with full EM Kuki is the most resin-efficient team. Deepwood/Gilded domain and Emblem/Shimenawa domain are the best value-per-resin farms."
+      },
+      {
+        title: "AR 50–55+: The Optimization Phase",
+        ar: "AR 50–55+",
+        content: "Your account is mature. Now you optimize, min-max, and prepare for every Abyss rotation. <br><br>" +
+          "<span class='highlight'>Key Objectives:</span>" +
+          "<ul>" +
+            "<li>Level key characters to 90/90 &mdash; especially those that scale on HP, DEF, or trigger Transformative Reactions (Swirl, Hyperbloom, Burgeon). ATK scalers can stay at 80/90.</li>" +
+            "<li>Crown your most-used talents: main DPS normal attacks, Bennett's Burst, Xingqiu's Burst, Xiangling's Burst, Nahida's Skill.</li>" +
+            "<li>Optimize artifact substats: aim for 70/140+ CRIT ratio on DPS, 200%+ ER on supports that need it, and 900+ EM on reaction triggers.</li>" +
+            "<li>Build specialized teams for each Abyss rotation: single-target boss-killer team + AoE mobbing team.</li>" +
+            "<li>Complete all world exploration to 100% in every region &mdash; each region offers hundreds of Primogems, sigils, and materials.</li>" +
+            "<li>Pre-farm for upcoming characters you want using the ascension planner tool.</li>" +
+            "<li>Master elemental gauge theory if you want to optimize Vaporize/Melt rotations &mdash; this separates good players from great ones.</li>" +
+          "</ul>" +
+          "<div class='accordion-tips'><i class='fa-solid fa-lightbulb'></i> <strong>Tip:</strong> At this stage, resin efficiency is about marginal gains. The Strongbox at the crafting bench recycles bad 5-star artifacts into sets like Viridescent Venerer, Noblesse Oblige, and Crimson Witch &mdash; use it heavily instead of farming their inefficient domains.</div>",
+        tips: "Use the Strongbox to recycle bad artifacts into VV, Noblesse, and Crimson Witch sets. Only level characters to 90 that scale on HP/DEF/EM."
+      }
+    ];
+
+    /* ===== Starfield Canvas Animation ===== */
+    (function() {
+      var canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var stars = [];
+      var STAR_COUNT = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function initStars() {
+        stars = [];
+        for (var i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < stars.length; i++) {
+          var s = stars[i];
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          var hsl = s.hue > 0
+            ? 'hsla(' + s.hue + ', 60%, 70%, ' + s.alpha + ')'
+            : 'rgba(200,200,220,' + s.alpha + ')';
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', function() { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ===== Scroll Reveal ===== */
+    (function() {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+    })();
+
+    /* ===== Navigation Scroll Effect ===== */
+    (function() {
+      var nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', function() {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+    })();
+
+    /* ===== Mobile Nav Toggle ===== */
+    (function() {
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        links.classList.toggle('open');
+        var icon = toggle.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-bars');
+          icon.classList.toggle('fa-xmark');
+        }
+      });
+    })();
+
+    /* ================================================================
+       TAB SWITCHING
+       ================================================================ */
+    (function() {
+      var tabBtns = document.querySelectorAll('.guides-tab-btn');
+
+      tabBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var tab = this.getAttribute('data-tab');
+
+          // Deactivate all
+          tabBtns.forEach(function(b) { b.classList.remove('active'); });
+          document.querySelectorAll('.guides-tab-panel').forEach(function(p) {
+            p.classList.remove('active');
+          });
+
+          // Activate target
+          this.classList.add('active');
+          var panel = document.getElementById('panel-' + tab);
+          if (panel) panel.classList.add('active');
+        });
+      });
+    })();
+
+    /* ================================================================
+       BEGINNER GUIDE ACCORDION
+       ================================================================ */
+    (function() {
+      var container = document.getElementById('beginnerAccordion');
+      if (!container) return;
+      if (typeof BEGINNER_GUIDE_STEPS === 'undefined') return;
+
+      BEGINNER_GUIDE_STEPS.forEach(function(step, index) {
+        var card = document.createElement('div');
+        card.className = 'accordion-card';
+
+        card.innerHTML =
+          '<div class="accordion-header">' +
+            '<div class="accordion-step-num">' + (index + 1) + '</div>' +
+            '<div class="accordion-title-area">' +
+              '<div>' +
+                '<span class="accordion-title">' + step.title + '</span>' +
+                (step.ar ? '<span class="accordion-ar-badge">' + step.ar + '</span>' : '') +
+              '</div>' +
+              '<i class="fa-solid fa-chevron-down accordion-chevron"></i>' +
+            '</div>' +
+          '</div>' +
+          '<div class="accordion-body">' +
+            '<div class="accordion-body-inner">' +
+              '<p>' + step.content + '</p>' +
+            '</div>' +
+          '</div>';
+
+        var header = card.querySelector('.accordion-header');
+        header.addEventListener('click', function() {
+          // Close all other cards
+          container.querySelectorAll('.accordion-card.open').forEach(function(c) {
+            if (c !== card) c.classList.remove('open');
+          });
+          card.classList.toggle('open');
+        });
+
+        container.appendChild(card);
+      });
+
+      // Open the first card by default
+      var firstCard = container.querySelector('.accordion-card');
+      if (firstCard) firstCard.classList.add('open');
+    })();
+
+    /* ================================================================
+       ELEMENTAL REACTIONS — RENDER CARDS
+       ================================================================ */
+    (function() {
+      var grid = document.getElementById('reactionGrid');
+      if (!grid) return;
+      if (typeof REACTIONS === 'undefined' || typeof ELEMENTS === 'undefined') return;
+
+      REACTIONS.forEach(function(reaction) {
+        var card = document.createElement('div');
+        card.className = 'reaction-card';
+
+        // Build element badges from reaction.els array
+        var badgesHtml = '';
+        var els = reaction.els || reaction.elements || [];
+        els.forEach(function(elKey) {
+          // Handle multi-element like "Pyro/Hydro/Electro/Cryo"
+          var parts = elKey.split('/');
+          parts.forEach(function(part) {
+            var elName = part.trim();
+            // Find element in ELEMENTS by matching name (case-insensitive)
+            var found = null;
+            for (var k in ELEMENTS) {
+              if (ELEMENTS.hasOwnProperty(k) && ELEMENTS[k].name.toLowerCase() === elName.toLowerCase()) {
+                found = ELEMENTS[k];
+                break;
+              }
+            }
+            if (found) {
+              badgesHtml +=
+                '<span class="reaction-el-badge" style="background:' + found.color + ';">' +
+                  '<i class="fa-solid ' + found.icon + '" style="font-size:0.65rem;"></i> ' +
+                  found.name +
+                '</span>';
+            }
+          });
+        });
+
+        // Reaction type badge
+        var typeClass = '';
+        switch (reaction.type) {
+          case 'Amplifying':    typeClass = 'amplifying'; break;
+          case 'Additive':      typeClass = 'additive'; break;
+          case 'Transformative': typeClass = 'transformative'; break;
+          case 'Aura':          typeClass = 'aura'; break;
+          case 'Shield':        typeClass = 'shield'; break;
+          default:              typeClass = 'transformative';
+        }
+
+        var desc = reaction.desc || reaction.description || '';
+        var mul = reaction.mul || reaction.multiplier || 'N/A';
+
+        // Generate usage tip based on reaction name
+        var tips = '';
+        var rName = (reaction.name || '').toLowerCase();
+        if (rName === 'vaporize') {
+          tips = 'Best used with a Hydro enabler (Xingqiu/Yelan) and a Pyro DPS. Reverse Vape deals the most consistent damage output. Forward Vape (2x) is stronger but harder to sustain.';
+        } else if (rName === 'melt') {
+          tips = 'Forward Melt (Pyro on Cryo) hits hardest at 2x but is difficult to maintain. Reverse Melt is more practical for most teams. Ganyu and Wriothesley excel at Reverse Melt.';
+        } else if (rName === 'aggravate') {
+          tips = 'Build EM on your Electro unit. Fischl and Keqing excel here. Quickbloom teams mix Aggravate with Hyperbloom for maximum damage output.';
+        } else if (rName === 'spread') {
+          tips = 'Alhaitham and Tighnari are the top Spread DPS options. Deepwood Memories on a support is mandatory for maximum Dendro RES shred.';
+        } else if (rName === 'hyperbloom') {
+          tips = 'Kuki Shinobu and Raiden are the best triggers. Stack full EM (1000+) on the Electro trigger. Very resin-efficient to build &mdash; only needs EM main stats.';
+        } else if (rName === 'burgeon') {
+          tips = 'Thoma is the best Burgeon trigger. Be careful with self-damage (5% of reaction damage) &mdash; bring a healer. Good AoE but situational.';
+        } else if (rName === 'bloom') {
+          tips = 'Base Bloom is weaker without Nilou. Her Bountiful Cores explode instantly for massive AoE damage. Standard Bloom creates up to 5 cores on the field.';
+        } else if (rName === 'quicken') {
+          tips = 'Quicken is an aura, not damage. It enables Aggravate (Electro hits) and Spread (Dendro hits). Maintain the aura by applying Dendro and Electro regularly.';
+        } else if (rName === 'swirl') {
+          tips = 'Always use 4pc Viridescent Venerer on your Anemo unit. Kazuha, Sucrose, and Venti are the top Swirl enablers. Swirl scales only on EM and character level.';
+        } else if (rName === 'superconduct') {
+          tips = 'Essential for Physical DPS like Eula and Razor. The -40% Physical RES debuff lasts 12 seconds. The reaction damage itself is negligible &mdash; the debuff is what matters.';
+        } else if (rName === 'crystallize') {
+          tips = 'Scales with EM. Geo characters like Zhongli and Albedo generate shards passively. Navia uses Crystallize shards to charge her Skill stacks. Shards absorb 250% of their matching element.';
+        } else if (rName === 'burning') {
+          tips = 'Applies persistent Pyro aura and DoT. Can be maintained indefinitely with Dendro + Pyro. Useful for enabling Melt via persistent Pyro aura. Emilie\'s kit is designed around Burning.';
+        }
+
+        card.innerHTML =
+          '<div class="reaction-card-header">' +
+            '<span class="reaction-name">' + (reaction.name || 'Unknown') + '</span>' +
+            '<span class="reaction-type-badge ' + typeClass + '">' + (reaction.type || '') + '</span>' +
+          '</div>' +
+          '<div class="reaction-badges">' + badgesHtml + '</div>' +
+          '<div class="reaction-multiplier">' +
+            '<i class="fa-solid fa-bolt" style="margin-right:4px;font-size:0.65rem;"></i>' +
+            mul +
+          '</div>' +
+          '<div class="reaction-description">' + desc + '</div>' +
+          '<div class="reaction-tips">' +
+            '<i class="fa-solid fa-lightbulb"></i><strong> Combat Usage:</strong> ' + tips +
+          '</div>';
+
+        grid.appendChild(card);
+      });
+    })();
+
+    /* ================================================================
+       PROGRESSION — FARMING SCHEDULE TABLE
+       ================================================================ */
+    (function() {
+      var wrap = document.getElementById('farmingTableWrap');
+      if (!wrap) return;
+      if (typeof FARMING_SCHEDULE === 'undefined') return;
+
+      // Map FARMING_SCHEDULE keys to day-of-week display
+      var scheduleEntries = [
+        { label: 'Monday / Thursday', key: 'Monday/Thursday' },
+        { label: 'Tuesday / Friday',   key: 'Tuesday/Friday' },
+        { label: 'Wednesday / Saturday', key: 'Wednesday/Saturday' },
+        { label: 'Sunday',             key: 'Sunday' }
+      ];
+
+      // Get current day of week
+      var today = new Date().getDay(); // 0=Sun, 1=Mon, ...
+      var todayKeyMap = {
+        0: 'Sunday',
+        1: 'Monday/Thursday',
+        2: 'Tuesday/Friday',
+        3: 'Wednesday/Saturday',
+        4: 'Monday/Thursday',
+        5: 'Tuesday/Friday',
+        6: 'Wednesday/Saturday'
+      };
+      var todayKey = todayKeyMap[today];
+
+      var html = '<table class="farming-table"><thead><tr>';
+      html += '<th>Day</th><th>Talent Books</th><th>Weapon Materials</th>';
+      html += '</tr></thead><tbody>';
+
+      scheduleEntries.forEach(function(entry) {
+        var isToday = (entry.key === todayKey);
+        var trClass = isToday ? 'today-row' : '';
+        var dayLabel = entry.label;
+        if (isToday) dayLabel += ' &#x25C0; Today';
+
+        var data = FARMING_SCHEDULE[entry.key];
+        var talentHtml = '';
+        var weaponHtml = '';
+
+        if (data) {
+          // Talent books
+          var talentData = data.talent;
+          if (typeof talentData === 'string') {
+            talentHtml = '<span class="farming-tag sunday">' + talentData + '</span>';
+          } else if (Array.isArray(talentData)) {
+            talentData.forEach(function(t) {
+              talentHtml += '<span class="farming-tag talent">' + t + '</span> ';
+            });
+          }
+
+          // Weapon materials
+          var weaponData = data.weapon;
+          if (typeof weaponData === 'string') {
+            weaponHtml = '<span class="farming-tag sunday">' + weaponData + '</span>';
+          } else if (Array.isArray(weaponData)) {
+            weaponData.forEach(function(w) {
+              weaponHtml += '<span class="farming-tag weapon">' + w + '</span> ';
+            });
+          }
+        }
+
+        html += '<tr class="' + trClass + '">';
+        html += '<td class="day-col">' + dayLabel + '</td>';
+        html += '<td>' + talentHtml + '</td>';
+        html += '<td>' + weaponHtml + '</td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+    })();
+
+    /* ================================================================
+       PROGRESSION — WEEKLY CHECKLIST
+       ================================================================ */
+    (function() {
+      var container = document.getElementById('weeklyChecklist');
+      if (!container) return;
+
+      var checklistItems = [
+        { label: 'Complete 3 discounted Weekly Boss claims (30 Resin each)', icon: 'fa-skull' },
+        { label: 'Finish all Limited-Time Event stages and claim rewards', icon: 'fa-calendar-star' },
+        { label: 'Complete Daily Commissions (every day — all 4 + Katheryne)', icon: 'fa-clipboard-list' },
+        { label: 'Spend all Original Resin (cap is 160 — do not let it sit full)', icon: 'fa-hourglass-half' },
+        { label: 'Collect and replant seeds in the Serenitea Pot', icon: 'fa-seedling' },
+        { label: 'Claim Realm Currency from Tubby (Serenitea Pot)', icon: 'fa-coins' },
+        { label: 'Complete Battle Pass missions (weekly tab)', icon: 'fa-scroll' },
+        { label: 'Check Parametric Transformer cooldown (7 days)', icon: 'fa-microchip' },
+        { label: 'Expeditions: send characters and collect rewards', icon: 'fa-paper-plane' },
+        { label: 'Visit the Souvenir Shop for monthly stardust/starglitter wishes', icon: 'fa-star' }
+      ];
+
+      // Load saved state from localStorage
+      var saved = {};
+      try {
+        saved = JSON.parse(localStorage.getItem('teyvat_weekly_checklist') || '{}');
+      } catch (e) { saved = {}; }
+
+      checklistItems.forEach(function(item, index) {
+        var div = document.createElement('div');
+        div.className = 'checklist-item';
+        if (saved['item_' + index]) div.classList.add('checked');
+
+        div.innerHTML =
+          '<div class="checklist-check"><i class="fa-solid fa-check"></i></div>' +
+          '<span class="checklist-label"><i class="fa-solid ' + item.icon + '" style="color:var(--gold);width:18px;margin-right:6px;"></i>' + item.label + '</span>';
+
+        div.addEventListener('click', function() {
+          div.classList.toggle('checked');
+          saveChecklist();
+        });
+
+        container.appendChild(div);
+      });
+
+      function saveChecklist() {
+        var state = {};
+        var items = container.querySelectorAll('.checklist-item');
+        items.forEach(function(item, i) {
+          if (item.classList.contains('checked')) {
+            state['item_' + i] = true;
+          }
+        });
+        try {
+          localStorage.setItem('teyvat_weekly_checklist', JSON.stringify(state));
+        } catch (e) {}
+      }
+
+      // Reset button
+      var resetBtn = document.getElementById('checklistReset');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+          container.querySelectorAll('.checklist-item').forEach(function(item) {
+            item.classList.remove('checked');
+          });
+          try { localStorage.removeItem('teyvat_weekly_checklist'); } catch (e) {}
+        });
+      }
+    })();
+
+    /* ================================================================
+       PROGRESSION — RESIN SPENDING PRIORITY
+       ================================================================ */
+    (function() {
+      var list = document.getElementById('resinPriorityList');
+      if (!list) return;
+
+      var priorities = [
+        {
+          rank: 1,
+          top: true,
+          title: 'Weekly Bosses (30 Resin each x 3 discounted)',
+          desc: 'Always do your 3 discounted weekly boss claims. They drop talent materials and billets you cannot get elsewhere. Even if you do not need the specific boss drops now, you will later.'
+        },
+        {
+          rank: 2,
+          top: true,
+          title: 'Limited-Time Events',
+          desc: 'Events often give Primogems, Crown of Insight, and exclusive weapons that never return. Always complete event content before it expires. Some events reward up to 1000+ Primogems.'
+        },
+        {
+          rank: 3,
+          top: true,
+          title: 'Talent Book Domains (AR 25+)',
+          desc: 'Talents are guaranteed, permanent power increases. Level relevant talents to 6 for supports and 8-9 for main DPS. Crown (level 10) sparingly &mdash; only on your most-used characters.'
+        },
+        {
+          rank: 4,
+          top: false,
+          title: 'Weapon Ascension Domains',
+          desc: 'Weapon levels are a huge source of base ATK. Always keep your main DPS weapon at max level. Support weapons can lag 10-20 levels behind. Weapon domains are day-gated &mdash; plan ahead.'
+        },
+        {
+          rank: 5,
+          top: false,
+          title: 'World Bosses (40 Resin)',
+          desc: 'Required for character ascension. Farm only for the characters you are actively building. Over-farming boss mats you do not need is a common resin trap for new players.'
+        },
+        {
+          rank: 6,
+          top: false,
+          title: 'Artifact Domains (AR 45+)',
+          desc: 'The endless grind. Focus on resin-efficient domains first: Momiji-Dyed Court (Emblem/Shimenawa) and Spire of Solitary Enlightenment (Deepwood/Gilded). Strongbox bad pieces into VV, Noblesse, and Crimson Witch.'
+        },
+        {
+          rank: 7,
+          top: false,
+          title: 'Ley Lines &mdash; Mora (Gold Blossom)',
+          desc: 'You will ALWAYS need more Mora. Talents cost ~1.6M each to crown, artifacts cost ~270K to +20. Farm when you drop below 2 million Mora. Each ley line gives 60K at max world level.'
+        },
+        {
+          rank: 8,
+          top: false,
+          title: 'Ley Lines &mdash; EXP (Blue Blossom)',
+          desc: 'Only farm when you are actively leveling characters. Events and Battle Pass provide significant EXP books. Avoid over-farming &mdash; each ley line gives ~6-7 Hero\'s Wit at max world level.'
+        }
+      ];
+
+      priorities.forEach(function(p) {
+        var item = document.createElement('div');
+        item.className = 'resin-priority-item';
+
+        item.innerHTML =
+          '<div class="resin-rank' + (p.top ? ' top' : '') + '">' + p.rank + '</div>' +
+          '<div class="resin-priority-info">' +
+            '<h4>' + p.title + '</h4>' +
+            '<p>' + p.desc + '</p>' +
+          '</div>';
+
+        list.appendChild(item);
+      });
+    })();
+  </script>
+
+</body>
+</html>

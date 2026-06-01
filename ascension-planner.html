@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ascension Planner — Teyvat Guide</title>
+  <meta name="description" content="Plan your character ascensions. Calculate all materials, mora, EXP books, and resin needed to level any character in Genshin Impact.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Planner Layout ── */
+    .planner-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    /* ── Control Panel ── */
+    .control-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      position: sticky;
+      top: calc(var(--nav-height) + 2rem);
+    }
+    .control-panel h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .control-panel h3 i { color: var(--gold); font-size: 1rem; }
+
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23c9a96e' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .form-group select:focus {
+      border-color: var(--gold);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ── Character Info Badge ── */
+    .char-info-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg-card-hover);
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--border-subtle);
+    }
+    .char-info-badge .char-icon {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: #fff;
+      flex-shrink: 0;
+      border: 2px solid var(--border-subtle);
+    }
+    .char-info-badge .char-details { min-width: 0; }
+    .char-info-badge .char-name-block {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .char-info-badge .char-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Results Panel ── */
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: border-color 0.3s;
+    }
+    .result-card:hover { border-color: var(--border-active); }
+    .result-card h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .result-card h4 i { color: var(--gold); font-size: 0.9rem; }
+
+    /* ── Material Rows ── */
+    .material-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      gap: 12px;
+    }
+    .material-row:last-child { border-bottom: none; }
+    .material-name {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .material-count {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .material-count.zero { color: var(--text-muted); }
+
+    /* ── Summary Bar ── */
+    .summary-bar {
+      background: linear-gradient(135deg, rgba(201,169,110,0.08), rgba(201,169,110,0.02));
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .summary-item {
+      text-align: center;
+      min-width: 80px;
+    }
+    .summary-item .sum-value {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--gold-light);
+      letter-spacing: 0.5px;
+    }
+    .summary-item .sum-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    /* ── EXP Book Bars ── */
+    .exp-bar-wrapper { margin-bottom: 10px; }
+    .exp-bar-label {
+      display: flex; justify-content: space-between;
+      font-size: 0.82rem; margin-bottom: 4px;
+    }
+    .exp-bar-label span:first-child { color: var(--text-secondary); }
+    .exp-bar-label span:last-child { color: var(--text-primary); font-weight: 600; }
+
+    /* ── Gem Table ── */
+    .gem-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    }
+    .gem-cell {
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 8px;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .gem-cell.needed { border-color: var(--gold-dim); }
+    .gem-cell .gem-count {
+      font-size: 1.5rem; font-weight: 900;
+      font-family: 'Cinzel', serif;
+      color: var(--text-primary);
+    }
+    .gem-cell .gem-count.zero { color: var(--text-muted); }
+    .gem-cell .gem-tier {
+      font-size: 0.65rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;
+    }
+
+    /* ── Crown Highlight ── */
+    .crown-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: var(--radius-full);
+      background: rgba(255,177,59,0.1); border: 1px solid var(--star5);
+      color: var(--star5); font-size: 0.85rem; font-weight: 600;
+      margin-right: 4px; margin-bottom: 4px;
+    }
+    .crown-badge.zero { opacity: 0.35; }
+
+    /* ── Farming List ── */
+    .farming-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      margin-bottom: 6px;
+      transition: all 0.2s;
+      cursor: pointer;
+      user-select: none;
+    }
+    .farming-item:hover { border-color: var(--border-active); }
+    .farming-item.done {
+      opacity: 0.45;
+      text-decoration: line-through;
+      text-decoration-color: var(--gold-dim);
+    }
+    .farming-item input[type="checkbox"] {
+      appearance: none; -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border: 2px solid var(--border-subtle);
+      border-radius: 4px;
+      background: var(--bg-input);
+      cursor: pointer;
+      flex-shrink: 0;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .farming-item input[type="checkbox"]:checked {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+    .farming-item input[type="checkbox"]:checked::after {
+      content: '\f00c';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      font-size: 0.6rem;
+      color: #111;
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .farming-item .farm-label {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 0;
+    }
+    .farming-item .farm-qty {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      white-space: nowrap;
+    }
+    .farming-actions {
+      display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap;
+    }
+
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-muted);
+    }
+    .empty-state i {
+      font-size: 3rem;
+      color: var(--gold-dim);
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .empty-state h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+    }
+    .empty-state p { font-size: 0.88rem; max-width: 380px; margin: 0 auto; }
+
+    /* ── Farming Route Tips ── */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+    .tip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      transition: border-color 0.3s, transform 0.3s var(--ease-out);
+    }
+    .tip-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
+    .tip-card .tip-icon {
+      width: 42px; height: 42px;
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; color: #fff;
+      margin-bottom: 0.75rem;
+    }
+    .tip-card h5 {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+    }
+    .tip-card p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .tip-card ul {
+      list-style: none;
+      padding: 0;
+    }
+    .tip-card ul li {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      padding: 3px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      line-height: 1.4;
+    }
+    .tip-card ul li i {
+      color: var(--gold);
+      font-size: 0.55rem;
+      margin-top: 0.38rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Cost table ── */
+    .cost-sub-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 0.78rem;
+    }
+    .cost-sub-table td {
+      padding: 4px 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: var(--text-secondary);
+    }
+    .cost-sub-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .planner-grid { grid-template-columns: 1fr; }
+      .control-panel { position: static; }
+      .summary-bar { justify-content: center; }
+      .gem-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .gem-grid { grid-template-columns: 1fr 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .tips-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#" class="active">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html" class="active"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero" style="min-height:34vh;padding:3rem 2rem 2rem;">
+    <div class="hero-content">
+      <span class="hero-badge"><i class="fa-solid fa-arrow-trend-up" style="margin-right:6px;"></i> Material Calculator</span>
+      <h1>Ascension Planner</h1>
+      <p>Select a character and target level to see every material, mora, EXP book, gemstone, and talent book needed. Real Genshin Impact ascension costs -- no fake numbers.</p>
+    </div>
+  </section>
+
+  <!-- ── Planner Section ── -->
+  <section class="section reveal" style="padding-top:0.5rem;">
+    <div class="section-inner">
+      <div class="planner-grid">
+
+        <!-- ===== Left: Controls ===== -->
+        <div class="control-panel" id="controlPanel">
+          <h3><i class="fa-solid fa-sliders"></i> Configure</h3>
+
+          <div class="form-group">
+            <label for="charSelect">Character</label>
+            <select id="charSelect">
+              <option value="">-- Choose a Character --</option>
+            </select>
+          </div>
+
+          <div id="charInfoContainer"></div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="currentLevel">Current Level</label>
+              <select id="currentLevel"></select>
+            </div>
+            <div class="form-group">
+              <label for="targetLevel">Target Level</label>
+              <select id="targetLevel"></select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ascensionPhase">or Ascension Phase Preset</label>
+            <select id="ascensionPhase">
+              <option value="-1">-- Custom Levels --</option>
+              <option value="0">A1: Lv. 20 &#8594; 40</option>
+              <option value="1">A2: Lv. 40 &#8594; 50</option>
+              <option value="2">A3: Lv. 50 &#8594; 60</option>
+              <option value="3">A4: Lv. 60 &#8594; 70</option>
+              <option value="4">A5: Lv. 70 &#8594; 80</option>
+              <option value="5">A6: Lv. 80 &#8594; 90 (Final)</option>
+              <option value="all">Full: Lv. 1 &#8594; 90</option>
+            </select>
+          </div>
+
+          <button class="btn btn-primary" id="calculateBtn" style="width:100%;justify-content:center;" disabled>
+            <i class="fa-solid fa-calculator"></i> Calculate Materials
+          </button>
+        </div>
+
+        <!-- ===== Right: Results ===== -->
+        <div class="results-panel" id="resultsPanel">
+          <!-- Empty State -->
+          <div class="empty-state" id="emptyState">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <h4>Select a Character</h4>
+            <p>Choose a character and set your target level to see exactly what materials you need.</p>
+          </div>
+
+          <!-- Results (hidden initially) -->
+          <div id="resultsContent" style="display:none;">
+
+            <!-- Summary Bar -->
+            <div class="summary-bar" id="summaryBar"></div>
+
+            <!-- EXP Books -->
+            <div class="result-card" id="expCard">
+              <h4><i class="fa-solid fa-book-open"></i> EXP Books Required</h4>
+              <div id="expContent"></div>
+            </div>
+
+            <!-- Ascension Materials -->
+            <div class="result-card" id="ascensionCard">
+              <h4><i class="fa-solid fa-cubes"></i> Ascension Materials</h4>
+              <div id="ascensionContent"></div>
+            </div>
+
+            <!-- Gemstones -->
+            <div class="result-card" id="gemCard">
+              <h4><i class="fa-solid fa-gem"></i> Elemental Gemstones</h4>
+              <div class="gem-grid" id="gemContent"></div>
+            </div>
+
+            <!-- Talent Books + Crowns -->
+            <div class="result-card" id="talentCard">
+              <h4><i class="fa-solid fa-scroll"></i> Talent Materials & Crowns</h4>
+              <div id="talentContent"></div>
+            </div>
+
+            <!-- Resin Estimate -->
+            <div class="result-card" id="resinCard">
+              <h4><i class="fa-solid fa-hourglass-half"></i> Resin Estimate</h4>
+              <div id="resinContent"></div>
+            </div>
+
+            <!-- Farming List -->
+            <div class="result-card" id="farmingCard">
+              <h4><i class="fa-solid fa-clipboard-check"></i> Farming Checklist</h4>
+              <div class="farming-actions">
+                <button class="btn btn-outline btn-sm" id="resetFarmingBtn">
+                  <i class="fa-solid fa-rotate-left"></i> Reset All
+                </button>
+                <button class="btn btn-outline btn-sm" id="checkAllFarmingBtn">
+                  <i class="fa-solid fa-check-double"></i> Check All
+                </button>
+                <button class="btn btn-primary btn-sm" id="addToTrackerBtn">
+                  <i class="fa-solid fa-plus"></i> Add to Farming Tracker
+                </button>
+              </div>
+              <div id="farmingList"></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Farming Route Tips ── -->
+  <section class="section reveal" style="padding-top:0;">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Farming Guide</span>
+        <h2>Material Farming Route Tips</h2>
+        <p>Maximize your farming efficiency with these strategies for every material type.</p>
+      </div>
+
+      <div class="tips-grid">
+
+        <!-- Boss Materials -->
+        <div class="tip-card">
+          <div class="tip-icon" style="background:radial-gradient(circle at 30% 30%, #f44336aa, #f4433644);">
+            <i class="fa-solid fa-skull"></i>
+          </div>
+          <h5>World Boss Materials</h5>
+          <ul>
+            <li><i class="fa-solid fa-circle"></i> Cost: <strong>40 Resin</strong> per claim (60 for Weekly Bosses).</li>
+            <li><i class="fa-solid fa-circle"></i> Drops: avg <strong>2.5 boss mats</strong> per run at WL8 (range 2-3).</li>
+            <li><i class="fa-solid fa-circle"></i> Also drops elemental gemstones, artifacts, and companion XP.</li>
+            <li><i class="fa-solid fa-circle"></i> Boss respawns ~3 minutes after claim (teleport away and back).</li>
+            <li><i class="fa-solid fa-circle"></i> <strong>46 boss mats</strong> total needed for 1&#8594;90 ascension.</li>
+            <li><i class="fa-solid fa-circle"></i> Plan for ~19 runs (760 Resin) to get all boss mats plus gems.</li>
+          </ul>
+        </div>
+
+        <!-- Local Specialties -->
+        <div class="tip-card">
+          <div class="tip-icon" style="background:radial-gradient(circle at 30% 30%, #a5d63eaa, #a5d63e44);">
+            <i class="fa-solid fa-leaf"></i>
+          </div>
+          <h5>Local Specialties</h5>
+          <ul>
+            <li><i class="fa-solid fa-circle"></i> <strong>168 items</strong> needed for full 1&#8594;90 ascension.</li>
+            <li><i class="fa-solid fa-circle"></i> Respawn timer: <strong>48 hours</strong> (real time).</li>
+            <li><i class="fa-solid fa-circle"></i> Farm in <strong>co-op</strong> to double your collection per cycle.</li>
+            <li><i class="fa-solid fa-circle"></i> Use the <strong>official interactive map</strong> (Teyvat Map) for exact locations.</li>
+            <li><i class="fa-solid fa-circle"></i> Equip <strong>Klee / Mika / Yanfei</strong> (passive reveals Mondstadt / Liyue specialties on minimap).</li>
+            <li><i class="fa-solid fa-circle"></i> Some specialties can be grown in the <strong>Serenitea Pot</strong> (Luxuriant Glebe / Orderly Meadow).</li>
+          </ul>
+        </div>
+
+        <!-- Common Enemy Drops -->
+        <div class="tip-card">
+          <div class="tip-icon" style="background:radial-gradient(circle at 30% 30%, #af8fd1aa, #af8fd144);">
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <h5>Common Enemy Materials</h5>
+          <ul>
+            <li><i class="fa-solid fa-circle"></i> Total needed: <strong>18 T1</strong> + <strong>30 T2</strong> + <strong>36 T3</strong> for 1&#8594;90.</li>
+            <li><i class="fa-solid fa-circle"></i> Use the <strong>Adventurer's Handbook</strong> (F1) &#8594; Enemies tab to auto-track nearby mobs.</li>
+            <li><i class="fa-solid fa-circle"></i> Respawn: most common enemies respawn <strong>daily</strong> at server reset.</li>
+            <li><i class="fa-solid fa-circle"></i> <strong>Craft lower tiers upward</strong> at the alchemy bench (3 T1 &#8594; 1 T2, 3 T2 &#8594; 1 T3).</li>
+            <li><i class="fa-solid fa-circle"></i> Use <strong>Sucrose</strong> (10% chance double craft) or <strong>Albedo</strong> (10% refund) when crafting.</li>
+          </ul>
+        </div>
+
+        <!-- Gemstones -->
+        <div class="tip-card">
+          <div class="tip-icon" style="background:radial-gradient(circle at 30% 30%, #ffb13baa, #ffb13b44);">
+            <i class="fa-solid fa-gem"></i>
+          </div>
+          <h5>Elemental Gemstones</h5>
+          <ul>
+            <li><i class="fa-solid fa-circle"></i> Total needed: <strong>1 Sliver</strong> + <strong>9 Fragments</strong> + <strong>9 Chunks</strong> + <strong>6 Gemstones</strong>.</li>
+            <li><i class="fa-solid fa-circle"></i> World bosses drop gems matching their element alongside boss mats.</li>
+            <li><i class="fa-solid fa-circle"></i> <strong>Dust of Azoth</strong> (Stardust shop) lets you convert gems between elements at the alchemy bench.</li>
+            <li><i class="fa-solid fa-circle"></i> Weekly bosses drop gemstones at a high rate -- always do your weeklies.</li>
+            <li><i class="fa-solid fa-circle"></i> Craft upward: 3 Slivers &#8594; 1 Fragment, 3 Fragments &#8594; 1 Chunk, 3 Chunks &#8594; 1 Gemstone.</li>
+            <li><i class="fa-solid fa-circle"></i> Parametric Transformer can yield gem fragments (weekly, 150 items fed).</li>
+          </ul>
+        </div>
+
+        <!-- Talent Books -->
+        <div class="tip-card">
+          <div class="tip-icon" style="background:radial-gradient(circle at 30% 30%, #4cc2f1aa, #4cc2f144);">
+            <i class="fa-solid fa-book"></i>
+          </div>
+          <h5>Talent Books & Domains</h5>
+          <ul>
+            <li><i class="fa-solid fa-circle"></i> Each book series is available <strong>2 days per week</strong> + all on Sunday.</li>
+            <li><i class="fa-solid fa-circle"></i> Per talent 1&#8594;10: <strong>3 Teachings + 21 Guides + 38 Philosophies</strong>.</li>
+            <li><i class="fa-solid fa-circle"></i> Triple-crowning 1&#8594;10 costs: <strong>9 Teachings</strong>, <strong>63 Guides</strong>, <strong>114 Philosophies</strong>.</li>
+            <li><i class="fa-solid fa-circle"></i> Cost: <strong>20 Resin</strong> per domain run. Condensed Resin doubles drops per run.</li>
+            <li><i class="fa-solid fa-circle"></i> Plan around the weekly schedule -- check the <a href="domains.html" style="color:var(--gold-light);">Domains page</a>.</li>
+          </ul>
+        </div>
+
+        <!-- Crowns -->
+        <div class="tip-card">
+          <div class="tip-icon" style="background:radial-gradient(circle at 30% 30%, #ffb13baa, #ffb13b44);">
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <h5>Crowns of Insight</h5>
+          <ul>
+            <li><i class="fa-solid fa-circle"></i> Required to level any talent from <strong>9 &#8594; 10</strong> (1 Crown per talent).</li>
+            <li><i class="fa-solid fa-circle"></i> Max <strong>3 Crowns</strong> per character (one per talent) for triple-crown.</li>
+            <li><i class="fa-solid fa-circle"></i> Sources: <strong>events</strong> (main source, ~1-2 per patch), Frostbearing Tree, Sacred Sakura, Tree of Dreams, Fountain of Lucine, Tablet of Tona.</li>
+            <li><i class="fa-solid fa-circle"></i> Crowns are the <strong>scarcest resource</strong> in Genshin -- spend them wisely on key talents.</li>
+            <li><i class="fa-solid fa-circle"></i> Priority: Burst/Skill talents that scale team damage > Normal Attack for on-field carries.</li>
+          </ul>
+        </div>
+
+        <!-- Ley Lines -->
+        <div class="tip-card">
+          <div class="tip-icon" style="background:radial-gradient(circle at 30% 30%, #c9a96eaa, #c9a96e44);">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <h5>Ley Lines (EXP & Mora)</h5>
+          <ul>
+            <li><i class="fa-solid fa-circle"></i> <strong>Blossom of Revelation</strong> (blue, 20 Resin): avg ~122,500 character EXP per run.</li>
+            <li><i class="fa-solid fa-circle"></i> <strong>Blossom of Wealth</strong> (gold, 20 Resin): 60,000 Mora per run at WL8.</li>
+            <li><i class="fa-solid fa-circle"></i> Leveling 1&#8594;90 requires <strong>~8.36 million EXP</strong> (about 419 Hero's Wits).</li>
+            <li><i class="fa-solid fa-circle"></i> Total ascension + leveling mora for 1&#8594;90: <strong>~1.67 million Mora</strong>.</li>
+            <li><i class="fa-solid fa-circle"></i> Use Condensed Resin (craft at alchemy bench, 40 Resin &#8594; 1 Condensed) for 2x rewards per run.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <!-- ── Shared data ── -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+
+  <!-- ── App Script ── -->
+  <script>
+  (function() {
+    /* ================================================================
+       STARFIELD BACKGROUND
+       ================================================================ */
+    (function() {
+      const canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const STAR_COUNT = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          const hsl = s.hue > 0
+            ? `hsla(${s.hue}, 60%, 70%, ${s.alpha})`
+            : `rgba(200,200,220,${s.alpha})`;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      window.addEventListener('resize', function() { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ================================================================
+       SCROLL REVEAL
+       ================================================================ */
+    (function() {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+    })();
+
+    /* ================================================================
+       NAVIGATION
+       ================================================================ */
+    (function() {
+      var nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', function() { nav.classList.toggle('scrolled', window.scrollY > 10); });
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        links.classList.toggle('open');
+        var icon = toggle.querySelector('i');
+        if (icon) { icon.classList.toggle('fa-bars'); icon.classList.toggle('fa-xmark'); }
+      });
+    })();
+
+    /* ================================================================
+       GAME DATA - Ascension Costs
+       ================================================================ */
+
+    /* Ascension cost per phase (index 0 = A1 20->40, ..., index 5 = A6 80->90)
+       These are the REAL Genshin Impact ascension costs. Verified against game data. */
+    var ASCENSION_COSTS = [
+      { /* A1: 20 -> 40 */
+        mora: 20000,
+        gems: { sliver: 1, fragment: 0, chunk: 0, gemstone: 0 },
+        boss: 0,
+        local: 3,
+        common: { t1: 3, t2: 0, t3: 0 }
+      },
+      { /* A2: 40 -> 50 */
+        mora: 40000,
+        gems: { sliver: 0, fragment: 3, chunk: 0, gemstone: 0 },
+        boss: 2,
+        local: 10,
+        common: { t1: 15, t2: 0, t3: 0 }
+      },
+      { /* A3: 50 -> 60 */
+        mora: 60000,
+        gems: { sliver: 0, fragment: 6, chunk: 0, gemstone: 0 },
+        boss: 4,
+        local: 20,
+        common: { t1: 0, t2: 12, t3: 0 }
+      },
+      { /* A4: 60 -> 70 */
+        mora: 80000,
+        gems: { sliver: 0, fragment: 0, chunk: 3, gemstone: 0 },
+        boss: 8,
+        local: 30,
+        common: { t1: 0, t2: 18, t3: 0 }
+      },
+      { /* A5: 70 -> 80 */
+        mora: 100000,
+        gems: { sliver: 0, fragment: 0, chunk: 6, gemstone: 0 },
+        boss: 12,
+        local: 45,
+        common: { t1: 0, t2: 0, t3: 12 }
+      },
+      { /* A6: 80 -> 90 */
+        mora: 120000,
+        gems: { sliver: 0, fragment: 0, chunk: 0, gemstone: 6 },
+        boss: 20,
+        local: 60,
+        common: { t1: 0, t2: 0, t3: 24 }
+      }
+    ];
+
+    /* Cumulative EXP from level 1 to each breakpoint (real values) */
+    var CUMULATIVE_EXP = {
+      1: 0,
+      20: 120175,
+      40: 699000,
+      50: 1278100,
+      60: 2132225,
+      70: 3328150,
+      80: 4940025,
+      90: 8363150
+    };
+
+    /* Level ranges: [min, max, ascensionPhaseNumber] */
+    var LEVEL_RANGES = [
+      { min: 1,  max: 20, phase: 0 },
+      { min: 20, max: 40, phase: 1 },
+      { min: 40, max: 50, phase: 2 },
+      { min: 50, max: 60, phase: 3 },
+      { min: 60, max: 70, phase: 4 },
+      { min: 70, max: 80, phase: 5 },
+      { min: 80, max: 90, phase: 6 }
+    ];
+
+    /* EXP book definitions */
+    var EXP_BOOKS = {
+      herosWit:    { name: "Hero's Wit",              exp: 20000, moraCost: 2000 },
+      adventurer:  { name: "Adventurer's Experience",  exp: 5000,  moraCost: 500  },
+      wanderer:    { name: "Wanderer's Advice",         exp: 1000,  moraCost: 200  }
+    };
+
+    /* Gemstone names by element */
+    var GEM_NAMES = {
+      pyro:    { sliver: 'Agnidus Agate Sliver',    fragment: 'Agnidus Agate Fragment',    chunk: 'Agnidus Agate Chunk',    gemstone: 'Agnidus Agate Gemstone' },
+      hydro:   { sliver: 'Varunada Lazurite Sliver', fragment: 'Varunada Lazurite Fragment', chunk: 'Varunada Lazurite Chunk', gemstone: 'Varunada Lazurite Gemstone' },
+      anemo:   { sliver: 'Vayuda Turquoise Sliver',  fragment: 'Vayuda Turquoise Fragment',  chunk: 'Vayuda Turquoise Chunk',  gemstone: 'Vayuda Turquoise Gemstone' },
+      electro: { sliver: 'Vajrada Amethyst Sliver',   fragment: 'Vajrada Amethyst Fragment',   chunk: 'Vajrada Amethyst Chunk',   gemstone: 'Vajrada Amethyst Gemstone' },
+      dendro:  { sliver: 'Nagadus Emerald Sliver',    fragment: 'Nagadus Emerald Fragment',    chunk: 'Nagadus Emerald Chunk',    gemstone: 'Nagadus Emerald Gemstone' },
+      cryo:    { sliver: 'Shivada Jade Sliver',       fragment: 'Shivada Jade Fragment',       chunk: 'Shivada Jade Chunk',       gemstone: 'Shivada Jade Gemstone' },
+      geo:     { sliver: 'Prithiva Topaz Sliver',     fragment: 'Prithiva Topaz Fragment',     chunk: 'Prithiva Topaz Chunk',     gemstone: 'Prithiva Topaz Gemstone' }
+    };
+
+    /* Talent book farming days */
+    var TALENT_DAYS = {
+      'Freedom':     'Monday / Thursday',
+      'Resistance':  'Tuesday / Friday',
+      'Ballad':      'Wednesday / Saturday',
+      'Prosperity':  'Monday / Thursday',
+      'Diligence':   'Tuesday / Friday',
+      'Gold':        'Wednesday / Saturday',
+      'Transience':  'Monday / Thursday',
+      'Elegance':    'Tuesday / Friday',
+      'Light':       'Wednesday / Saturday',
+      'Admonition':  'Monday / Thursday',
+      'Ingenuity':   'Tuesday / Friday',
+      'Praxis':      'Wednesday / Saturday',
+      'Equity':      'Monday / Thursday',
+      'Justice':     'Tuesday / Friday',
+      'Order':       'Wednesday / Saturday',
+      'Conflict':    'Monday / Thursday',
+      'Kindling':    'Tuesday / Friday',
+      'Contention':  'Wednesday / Saturday'
+    };
+
+    /* ================================================================
+       EXP CALCULATION
+       ================================================================ */
+
+    /* Get cumulative EXP needed from level 1 to `level` using interpolation */
+    function getCumulativeExp(level) {
+      if (level <= 1) return 0;
+      if (level >= 90) return CUMULATIVE_EXP[90];
+
+      var breakpoints = [1, 20, 40, 50, 60, 70, 80, 90];
+      var lower = 1, upper = 90;
+      for (var i = 0; i < breakpoints.length - 1; i++) {
+        if (level >= breakpoints[i] && level <= breakpoints[i + 1]) {
+          lower = breakpoints[i];
+          upper = breakpoints[i + 1];
+          break;
+        }
+      }
+      if (lower === upper) return CUMULATIVE_EXP[lower] || 0;
+
+      var lowerExp = CUMULATIVE_EXP[lower];
+      var upperExp = CUMULATIVE_EXP[upper];
+      var ratio = (level - lower) / (upper - lower);
+      return Math.round(lowerExp + (upperExp - lowerExp) * ratio);
+    }
+
+    function getExpNeeded(currentLevel, targetLevel) {
+      return getCumulativeExp(targetLevel) - getCumulativeExp(currentLevel);
+    }
+
+    /* ================================================================
+       ASCENSION COST CALCULATION
+       ================================================================ */
+
+    /* Returns indices of ASCENSION_COSTS that apply between two levels */
+    function getRequiredAscensions(currentLevel, targetLevel) {
+      var phases = [];
+      for (var i = 0; i < ASCENSION_COSTS.length; i++) {
+        var phaseMin = LEVEL_RANGES[i + 1].min;
+        var phaseMax = LEVEL_RANGES[i + 1].max;
+        if (targetLevel > phaseMin && currentLevel < phaseMax) {
+          phases.push(i);
+        }
+      }
+      return phases;
+    }
+
+    function sumAscensionCosts(phases) {
+      var total = {
+        mora: 0,
+        gems: { sliver: 0, fragment: 0, chunk: 0, gemstone: 0 },
+        boss: 0,
+        local: 0,
+        common: { t1: 0, t2: 0, t3: 0 }
+      };
+      for (var p = 0; p < phases.length; p++) {
+        var c = ASCENSION_COSTS[phases[p]];
+        total.mora += c.mora;
+        total.gems.sliver   += c.gems.sliver;
+        total.gems.fragment += c.gems.fragment;
+        total.gems.chunk    += c.gems.chunk;
+        total.gems.gemstone += c.gems.gemstone;
+        total.boss   += c.boss;
+        total.local  += c.local;
+        total.common.t1 += c.common.t1;
+        total.common.t2 += c.common.t2;
+        total.common.t3 += c.common.t3;
+      }
+      return total;
+    }
+
+    /* ================================================================
+       EXP BOOK DISTRIBUTION
+       ================================================================ */
+
+    function calculateExpBooks(totalExp) {
+      var remaining = totalExp;
+      var herosWit = Math.floor(remaining / EXP_BOOKS.herosWit.exp);
+      remaining -= herosWit * EXP_BOOKS.herosWit.exp;
+
+      var adventurer = Math.floor(remaining / EXP_BOOKS.adventurer.exp);
+      remaining -= adventurer * EXP_BOOKS.adventurer.exp;
+
+      var wanderer = Math.ceil(remaining / EXP_BOOKS.wanderer.exp);
+      if (wanderer < 0) wanderer = 0;
+
+      var levelingMora = herosWit * EXP_BOOKS.herosWit.moraCost
+                       + adventurer * EXP_BOOKS.adventurer.moraCost
+                       + wanderer * EXP_BOOKS.wanderer.moraCost;
+
+      return { herosWit: herosWit, adventurer: adventurer, wanderer: wanderer, levelingMora: levelingMora };
+    }
+
+    /* ================================================================
+       RESIN ESTIMATE
+       ================================================================ */
+
+    function estimateResin(ascensionCosts, expBooks) {
+      /* Boss drops: avg 2.5 per 40-resin run */
+      var bossRuns = Math.ceil(ascensionCosts.boss / 2.5);
+      var bossResin = bossRuns * 40;
+
+      /* EXP ley lines: ~122,500 EXP per 20 resin */
+      var totalExp = expBooks.herosWit * EXP_BOOKS.herosWit.exp
+                   + expBooks.adventurer * EXP_BOOKS.adventurer.exp
+                   + expBooks.wanderer * EXP_BOOKS.wanderer.exp;
+      var expLeyLines = Math.ceil(totalExp / 122500);
+      var expResin = expLeyLines * 20;
+
+      /* Mora ley lines: 60,000 mora per 20 resin */
+      var totalMora = ascensionCosts.mora + expBooks.levelingMora;
+      var moraLeyLines = Math.ceil(totalMora / 60000);
+      var moraResin = moraLeyLines * 20;
+
+      /* Gem shortfall: estimate extra boss runs if gems are insufficient after regular boss farming.
+         Convert all needed gems to "gem equivalents" (1 gemstone = 27 sliver equivalents). */
+      var gemScoreNeeded = ascensionCosts.gems.sliver * 1
+                         + ascensionCosts.gems.fragment * 3
+                         + ascensionCosts.gems.chunk * 9
+                         + ascensionCosts.gems.gemstone * 27;
+      var gemScoreFromBossRuns = bossRuns * 4.5; /* ~4.5 sliver-equivalents per boss run */
+      var gemShortfallRuns = Math.max(0, Math.ceil((gemScoreNeeded - gemScoreFromBossRuns) / 4.5));
+      var gemResin = gemShortfallRuns * 40;
+
+      return {
+        bossResin: bossResin,
+        expResin: expResin,
+        moraResin: moraResin,
+        gemResin: gemResin,
+        total: bossResin + expResin + moraResin + gemResin,
+        bossRuns: bossRuns,
+        expLeyLines: expLeyLines,
+        moraLeyLines: moraLeyLines,
+        gemShortfallRuns: gemShortfallRuns
+      };
+    }
+
+    /* ================================================================
+       UTILITY HELPERS
+       ================================================================ */
+
+    var elementIcons = {
+      pyro: 'fa-fire', hydro: 'fa-droplet', anemo: 'fa-wind',
+      electro: 'fa-bolt', dendro: 'fa-leaf', cryo: 'fa-snowflake', geo: 'fa-mountain'
+    };
+    var elementColors = {
+      pyro: '#ef7938', hydro: '#4cc2f1', anemo: '#74c2a8',
+      electro: '#af8fd1', dendro: '#a5d63e', cryo: '#9fd6e3', geo: '#fab72e'
+    };
+
+    function el(id) { return document.getElementById(id); }
+
+    /* Format large numbers */
+    function fmtNum(n) {
+      if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n / 1000).toFixed(0) + 'k';
+      return n.toLocaleString();
+    }
+
+    /* ================================================================
+       INITIALIZE SELECTS
+       ================================================================ */
+
+    function populateCharacterSelect() {
+      var select = el('charSelect');
+      /* Group characters by element using `el` field from data.js */
+      var byElement = {};
+      CHARACTERS.forEach(function(ch) {
+        var elem = ch.el; /* data.js uses `el` not `element` */
+        if (!byElement[elem]) byElement[elem] = [];
+        byElement[elem].push(ch);
+      });
+
+      var elementOrder = ['pyro','hydro','anemo','electro','dendro','cryo','geo'];
+      elementOrder.forEach(function(elem) {
+        if (!byElement[elem]) return;
+        var elData = ELEMENTS[elem];
+        var optgroup = document.createElement('optgroup');
+        optgroup.label = (elData && elData.name) ? elData.name : elem;
+        byElement[elem].sort(function(a, b) { return b.st - a.st || a.name.localeCompare(b.name); });
+        byElement[elem].forEach(function(ch) {
+          var option = document.createElement('option');
+          option.value = ch.name;
+          var starsStr = '★'.repeat(ch.st);
+          option.textContent = ch.name + ' ' + starsStr + ' — ' + ch.role;
+          optgroup.appendChild(option);
+        });
+        select.appendChild(optgroup);
+      });
+    }
+
+    function populateLevelSelects() {
+      var currentSel = el('currentLevel');
+      var targetSel = el('targetLevel');
+      for (var lv = 1; lv <= 90; lv++) {
+        var opt1 = document.createElement('option');
+        opt1.value = lv;
+        opt1.textContent = 'Lv. ' + lv;
+        currentSel.appendChild(opt1);
+
+        var opt2 = document.createElement('option');
+        opt2.value = lv;
+        opt2.textContent = 'Lv. ' + lv;
+        targetSel.appendChild(opt2);
+      }
+      currentSel.value = '1';
+      targetSel.value = '90';
+    }
+
+    /* ================================================================
+       CHARACTER INFO BADGE
+       ================================================================ */
+
+    function updateCharInfoBadge(charName) {
+      var container = el('charInfoContainer');
+      if (!charName) {
+        container.innerHTML = '';
+        return;
+      }
+      var ch = findChar(charName);
+      if (!ch) { container.innerHTML = ''; return; }
+      var ec = elementColors[ch.el] || '#888';
+      var ei = elementIcons[ch.el] || 'fa-question';
+      var elemName = (ELEMENTS[ch.el] && ELEMENTS[ch.el].name) ? ELEMENTS[ch.el].name : ch.el;
+      container.innerHTML =
+        '<div class="char-info-badge">' +
+          '<div class="char-icon" style="background:radial-gradient(circle at 40% 40%, ' + ec + 'dd, ' + ec + '55);box-shadow:0 0 14px ' + ec + '44;">' +
+            '<i class="fa-solid ' + ei + '"></i>' +
+          '</div>' +
+          '<div class="char-details">' +
+            '<div class="char-name-block">' + escHtml(ch.name) + '</div>' +
+            '<div class="char-sub">' +
+              '<span class="stars">' + '★'.repeat(ch.st) + '</span>' +
+              ' &middot; ' + elemName +
+              ' &middot; ' + escHtml(ch.wp) +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function findChar(name) {
+      for (var i = 0; i < CHARACTERS.length; i++) {
+        if (CHARACTERS[i].name === name) return CHARACTERS[i];
+      }
+      return null;
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    /* ================================================================
+       MAIN CALCULATION & RENDER
+       ================================================================ */
+
+    function calculateAndRender() {
+      var charName = el('charSelect').value;
+      var currentLevel = parseInt(el('currentLevel').value, 10);
+      var targetLevel = parseInt(el('targetLevel').value, 10);
+
+      if (!charName || isNaN(currentLevel) || isNaN(targetLevel)) {
+        el('resultsContent').style.display = 'none';
+        el('emptyState').style.display = '';
+        return;
+      }
+
+      if (targetLevel <= currentLevel) {
+        el('resultsContent').style.display = 'none';
+        el('emptyState').style.display = '';
+        el('emptyState').innerHTML =
+          '<i class="fa-solid fa-exclamation-triangle"></i>' +
+          '<h4>Invalid Levels</h4>' +
+          '<p>Target level must be higher than current level.</p>';
+        return;
+      }
+
+      var ch = findChar(charName);
+      if (!ch) return;
+
+      var phases = getRequiredAscensions(currentLevel, targetLevel);
+      var ascCosts = sumAscensionCosts(phases);
+      var totalExp = getExpNeeded(currentLevel, targetLevel);
+      var expBooks = calculateExpBooks(totalExp);
+      var resin = estimateResin(ascCosts, expBooks);
+
+      /* Show results, hide empty state */
+      el('emptyState').style.display = 'none';
+      el('resultsContent').style.display = '';
+
+      renderSummary(currentLevel, targetLevel, ascCosts, expBooks, resin);
+      renderExpBooks(expBooks, totalExp);
+      renderAscensionMaterials(ch, ascCosts, phases);
+      renderGemstones(ch, ascCosts);
+      renderTalentBooks(ch);
+      renderResin(resin, ascCosts, expBooks);
+      renderFarmingList(ch, ascCosts, expBooks);
+    }
+
+    /* ── Summary Bar ── */
+    function renderSummary(currentLevel, targetLevel, ascCosts, expBooks, resin) {
+      var totalMora = ascCosts.mora + expBooks.levelingMora;
+      el('summaryBar').innerHTML =
+        '<div class="summary-item">' +
+          '<div class="sum-value">' + currentLevel + ' <span style="font-size:0.7rem;color:var(--text-muted);">→</span> ' + targetLevel + '</div>' +
+          '<div class="sum-label">Level Range</div>' +
+        '</div>' +
+        '<div class="summary-item">' +
+          '<div class="sum-value">' + fmtNum(totalMora) + '</div>' +
+          '<div class="sum-label">Total Mora</div>' +
+        '</div>' +
+        '<div class="summary-item">' +
+          '<div class="sum-value">' + expBooks.herosWit + '</div>' +
+          '<div class="sum-label">Hero\'s Wits</div>' +
+        '</div>' +
+        '<div class="summary-item">' +
+          '<div class="sum-value">' + resin.total.toLocaleString() + '</div>' +
+          '<div class="sum-label">Resin Est.</div>' +
+        '</div>' +
+        '<div class="summary-item">' +
+          '<div class="sum-value">' + (resin.total / 180).toFixed(1) + 'd</div>' +
+          '<div class="sum-label">Days (180/d)</div>' +
+        '</div>';
+    }
+
+    /* ── EXP Books ── */
+    function renderExpBooks(expBooks, totalExp) {
+      var html = '';
+      var items = [
+        { label: EXP_BOOKS.herosWit.name,   count: expBooks.herosWit,   exp: expBooks.herosWit * EXP_BOOKS.herosWit.exp },
+        { label: EXP_BOOKS.adventurer.name, count: expBooks.adventurer, exp: expBooks.adventurer * EXP_BOOKS.adventurer.exp },
+        { label: EXP_BOOKS.wanderer.name,   count: expBooks.wanderer,   exp: expBooks.wanderer * EXP_BOOKS.wanderer.exp }
+      ];
+
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var pct = totalExp > 0 ? Math.min(100, (item.exp / totalExp) * 100) : 0;
+        html +=
+          '<div class="exp-bar-wrapper">' +
+            '<div class="exp-bar-label">' +
+              '<span>' + escHtml(item.label) + ' <span style="color:var(--text-muted);font-size:0.72rem;">(&times;' + item.count + ')</span></span>' +
+              '<span>' + (item.exp).toLocaleString() + ' EXP</span>' +
+            '</div>' +
+            '<div class="progress-bar">' +
+              '<div class="progress-fill" style="width:' + pct + '%;background:var(--gold);"></div>' +
+            '</div>' +
+          '</div>';
+      }
+
+      html +=
+        '<div class="material-row" style="margin-top:10px;">' +
+          '<span class="material-name"><i class="fa-solid fa-coins" style="color:var(--gold);"></i> Mora (leveling cost)</span>' +
+          '<span class="material-count">' + expBooks.levelingMora.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name"><strong>Total EXP Needed</strong></span>' +
+          '<span class="material-count">' + totalExp.toLocaleString() + '</span>' +
+        '</div>';
+      el('expContent').innerHTML = html;
+    }
+
+    /* ── Ascension Materials ── */
+    function renderAscensionMaterials(ch, ascCosts, phases) {
+      var phaseLabel;
+      if (phases.length === 0) {
+        phaseLabel = 'None (leveling within same phase)';
+      } else if (phases.length === 6) {
+        phaseLabel = 'A1–A6 (Full 1→90)';
+      } else {
+        phaseLabel = phases.map(function(p) { return 'A' + (p + 1); }).join(', ');
+      }
+
+      /* data.js uses ch.mat (not ch.materials) */
+      var bossName = (ch.mat && ch.mat.boss) ? ch.mat.boss : 'Unknown Boss Material';
+      var localName = (ch.mat && ch.mat.local) ? ch.mat.local : 'Unknown Local Specialty';
+      var commonName = (ch.mat && ch.mat.com) ? ch.mat.com : 'Unknown Common Material';
+
+      var html =
+        '<div class="material-row">' +
+          '<span class="material-name">Ascension Phases</span>' +
+          '<span class="material-count" style="font-size:0.82rem;color:var(--gold-light);">' + escHtml(phaseLabel) + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-coins" style="color:var(--gold);"></i> Ascension Mora</span>' +
+          '<span class="material-count">' + ascCosts.mora.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-skull" style="color:var(--danger);"></i> ' + escHtml(bossName) + ' <span style="font-size:0.7rem;color:var(--text-muted);">(Boss Drop)</span></span>' +
+          '<span class="material-count">' + ascCosts.boss + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-leaf" style="color:var(--dendro);"></i> ' + escHtml(localName) + ' <span style="font-size:0.7rem;color:var(--text-muted);">(Local Specialty)</span></span>' +
+          '<span class="material-count">' + ascCosts.local + '</span>' +
+        '</div>';
+
+      /* Common enemy materials by tier */
+      if (ascCosts.common.t1 > 0) {
+        html +=
+          '<div class="material-row">' +
+            '<span class="material-name"><i class="fa-solid fa-circle" style="color:var(--text-muted);font-size:0.4rem;"></i> ' + escHtml(commonName) + ' <span style="color:var(--text-muted);font-size:0.72rem;">(T1 • Common)</span></span>' +
+            '<span class="material-count">' + ascCosts.common.t1 + '</span>' +
+          '</div>';
+      }
+      if (ascCosts.common.t2 > 0) {
+        html +=
+          '<div class="material-row">' +
+            '<span class="material-name"><i class="fa-solid fa-circle" style="color:#4caf50;font-size:0.4rem;"></i> ' + escHtml(commonName) + ' <span style="color:var(--text-muted);font-size:0.72rem;">(T2 • Uncommon)</span></span>' +
+            '<span class="material-count">' + ascCosts.common.t2 + '</span>' +
+          '</div>';
+      }
+      if (ascCosts.common.t3 > 0) {
+        html +=
+          '<div class="material-row">' +
+            '<span class="material-name"><i class="fa-solid fa-circle" style="color:#9b59b6;font-size:0.4rem;"></i> ' + escHtml(commonName) + ' <span style="color:var(--text-muted);font-size:0.72rem;">(T3 • Rare)</span></span>' +
+            '<span class="material-count">' + ascCosts.common.t3 + '</span>' +
+          '</div>';
+      }
+
+      el('ascensionContent').innerHTML = html;
+    }
+
+    /* ── Gemstones ── */
+    function renderGemstones(ch, ascCosts) {
+      var elem = ch.el; /* data.js uses `el` */
+      var gems = GEM_NAMES[elem] || GEM_NAMES.pyro;
+      var tiers = [
+        { key: 'sliver',   label: 'Sliver',   count: ascCosts.gems.sliver   },
+        { key: 'fragment', label: 'Fragment', count: ascCosts.gems.fragment },
+        { key: 'chunk',    label: 'Chunk',    count: ascCosts.gems.chunk    },
+        { key: 'gemstone', label: 'Gemstone', count: ascCosts.gems.gemstone }
+      ];
+
+      var html = '';
+      for (var i = 0; i < tiers.length; i++) {
+        var t = tiers[i];
+        html +=
+          '<div class="gem-cell' + (t.count > 0 ? ' needed' : '') + '" title="' + escHtml(gems[t.key] || '') + '">' +
+            '<div class="gem-count' + (t.count === 0 ? ' zero' : '') + '">' + t.count + '</div>' +
+            '<div class="gem-tier">' + escHtml(t.label) + '</div>' +
+          '</div>';
+      }
+      el('gemContent').innerHTML = html;
+    }
+
+    /* ── Talent Books & Crowns ── */
+    function renderTalentBooks(ch) {
+      /* data.js uses ch.mat.bk for talent book series, ch.tal for priority */
+      var bookSeries = (ch.mat && ch.mat.bk) ? ch.mat.bk : 'Unknown';
+      var days = TALENT_DAYS[bookSeries] || 'Varies';
+      var talPriority = ch.tal || ['NA', 'E', 'Q'];
+
+      var html =
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-book" style="color:var(--gold);"></i> Talent Book Series</span>' +
+          '<span class="material-count" style="color:var(--gold-light);">Teachings of ' + escHtml(bookSeries) + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-calendar-day" style="color:var(--text-muted);"></i> Farming Days</span>' +
+          '<span class="material-count" style="font-size:0.85rem;">' + escHtml(days) + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-list-ol" style="color:var(--text-muted);"></i> Talent Priority</span>' +
+          '<span class="material-count" style="font-size:0.85rem;color:var(--text-primary);">' + escHtml(talPriority.join(' ≥ ')) + '</span>' +
+        '</div>';
+
+      /* Per-talent full 1->10 cost table */
+      html +=
+        '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-subtle);">' +
+          '<p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;">' +
+            '<i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>' +
+            'Per-talent cost 1→10 (triple-crown values in parentheses):' +
+          '</p>' +
+          '<table class="cost-sub-table">' +
+            '<tr><td>Teachings</td><td>3 (9)</td></tr>' +
+            '<tr><td>Guides</td><td>21 (63)</td></tr>' +
+            '<tr><td>Philosophies</td><td>38 (114)</td></tr>' +
+            '<tr><td>Mora</td><td>1,652,500 (4,957,500)</td></tr>' +
+          '</table>' +
+        '</div>';
+
+      /* Crowns of Insight section */
+      html +=
+        '<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--border-subtle);">' +
+          '<p style="font-size:0.82rem;font-weight:600;color:var(--text-primary);margin-bottom:8px;">' +
+            '<i class="fa-solid fa-crown" style="color:var(--star5);margin-right:6px;"></i> Crowns of Insight (Talent 9 → 10)' +
+          '</p>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+            '<span class="crown-badge">' +
+              '<i class="fa-solid fa-crown" style="font-size:0.75rem;"></i> 1 Crown = 1 talent crowned' +
+            '</span>' +
+            '<span class="crown-badge">' +
+              '<i class="fa-solid fa-crown" style="font-size:0.75rem;"></i> 3 Crowns = triple-crown' +
+            '</span>' +
+          '</div>' +
+          '<p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">' +
+            'Crowns are obtained from limited-time events (~1–2 per patch), reputation systems, and exploration offerings. ' +
+            'They are the scarcest resource in Genshin -- plan carefully which talents to crown.' +
+          '</p>' +
+        '</div>';
+
+      el('talentContent').innerHTML = html;
+    }
+
+    /* ── Resin Estimate ── */
+    function renderResin(resin, ascCosts, expBooks) {
+      var html =
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-skull" style="color:var(--danger);"></i> World Boss (' + resin.bossRuns + ' runs × 40 Resin)</span>' +
+          '<span class="material-count">' + resin.bossResin.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-book-open" style="color:var(--electro);"></i> EXP Ley Lines (' + resin.expLeyLines + ' runs × 20 Resin)</span>' +
+          '<span class="material-count">' + resin.expResin.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name"><i class="fa-solid fa-coins" style="color:var(--gold);"></i> Mora Ley Lines (' + resin.moraLeyLines + ' runs × 20 Resin)</span>' +
+          '<span class="material-count">' + resin.moraResin.toLocaleString() + '</span>' +
+        '</div>';
+
+      if (resin.gemResin > 0) {
+        html +=
+          '<div class="material-row">' +
+            '<span class="material-name"><i class="fa-solid fa-gem" style="color:var(--electro);"></i> Extra Gem Boss Runs (' + resin.gemShortfallRuns + ' runs × 40 Resin)</span>' +
+            '<span class="material-count">' + resin.gemResin.toLocaleString() + '</span>' +
+          '</div>';
+      }
+
+      html +=
+        '<div class="material-row" style="border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:4px;">' +
+          '<span class="material-name" style="font-weight:700;color:var(--text-primary);"><i class="fa-solid fa-hourglass-end" style="color:var(--gold);"></i> Total Resin</span>' +
+          '<span class="material-count" style="font-size:1.15rem;color:var(--gold-light);">' + resin.total.toLocaleString() + '</span>' +
+        '</div>' +
+        '<div class="material-row">' +
+          '<span class="material-name" style="font-size:0.82rem;color:var(--text-muted);">At 180 resin/day</span>' +
+          '<span class="material-count" style="font-size:0.85rem;">~' + (resin.total / 180).toFixed(1) + ' days</span>' +
+        '</div>' +
+        '<p style="font-size:0.75rem;color:var(--text-muted);margin-top:8px;">' +
+          '<i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>' +
+          'Resin estimates are approximate. Local specialties and common enemy drops cost no resin. ' +
+          'Boss drop rate averages 2.5 mats per 40-resin run at World Level 8. Gem estimates assume some overlap from boss farming.' +
+        '</p>';
+
+      el('resinContent').innerHTML = html;
+    }
+
+    /* ================================================================
+       FARMING CHECKLIST
+       ================================================================ */
+
+    var currentFarmingKey = '';
+
+    function buildFarmingKey(charName, ascCosts) {
+      return charName + '|' + ascCosts.boss + '|' + ascCosts.local + '|' +
+             ascCosts.common.t1 + '|' + ascCosts.common.t2 + '|' + ascCosts.common.t3 + '|' +
+             ascCosts.gems.sliver + '|' + ascCosts.gems.fragment + '|' + ascCosts.gems.chunk + '|' + ascCosts.gems.gemstone;
+    }
+
+    function getFarmingState(key) {
+      try {
+        var raw = localStorage.getItem('ascensionPlanner_farming');
+        if (!raw) return {};
+        var data = JSON.parse(raw);
+        return data[key] || {};
+      } catch (e) { return {}; }
+    }
+
+    function saveFarmingState(key, state) {
+      try {
+        var raw = localStorage.getItem('ascensionPlanner_farming');
+        var data = raw ? JSON.parse(raw) : {};
+        data[key] = state;
+        localStorage.setItem('ascensionPlanner_farming', JSON.stringify(data));
+      } catch (e) { /* localStorage may be full or unavailable */ }
+    }
+
+    function renderFarmingList(ch, ascCosts, expBooks) {
+      currentFarmingKey = buildFarmingKey(ch.name, ascCosts);
+      var state = getFarmingState(currentFarmingKey);
+
+      /* data.js uses ch.mat fields */
+      var bossName   = (ch.mat && ch.mat.boss) ? ch.mat.boss : 'Boss Material';
+      var localName  = (ch.mat && ch.mat.local) ? ch.mat.local : 'Local Specialty';
+      var commonName = (ch.mat && ch.mat.com) ? ch.mat.com : 'Common Material';
+      var gemNames   = GEM_NAMES[ch.el] || GEM_NAMES.pyro;
+
+      /* Build list of items to farm */
+      var items = [];
+
+      if (ascCosts.boss > 0) {
+        items.push({ id: 'boss', label: bossName + ' (Boss Material)', qty: ascCosts.boss, icon: 'fa-skull', color: 'var(--danger)' });
+      }
+      if (ascCosts.local > 0) {
+        items.push({ id: 'local', label: localName + ' (Local Specialty)', qty: ascCosts.local, icon: 'fa-leaf', color: 'var(--dendro)' });
+      }
+      if (ascCosts.common.t1 > 0) {
+        items.push({ id: 'common_t1', label: commonName + ' — T1', qty: ascCosts.common.t1, icon: 'fa-circle', color: 'var(--text-muted)' });
+      }
+      if (ascCosts.common.t2 > 0) {
+        items.push({ id: 'common_t2', label: commonName + ' — T2', qty: ascCosts.common.t2, icon: 'fa-circle', color: '#4caf50' });
+      }
+      if (ascCosts.common.t3 > 0) {
+        items.push({ id: 'common_t3', label: commonName + ' — T3', qty: ascCosts.common.t3, icon: 'fa-circle', color: '#9b59b6' });
+      }
+      if (ascCosts.gems.sliver > 0) {
+        items.push({ id: 'gem_sliver', label: gemNames.sliver, qty: ascCosts.gems.sliver, icon: 'fa-gem', color: 'var(--electro)' });
+      }
+      if (ascCosts.gems.fragment > 0) {
+        items.push({ id: 'gem_fragment', label: gemNames.fragment, qty: ascCosts.gems.fragment, icon: 'fa-gem', color: 'var(--electro)' });
+      }
+      if (ascCosts.gems.chunk > 0) {
+        items.push({ id: 'gem_chunk', label: gemNames.chunk, qty: ascCosts.gems.chunk, icon: 'fa-gem', color: 'var(--electro)' });
+      }
+      if (ascCosts.gems.gemstone > 0) {
+        items.push({ id: 'gem_gemstone', label: gemNames.gemstone, qty: ascCosts.gems.gemstone, icon: 'fa-gem', color: 'var(--electro)' });
+      }
+      if (expBooks.herosWit > 0) {
+        items.push({ id: 'exp_heros', label: "Hero's Wit", qty: expBooks.herosWit, icon: 'fa-book-open', color: 'var(--gold)' });
+      }
+      if (expBooks.adventurer > 0) {
+        items.push({ id: 'exp_adv', label: "Adventurer's Experience", qty: expBooks.adventurer, icon: 'fa-book-open', color: 'var(--gold-dim)' });
+      }
+      if (expBooks.wanderer > 0) {
+        items.push({ id: 'exp_wand', label: "Wanderer's Advice", qty: expBooks.wanderer, icon: 'fa-book-open', color: 'var(--text-muted)' });
+      }
+
+      var totalMora = ascCosts.mora + expBooks.levelingMora;
+      items.push({ id: 'mora', label: 'Mora', qty: totalMora, icon: 'fa-coins', color: 'var(--gold)' });
+
+      /* Render items */
+      var html = '';
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        var checked = state[item.id] === true;
+        var qtyDisplay = item.qty >= 1000000 ? (item.qty / 1000000).toFixed(1) + 'M'
+                       : item.qty >= 1000 ? (item.qty / 1000).toFixed(0) + 'k'
+                       : item.qty.toLocaleString();
+        html +=
+          '<div class="farming-item' + (checked ? ' done' : '') + '" data-farm-id="' + item.id + '">' +
+            '<input type="checkbox"' + (checked ? ' checked' : '') + ' tabindex="-1">' +
+            '<i class="fa-solid ' + item.icon + '" style="color:' + item.color + ';font-size:0.8rem;width:16px;text-align:center;"></i>' +
+            '<span class="farm-label">' + escHtml(item.label) + '</span>' +
+            '<span class="farm-qty">' + qtyDisplay + '</span>' +
+          '</div>';
+      }
+
+      el('farmingList').innerHTML = html;
+
+      /* Event delegation for checkboxes */
+      el('farmingList').onclick = function(e) {
+        var farmItem = e.target.closest('.farming-item');
+        if (!farmItem) return;
+        var id = farmItem.dataset.farmId;
+        var st = getFarmingState(currentFarmingKey);
+        st[id] = !st[id];
+        saveFarmingState(currentFarmingKey, st);
+        farmItem.classList.toggle('done', st[id]);
+        var cb = farmItem.querySelector('input[type="checkbox"]');
+        if (cb) cb.checked = st[id];
+      };
+
+      /* Prevent direct checkbox clicks from double-firing */
+      var checkboxes = el('farmingList').querySelectorAll('input[type="checkbox"]');
+      for (var j = 0; j < checkboxes.length; j++) {
+        checkboxes[j].addEventListener('click', function(e) { e.stopPropagation(); });
+      }
+    }
+
+    /* ================================================================
+       FARMING BUTTONS
+       ================================================================ */
+
+    el('resetFarmingBtn').addEventListener('click', function() {
+      if (!currentFarmingKey) return;
+      saveFarmingState(currentFarmingKey, {});
+      var charName = el('charSelect').value;
+      if (charName) calculateAndRender();
+    });
+
+    el('checkAllFarmingBtn').addEventListener('click', function() {
+      if (!currentFarmingKey) return;
+      var items = el('farmingList').querySelectorAll('.farming-item');
+      var st = {};
+      for (var i = 0; i < items.length; i++) {
+        st[items[i].dataset.farmId] = true;
+      }
+      saveFarmingState(currentFarmingKey, st);
+      for (var j = 0; j < items.length; j++) {
+        items[j].classList.add('done');
+        var cb = items[j].querySelector('input[type="checkbox"]');
+        if (cb) cb.checked = true;
+      }
+    });
+
+    /* "Add to Farming Tracker" button - copies data to a persistent list */
+    el('addToTrackerBtn').addEventListener('click', function() {
+      var charName = el('charSelect').value;
+      if (!charName || !currentFarmingKey) return;
+
+      try {
+        var raw = localStorage.getItem('ascensionPlanner_tracker');
+        var tracker = raw ? JSON.parse(raw) : [];
+        /* Avoid duplicates */
+        var exists = false;
+        for (var i = 0; i < tracker.length; i++) {
+          if (tracker[i].key === currentFarmingKey) { exists = true; break; }
+        }
+        if (!exists) {
+          tracker.push({
+            key: currentFarmingKey,
+            char: charName,
+            date: new Date().toISOString(),
+            currentLevel: el('currentLevel').value,
+            targetLevel: el('targetLevel').value
+          });
+          localStorage.setItem('ascensionPlanner_tracker', JSON.stringify(tracker));
+          alert(charName + ' added to your farming tracker! View saved plans in local storage under "ascensionPlanner_tracker".');
+        } else {
+          alert(charName + ' is already in your farming tracker.');
+        }
+      } catch (e) {
+        alert('Could not save to tracker. LocalStorage may be full.');
+      }
+    });
+
+    /* ================================================================
+       EVENT LISTENERS
+       ================================================================ */
+
+    el('charSelect').addEventListener('change', function() {
+      var charName = this.value;
+      updateCharInfoBadge(charName);
+      el('calculateBtn').disabled = !charName;
+      if (charName) calculateAndRender();
+    });
+
+    el('currentLevel').addEventListener('change', function() {
+      var targetVal = parseInt(el('targetLevel').value, 10);
+      var currentVal = parseInt(this.value, 10);
+      if (currentVal >= targetVal) {
+        var newTarget = Math.min(90, currentVal + 10);
+        el('targetLevel').value = newTarget;
+      }
+      el('ascensionPhase').value = '-1';
+      if (el('charSelect').value) calculateAndRender();
+    });
+
+    el('targetLevel').addEventListener('change', function() {
+      var currentVal = parseInt(el('currentLevel').value, 10);
+      var targetVal = parseInt(this.value, 10);
+      if (targetVal <= currentVal) {
+        var newCurrent = Math.max(1, targetVal - 10);
+        el('currentLevel').value = newCurrent;
+      }
+      el('ascensionPhase').value = '-1';
+      if (el('charSelect').value) calculateAndRender();
+    });
+
+    el('ascensionPhase').addEventListener('change', function() {
+      var phaseVal = this.value;
+      if (phaseVal === '-1') return;
+      if (phaseVal === 'all') {
+        el('currentLevel').value = '1';
+        el('targetLevel').value = '90';
+      } else {
+        var phase = parseInt(phaseVal, 10);
+        var range = LEVEL_RANGES[phase];
+        if (range) {
+          el('currentLevel').value = range.min;
+          el('targetLevel').value = range.max;
+        }
+      }
+      if (el('charSelect').value) calculateAndRender();
+    });
+
+    el('calculateBtn').addEventListener('click', calculateAndRender);
+
+    /* ================================================================
+       INIT
+       ================================================================ */
+
+    populateCharacterSelect();
+    populateLevelSelects();
+    el('calculateBtn').disabled = true;
+
+  })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Guides — Teyvat Guide</title>
+  <meta name="description" content="Complete Genshin Impact domain farming guide — artifact domains, talent book domains, weapon material domains, daily farming schedule, and resin priority.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Page-Specific Styles ── */
+
+    /* Hero (compact) */
+    .hero-domains {
+      position: relative; z-index: 1; text-align: center;
+      padding: 3rem 2rem 2rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-domains::before {
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-domains-content { position: relative; z-index: 2; max-width: 680px; }
+    .hero-domains h1 {
+      font-family: 'Cinzel', serif; font-size: clamp(1.9rem, 4.5vw, 3rem);
+      font-weight: 900; letter-spacing: 1px;
+      background: linear-gradient(180deg, #fff 0%, var(--gold-light) 40%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-domains p { font-size: 1rem; color: var(--text-secondary); margin: 0.8rem auto 0; max-width: 520px; }
+
+    /* ── Domain Card ── */
+    .domain-card {
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .domain-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .domain-card-name {
+      font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700;
+      color: var(--text-primary); letter-spacing: 0.4px;
+    }
+    .domain-card-region {
+      font-size: 0.75rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 5px;
+      margin-bottom: 2px;
+    }
+    .domain-card-region i { color: var(--gold-dim); font-size: 0.68rem; }
+    .domain-sets {
+      display: flex; flex-wrap: wrap; gap: 6px; margin: 0.25rem 0;
+    }
+    .domain-set-tag {
+      display: inline-block; padding: 4px 12px; border-radius: var(--radius-full);
+      font-size: 0.73rem; font-weight: 500;
+      background: rgba(201,169,110,0.08); color: var(--gold-light);
+      border: 1px solid var(--border-gold);
+    }
+    .domain-elements {
+      display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+      margin: 0.25rem 0;
+    }
+    .domain-elements-label {
+      font-size: 0.68rem; color: var(--text-muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .domain-elem-dot {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.55rem; color: #fff; border: 1.5px solid transparent;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .domain-elem-dot:hover { transform: scale(1.3); }
+    .domain-desc {
+      font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55;
+      margin-top: auto; padding-top: 0.5rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* ── Schedule Table ── */
+    .schedule-table {
+      width: 100%; border-collapse: collapse; margin-top: 0.5rem;
+    }
+    .schedule-table th, .schedule-table td {
+      padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+    }
+    .schedule-table thead th {
+      color: var(--text-muted); font-weight: 700; text-transform: uppercase;
+      font-size: 0.7rem; letter-spacing: 1.5px;
+      background: rgba(201,169,110,0.04);
+    }
+    .schedule-table tbody tr { transition: background 0.2s; }
+    .schedule-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .schedule-table .day-col {
+      font-weight: 700; color: var(--gold); white-space: nowrap;
+      font-size: 0.85rem;
+    }
+    .schedule-table .today-row {
+      background: rgba(201,169,110,0.08);
+      border-left: 3px solid var(--gold);
+    }
+    .schedule-table .material-list {
+      display: flex; flex-wrap: wrap; gap: 5px;
+    }
+    .schedule-chip {
+      display: inline-block; padding: 3px 10px; border-radius: var(--radius-full);
+      font-size: 0.75rem; font-weight: 500;
+      background: rgba(201,169,110,0.06); color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ── Talent & Weapon Tables ── */
+    .domain-table {
+      width: 100%; border-collapse: collapse; margin-top: 0.5rem;
+    }
+    .domain-table th, .domain-table td {
+      padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.86rem;
+    }
+    .domain-table thead th {
+      color: var(--text-muted); font-weight: 700; text-transform: uppercase;
+      font-size: 0.7rem; letter-spacing: 1.5px;
+      background: rgba(201,169,110,0.04);
+    }
+    .domain-table tbody tr { transition: background 0.2s; }
+    .domain-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+    .domain-table .d-name {
+      font-weight: 600; color: var(--text-primary);
+    }
+    .domain-table .d-region {
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .books-list, .mats-list {
+      display: flex; flex-wrap: wrap; gap: 4px;
+    }
+
+    /* ── Element Dot Colors ── */
+    .edot-pyro   { background: var(--pyro);    box-shadow: 0 0 8px var(--pyro-glow); }
+    .edot-hydro  { background: var(--hydro);   box-shadow: 0 0 8px var(--hydro-glow); }
+    .edot-anemo  { background: var(--anemo);   box-shadow: 0 0 8px var(--anemo-glow); }
+    .edot-electro{ background: var(--electro); box-shadow: 0 0 8px var(--electro-glow); }
+    .edot-dendro { background: var(--dendro);  box-shadow: 0 0 8px var(--dendro-glow); }
+    .edot-cryo   { background: var(--cryo);    box-shadow: 0 0 8px var(--cryo-glow); }
+    .edot-geo    { background: var(--geo);     box-shadow: 0 0 8px var(--geo-glow); }
+
+    /* ── Section Divider ── */
+    .section-divider {
+      width: 70px; height: 2px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    }
+
+    /* ── Today Indicator ── */
+    .today-badge {
+      display: inline-block; padding: 3px 12px; border-radius: var(--radius-full);
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase;
+      background: rgba(201,169,110,0.12); color: var(--gold);
+      border: 1px solid var(--border-gold);
+      margin-left: 8px;
+    }
+
+    /* ── Resin Priority Guide ── */
+    .resin-priority-list {
+      display: flex; flex-direction: column; gap: 0.75rem;
+      counter-reset: resin-priority;
+      max-width: 700px; margin: 0 auto;
+    }
+    .resin-priority-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 1rem 1.25rem;
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius); transition: all 0.25s var(--ease-out);
+    }
+    .resin-priority-item:hover {
+      border-color: var(--border-active); transform: translateX(4px);
+    }
+    .resin-priority-rank {
+      flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cinzel', serif; font-weight: 900; font-size: 0.9rem;
+      color: #111; background: linear-gradient(135deg, var(--gold), #b8943a);
+    }
+    .resin-priority-item .rp-content h4 {
+      font-family: 'Cinzel', serif; font-size: 0.95rem; font-weight: 700;
+      color: var(--text-primary); margin-bottom: 2px;
+    }
+    .resin-priority-item .rp-content p {
+      font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;
+    }
+    .resin-priority-item .rp-badge {
+      display: inline-block; padding: 2px 8px; border-radius: var(--radius-full);
+      font-size: 0.66rem; font-weight: 600; letter-spacing: 0.5px;
+      margin-left: 6px;
+    }
+    .rp-badge-daily { background: rgba(76,194,241,0.12); color: var(--hydro); }
+    .rp-badge-important { background: rgba(239,121,56,0.12); color: var(--pyro); }
+    .rp-badge-luxury { background: rgba(201,169,110,0.1); color: var(--gold); }
+
+    /* ── Dropdown ── */
+    .domain-dropdown-btn {
+      width: 100%; text-align: left; padding: 14px 18px;
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius); color: var(--text-primary);
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: all 0.25s var(--ease-out);
+      font-family: inherit;
+    }
+    .domain-dropdown-btn:hover { border-color: var(--border-active); }
+    .domain-dropdown-btn i { transition: transform 0.3s var(--ease-out); font-size: 0.8rem; color: var(--gold-dim); }
+    .domain-dropdown-btn.open i { transform: rotate(180deg); }
+    .domain-dropdown-content {
+      display: none; overflow: hidden;
+      border: 1px solid var(--border-subtle); border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      margin-top: -1px;
+    }
+    .domain-dropdown-content.open { display: block; }
+
+    @media (max-width: 768px) {
+      .schedule-table, .domain-table { font-size: 0.78rem; }
+      .schedule-table th, .schedule-table td, .domain-table th, .domain-table td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ Starfield Background ═══ -->
+  <canvas id="starfield" aria-hidden="true"></canvas>
+
+  <!-- ═══ Navigation ═══ -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo" aria-label="Teyvat Guide Home">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="domains.html" class="active">Domains</a>
+      <div class="nav-dropdown">
+        <a href="#">More <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="bosses.html">Bosses</a>
+          <a href="teams.html">Teams</a>
+          <a href="spiral-abyss.html">Spiral Abyss</a>
+          <a href="events.html">Events</a>
+          <a href="codes.html">Codes</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html">Wish Sim</a>
+          <a href="damage-calc.html">Damage Calc</a>
+          <a href="resin-timer.html">Resin Timer</a>
+          <a href="primo-calc.html">Primo Calc</a>
+          <a href="ascension-planner.html">Ascension Planner</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero-domains">
+    <div class="hero-domains-content">
+      <h1>Domain Guides</h1>
+      <p>Artifact domains, talent book domains, and weapon ascension material domains.</p>
+    </div>
+  </section>
+
+  <!-- ═══ Daily Farming Schedule ═══ -->
+  <section class="section" style="padding-top:0;">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Weekly Rotation</span>
+        <h2>Daily Farming Schedule</h2>
+        <div class="section-divider"></div>
+        <p>Talent books and weapon ascension materials rotate on a fixed schedule. Plan your resin around these days.</p>
+      </div>
+      <div class="tool-panel">
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Talent Books</th>
+              <th>Weapon Materials</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleBody">
+            <!-- Rendered by JS from FARMING_SCHEDULE -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Artifact Domains ═══ -->
+  <section class="section" style="background:rgba(10,10,28,0.4);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Artifact Farming</span>
+        <h2>Artifact Domains</h2>
+        <div class="section-divider"></div>
+        <p>Each artifact domain drops two sets. Here is every domain, its drops, recommended elements, and farming notes.</p>
+      </div>
+      <div class="grid-2" id="artifactDomainGrid">
+        <!-- Rendered by JS from DOMAINS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Talent Book Domains ═══ -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Character Progression</span>
+        <h2>Talent Book Domains</h2>
+        <div class="section-divider"></div>
+        <p>Each region has one talent book domain. Three book types rotate on Mon/Thu, Tue/Fri, and Wed/Sat. All books are available on Sunday.</p>
+      </div>
+      <div class="tool-panel">
+        <table class="domain-table">
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>Region</th>
+              <th>Books (Mon/Thu)</th>
+              <th>Books (Tue/Fri)</th>
+              <th>Books (Wed/Sat)</th>
+              <th>Recommended</th>
+            </tr>
+          </thead>
+          <tbody id="talentDomainBody">
+            <!-- Rendered by JS from DOMAINS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Weapon Material Domains ═══ -->
+  <section class="section" style="background:rgba(10,10,28,0.4);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Weapon Upgrades</span>
+        <h2>Weapon Material Domains</h2>
+        <div class="section-divider"></div>
+        <p>Weapon ascension materials follow the same daily rotation. Each domain covers three material families for one region.</p>
+      </div>
+      <div class="tool-panel">
+        <table class="domain-table">
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>Region</th>
+              <th>Material (Mon/Thu)</th>
+              <th>Material (Tue/Fri)</th>
+              <th>Material (Wed/Sat)</th>
+              <th>Recommended</th>
+            </tr>
+          </thead>
+          <tbody id="weaponDomainBody">
+            <!-- Rendered by JS from DOMAINS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Resin Priority Guide ═══ -->
+  <section class="section">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Resin Efficiency</span>
+        <h2>Resin Priority Guide</h2>
+        <div class="section-divider"></div>
+        <p>Not sure where to spend your Original Resin? Follow this priority order for efficient progression.</p>
+      </div>
+      <div class="resin-priority-list">
+        <div class="resin-priority-item">
+          <div class="resin-priority-rank">1</div>
+          <div class="rp-content">
+            <h4>Weekly Bosses <span class="rp-badge rp-badge-important">Top Priority</span></h4>
+            <p>Defeat 3 weekly bosses at 30 Resin each. They drop unique talent materials, billets, and Dream Solvent. The first 3 cost only 30 Resin instead of 60 — do these <strong>every week</strong>.</p>
+          </div>
+        </div>
+        <div class="resin-priority-item">
+          <div class="resin-priority-rank">2</div>
+          <div class="rp-content">
+            <h4>World Bosses (Ascension Materials) <span class="rp-badge rp-badge-important">As Needed</span></h4>
+            <p>Required to ascend characters past level 40. Farm these <strong>only when you need them</strong> for a character you are actively leveling. Each boss costs 40 Resin and drops 2-3 elemental ascension gems and the unique boss material.</p>
+          </div>
+        </div>
+        <div class="resin-priority-item">
+          <div class="resin-priority-rank">3</div>
+          <div class="rp-content">
+            <h4>Talent Book Domains <span class="rp-badge rp-badge-daily">Daily Rotation</span></h4>
+            <p>Talents are guaranteed damage increases. Level key talents to at least 6 (requires books only), then 8 (requires boss material), and consider crowning (10) your main DPS. <strong>Farm on the correct day</strong> using the schedule above.</p>
+          </div>
+        </div>
+        <div class="resin-priority-item">
+          <div class="resin-priority-rank">4</div>
+          <div class="rp-content">
+            <h4>Weapon Material Domains <span class="rp-badge rp-badge-daily">Daily Rotation</span></h4>
+            <p>Weapon ascension materials provide a straightforward ATK and substat increase. A max-level weapon is often more resin-efficient than chasing minor artifact upgrades. Farm when you need to ascend a key weapon.</p>
+          </div>
+        </div>
+        <div class="resin-priority-item">
+          <div class="resin-priority-rank">5</div>
+          <div class="rp-content">
+            <h4>Artifact Domains <span class="rp-badge rp-badge-luxury">Endgame Grind</span></h4>
+            <p>Artifact farming is the <strong>endless endgame</strong>. Prioritize efficient domains like Spire of Solitary Enlightenment (Deepwood/Gilded), Momiji-Dyed Court (Emblem/Shimenawa), and Denouement of Sin (Golden Troupe/Marechaussee) where both sets are usable. Use the <strong>Artifact Strongbox</strong> for inefficient domains like Valley of Remembrance (VV) and Clear Pool (Noblesse).</p>
+          </div>
+        </div>
+        <div class="resin-priority-item">
+          <div class="resin-priority-rank">6</div>
+          <div class="rp-content">
+            <h4>Ley Lines <span class="rp-badge rp-badge-luxury">When Needed</span></h4>
+            <p>Blossom of Revelation (EXP books) and Blossom of Wealth (Mora) cost 20 Resin each. Farm these <strong>only when you run out</strong> — you get plenty of both from events, Battle Pass, and exploration.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Footer ═══ -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="domains.html">Domains</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="teams.html">Teams</a>
+      <a href="events.html">Events</a>
+    </nav>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+    </p>
+  </footer>
+
+  <!-- ═══ Scripts ═══ -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+
+  <script>
+    /* ============================================================
+       Starfield Background
+       ============================================================ */
+    (function() {
+      var canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var stars = [];
+      var animId;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      function initStars() {
+        var count = Math.floor((canvas.width * canvas.height) / 3200);
+        stars = [];
+        for (var i = 0; i < count; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.3,
+            a: Math.random(),
+            da: (Math.random() - 0.5) * 0.012,
+            maxA: Math.random() * 0.5 + 0.4
+          });
+        }
+      }
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < stars.length; i++) {
+          var s = stars[i];
+          s.a += s.da;
+          if (s.a > s.maxA || s.a < 0.1) s.da *= -1;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(200,200,220,' + s.a.toFixed(2) + ')';
+          ctx.fill();
+        }
+        animId = requestAnimationFrame(draw);
+      }
+      resize();
+      initStars();
+      draw();
+      window.addEventListener('resize', function() { resize(); initStars(); });
+    })();
+
+    /* ============================================================
+       Navigation: scroll effect + hamburger
+       ============================================================ */
+    (function() {
+      var nav = document.getElementById('navbar');
+      var hamburger = document.getElementById('navToggle');
+      var navLinks = document.getElementById('navLinks');
+
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 20) {
+          nav.classList.add('scrolled');
+        } else {
+          nav.classList.remove('scrolled');
+        }
+      });
+
+      if (hamburger && navLinks) {
+        hamburger.addEventListener('click', function() {
+          var expanded = navLinks.classList.toggle('open');
+          hamburger.setAttribute('aria-expanded', expanded);
+          var icon = hamburger.querySelector('i');
+          if (icon) {
+            icon.className = expanded ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+          }
+        });
+        document.addEventListener('click', function(e) {
+          if (!nav.contains(e.target)) {
+            navLinks.classList.remove('open');
+            hamburger.setAttribute('aria-expanded', 'false');
+            var icon = hamburger.querySelector('i');
+            if (icon) icon.className = 'fa-solid fa-bars';
+          }
+        });
+      }
+    })();
+  </script>
+
+  <script>
+    /* ============================================================
+       ELEMENT HELPERS
+       ============================================================ */
+    var ELEMENT_ICONS = {
+      pyro: 'fa-solid fa-fire',
+      hydro: 'fa-solid fa-droplet',
+      anemo: 'fa-solid fa-wind',
+      electro: 'fa-solid fa-bolt',
+      dendro: 'fa-solid fa-leaf',
+      cryo: 'fa-solid fa-snowflake',
+      geo: 'fa-solid fa-mountain'
+    };
+
+    function elementDot(elem) {
+      var el = (elem || '').toLowerCase();
+      var cls = 'domain-elem-dot edot-' + el;
+      var icon = ELEMENT_ICONS[el] || 'fa-solid fa-circle';
+      return '<span class="' + cls + '" title="' + elem + '"><i class="' + icon + '"></i></span>';
+    }
+
+    /* ============================================================
+       RENDER DAILY FARMING SCHEDULE (from FARMING_SCHEDULE in data.js)
+       ============================================================ */
+    (function() {
+      var scheduleKeys = [
+        { key: 'Monday/Thursday',    label: 'Monday / Thursday' },
+        { key: 'Tuesday/Friday',     label: 'Tuesday / Friday' },
+        { key: 'Wednesday/Saturday', label: 'Wednesday / Saturday' },
+        { key: 'Sunday',             label: 'Sunday' }
+      ];
+
+      // Determine today's row
+      var todayIndex = new Date().getDay(); // 0=Sun, 1=Mon, ... 6=Sat
+      var todayKeyMap = {
+        0: 'Sunday', 1: 'Monday/Thursday', 2: 'Tuesday/Friday',
+        3: 'Wednesday/Saturday', 4: 'Monday/Thursday',
+        5: 'Tuesday/Friday', 6: 'Wednesday/Saturday'
+      };
+      var todayKey = todayKeyMap[todayIndex];
+
+      var tbody = document.getElementById('scheduleBody');
+      var html = '';
+
+      for (var i = 0; i < scheduleKeys.length; i++) {
+        var sk = scheduleKeys[i];
+        var data = FARMING_SCHEDULE[sk.key];
+        if (!data) continue;
+
+        var isToday = (sk.key === todayKey);
+        var rowClass = isToday ? 'today-row' : '';
+
+        // Talent: handle both array and string values
+        var talentChips = '';
+        var talentItems = Array.isArray(data.talent) ? data.talent : [data.talent];
+        for (var t = 0; t < talentItems.length; t++) {
+          talentChips += '<span class="schedule-chip">' + talentItems[t] + '</span>';
+        }
+
+        // Weapon: handle both array and string values
+        var weaponChips = '';
+        var weaponItems = Array.isArray(data.weapon) ? data.weapon : [data.weapon];
+        for (var w = 0; w < weaponItems.length; w++) {
+          weaponChips += '<span class="schedule-chip">' + weaponItems[w] + '</span>';
+        }
+
+        html += '<tr class="' + rowClass + '">';
+        html += '<td class="day-col">' + sk.label + (isToday ? ' <span class="today-badge">Today</span>' : '') + '</td>';
+        html += '<td><div class="material-list">' + talentChips + '</div></td>';
+        html += '<td><div class="material-list">' + weaponChips + '</div></td>';
+        html += '</tr>';
+      }
+
+      tbody.innerHTML = html;
+    })();
+
+    /* ============================================================
+       RENDER ARTIFACT DOMAIN CARDS (from DOMAINS in data.js)
+       ============================================================ */
+    (function() {
+      var artifactDomains = DOMAINS.filter(function(d) { return d.type === 'Artifact'; });
+
+      var grid = document.getElementById('artifactDomainGrid');
+      var html = '';
+
+      for (var i = 0; i < artifactDomains.length; i++) {
+        var d = artifactDomains[i];
+
+        // Artifact set tags
+        var setNames = d.drops.split(', ');
+        var setTags = '';
+        for (var s = 0; s < setNames.length; s++) {
+          setTags += '<span class="domain-set-tag">' + setNames[s] + '</span>';
+        }
+
+        // Element dots
+        var elemDots = '';
+        for (var e = 0; e < d.rec.length; e++) {
+          elemDots += elementDot(d.rec[e]);
+        }
+        if (d.rec.length === 1 && d.rec[0] === 'Any') {
+          elemDots = '<span style="font-size:0.72rem;color:var(--text-muted);">Any element works</span>';
+        }
+
+        html += '<div class="card domain-card">';
+        html += '<div class="domain-card-header">';
+        html += '<span class="domain-card-name">' + d.name + '</span>';
+        html += '</div>';
+        html += '<div class="domain-card-region"><i class="fa-solid fa-map-pin"></i> ' + d.reg + '</div>';
+        html += '<div class="domain-sets">' + setTags + '</div>';
+        html += '<div class="domain-elements">';
+        html += '<span class="domain-elements-label">Recommended:</span>';
+        html += elemDots;
+        html += '</div>';
+        html += '<div class="domain-desc">' + d.desc + '</div>';
+        html += '</div>';
+      }
+
+      grid.innerHTML = html;
+    })();
+
+    /* ============================================================
+       RENDER TALENT BOOK DOMAIN TABLE (from DOMAINS in data.js)
+       ============================================================ */
+    (function() {
+      var talentDomains = DOMAINS.filter(function(d) { return d.type === 'Talent'; });
+
+      var tbody = document.getElementById('talentDomainBody');
+      var html = '';
+
+      for (var i = 0; i < talentDomains.length; i++) {
+        var d = talentDomains[i];
+
+        // Parse the three book names from drops
+        var books = d.drops.split(', ');
+
+        // Element dots
+        var elemDots = '';
+        for (var e = 0; e < d.rec.length; e++) {
+          elemDots += elementDot(d.rec[e]);
+        }
+
+        // Day-specific book chips
+        var monThuChip = '<span class="schedule-chip">' + books[0] + '</span>';
+        var tueFriChip = '<span class="schedule-chip">' + books[1] + '</span>';
+        var wedSatChip = '<span class="schedule-chip">' + books[2] + '</span>';
+
+        html += '<tr>';
+        html += '<td><span class="d-name">' + d.name + '</span><br><span class="d-region"><i class="fa-solid fa-map-pin"></i> ' + d.reg + '</span></td>';
+        html += '<td>' + d.reg + '</td>';
+        html += '<td><div class="books-list">' + monThuChip + '</div></td>';
+        html += '<td><div class="books-list">' + tueFriChip + '</div></td>';
+        html += '<td><div class="books-list">' + wedSatChip + '</div></td>';
+        html += '<td><div class="domain-elements">' + elemDots + '</div></td>';
+        html += '</tr>';
+      }
+
+      tbody.innerHTML = html;
+    })();
+
+    /* ============================================================
+       RENDER WEAPON MATERIAL DOMAIN TABLE (from DOMAINS in data.js)
+       ============================================================ */
+    (function() {
+      var weaponDomains = DOMAINS.filter(function(d) { return d.type === 'Weapon'; });
+
+      var tbody = document.getElementById('weaponDomainBody');
+      var html = '';
+
+      for (var i = 0; i < weaponDomains.length; i++) {
+        var d = weaponDomains[i];
+
+        // Parse material names: "Decarabian (Mon/Thu), Boreal Wolf (Tue/Fri), Dandelion Gladiator (Wed/Sat)"
+        var rawMats = d.drops.split(', ');
+        var matMonThu = rawMats[0] ? rawMats[0].replace(/\s*\(.*?\)/, '') : '';
+        var matTueFri = rawMats[1] ? rawMats[1].replace(/\s*\(.*?\)/, '') : '';
+        var matWedSat = rawMats[2] ? rawMats[2].replace(/\s*\(.*?\)/, '') : '';
+
+        var elemDots = '';
+        for (var e = 0; e < d.rec.length; e++) {
+          elemDots += elementDot(d.rec[e]);
+        }
+
+        html += '<tr>';
+        html += '<td><span class="d-name">' + d.name + '</span><br><span class="d-region"><i class="fa-solid fa-map-pin"></i> ' + d.reg + '</span></td>';
+        html += '<td>' + d.reg + '</td>';
+        html += '<td><div class="mats-list"><span class="schedule-chip">' + matMonThu + '</span></div></td>';
+        html += '<td><div class="mats-list"><span class="schedule-chip">' + matTueFri + '</span></div></td>';
+        html += '<td><div class="mats-list"><span class="schedule-chip">' + matWedSat + '</span></div></td>';
+        html += '<td><div class="domain-elements">' + elemDots + '</div></td>';
+        html += '</tr>';
+      }
+
+      tbody.innerHTML = html;
+    })();
+
+    /* ============================================================
+       SCROLL REVEAL ANIMATIONS
+       ============================================================ */
+    (function() {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      // Animate artifact cards
+      var cards = document.querySelectorAll('#artifactDomainGrid .card');
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].style.opacity = '0';
+        cards[i].style.transform = 'translateY(30px)';
+        cards[i].style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+        cards[i].style.transitionDelay = (i * 0.06) + 's';
+        observer.observe(cards[i]);
+      }
+
+      // Animate resin priority items
+      var rpItems = document.querySelectorAll('.resin-priority-item');
+      for (var j = 0; j < rpItems.length; j++) {
+        rpItems[j].style.opacity = '0';
+        rpItems[j].style.transform = 'translateX(-20px)';
+        rpItems[j].style.transition = 'all 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+        rpItems[j].style.transitionDelay = (j * 0.08) + 's';
+        observer.observe(rpItems[j]);
+      }
+    })();
+  </script>
+
+</body>
+</html>

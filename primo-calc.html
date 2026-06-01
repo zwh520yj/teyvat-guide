@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Primogem Calculator — Teyvat Guide</title>
+  <meta name="description" content="Plan your Genshin Impact pulls. Calculate how many Primogems you need, estimate saving time, track income, and visualize pull probability with an interactive pity chart.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Calc Layout ── */
+    .calc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    .calc-full { grid-column: 1 / -1; }
+
+    /* ── Cards ── */
+    .calc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: border-color 0.3s;
+    }
+    .calc-card:hover { border-color: var(--border-active); }
+    .calc-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .calc-card h3 i { color: var(--gold); font-size: 1rem; }
+
+    /* ── Form Elements ── */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+    .form-row { display: flex; gap: 1rem; }
+    .form-row .form-group { flex: 1; }
+    .input-wrapper { position: relative; }
+    .input-wrapper input {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-wrapper input:focus { border-color: var(--gold); }
+    .input-wrapper .input-suffix {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      pointer-events: none;
+      font-weight: 500;
+    }
+    .input-wrapper input { padding-right: 72px; }
+
+    /* ── Goal Selector Chips ── */
+    .goal-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    .goal-chip {
+      padding: 14px 8px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      font-weight: 600;
+      font-size: 0.85rem;
+      font-family: 'Cinzel', serif;
+    }
+    .goal-chip:hover { border-color: var(--gold-dim); color: var(--text-primary); }
+    .goal-chip.active {
+      border-color: var(--gold);
+      color: var(--gold-light);
+      background: rgba(201,169,110,0.1);
+      box-shadow: 0 0 18px rgba(201,169,110,0.12);
+    }
+    .goal-chip .goal-sub {
+      display: block;
+      font-size: 0.67rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-top: 3px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .goal-chip.active .goal-sub { color: var(--gold-dim); }
+
+    /* ── Custom Goal Input ── */
+    .custom-goal-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .custom-goal-row input {
+      width: 110px;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s;
+      text-align: center;
+    }
+    .custom-goal-row input:focus { border-color: var(--gold); }
+    .custom-goal-row span {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ── Income Checklist ── */
+    .income-list { display: flex; flex-direction: column; gap: 0; }
+    .income-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      transition: background 0.2s;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    .income-item:hover { background: rgba(255,255,255,0.02); }
+    .income-checkbox {
+      width: 22px; height: 22px;
+      border-radius: 5px;
+      border: 2px solid var(--border-subtle);
+      background: var(--bg-input);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      color: transparent;
+      font-size: 0.65rem;
+    }
+    .income-item.checked .income-checkbox {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--bg-deep);
+    }
+    .income-info { flex: 1; min-width: 0; }
+    .income-name {
+      font-size: 0.85rem; font-weight: 600;
+      color: var(--text-primary);
+    }
+    .income-detail {
+      font-size: 0.72rem; color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .income-value {
+      font-size: 0.88rem; font-weight: 700;
+      color: var(--gold-light); white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Income Summary ── */
+    .income-summary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .income-tiers {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1rem;
+    }
+    .income-tier {
+      text-align: center;
+      padding: 14px 8px;
+      border-radius: var(--radius);
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+    }
+    .income-tier-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .income-tier-primos {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+    }
+    .income-tier-wishes {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .income-tier.active-tier {
+      border-color: var(--gold);
+      background: rgba(201,169,110,0.08);
+    }
+    .income-tier.active-tier .income-tier-label { color: var(--gold); }
+
+    /* ── Summary Stat Rows ── */
+    .summary-stats { margin-top: 0.75rem; }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-label {
+      font-size: 0.8rem; color: var(--text-secondary);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .summary-label i { color: var(--gold-dim); width: 16px; text-align: center; }
+    .summary-value {
+      font-size: 0.9rem; font-weight: 700; color: var(--text-primary);
+      text-align: right;
+    }
+
+    /* ── Results Panel ── */
+    .results-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .results-panel::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .result-row:last-of-type { border-bottom: none; }
+    .result-label {
+      font-size: 0.88rem; color: var(--text-secondary);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .result-label i { color: var(--gold-dim); width: 18px; text-align: center; }
+    .result-value {
+      font-size: 1.05rem; font-weight: 700;
+      color: var(--text-primary); text-align: right;
+    }
+    .result-value.highlight {
+      font-size: 1.4rem; color: var(--gold-light);
+      font-family: 'Cinzel', serif;
+    }
+
+    /* ── Progress Bar ── */
+    .goal-progress { margin-top: 1rem; }
+    .goal-progress-header {
+      display: flex; justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.8rem; color: var(--text-muted); font-weight: 500;
+    }
+    .goal-progress-header span:last-child { color: var(--text-secondary); }
+    .progress-bar-custom {
+      height: 14px; background: var(--border-subtle);
+      border-radius: 7px; overflow: hidden; position: relative;
+    }
+    .progress-fill-custom {
+      height: 100%; border-radius: 7px;
+      background: linear-gradient(90deg, #8a7040, var(--gold), var(--gold-light));
+      transition: width 0.6s var(--ease-out);
+    }
+    .progress-fill-custom.complete {
+      background: linear-gradient(90deg, var(--success), #66bb6a);
+    }
+    .progress-milestones {
+      display: flex; justify-content: space-between;
+      margin-top: 6px; font-size: 0.68rem; color: var(--text-muted);
+    }
+
+    /* ── Time Cards ── */
+    .time-estimates {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .time-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.2rem 0.8rem;
+      text-align: center;
+      transition: border-color 0.3s;
+    }
+    .time-card.featured { border-color: var(--border-gold); background: rgba(201,169,110,0.04); }
+    .time-card-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .time-card-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'Cinzel', serif;
+    }
+    .time-card-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Quick Stats ── */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .quick-stat {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .quick-stat-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .quick-stat-value {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* ── Pity Chart Section ── */
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+    .chart-wrapper canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .chart-legend {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .chart-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .chart-legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .chart-prob-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.25rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .chart-prob-input {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .chart-prob-input input {
+      width: 70px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .chart-prob-input input:focus { border-color: var(--gold); }
+    .chart-prob-result {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      padding: 8px 16px;
+      background: rgba(201,169,110,0.08);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-gold);
+    }
+
+    /* ── Disclaimer ── */
+    .calc-disclaimer {
+      margin-top: 1.5rem;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      background: rgba(255,152,0,0.06);
+      border: 1px solid rgba(255,152,0,0.2);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .calc-disclaimer i { color: var(--warning); margin-right: 6px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1080px) {
+      .calc-grid { grid-template-columns: 1fr; }
+      .time-estimates { grid-template-columns: repeat(3, 1fr); }
+      .income-tiers { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      .goal-selector { grid-template-columns: repeat(3, 1fr); }
+      .time-estimates { grid-template-columns: 1fr; }
+      .income-tiers { grid-template-columns: 1fr; }
+      .quick-stats { grid-template-columns: 1fr 1fr; }
+      .chart-prob-row { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html" class="active"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <section class="hero" style="min-height:34vh;padding-top:5rem;">
+    <div class="hero-content">
+      <span class="hero-badge"><i class="fa-solid fa-coins" style="margin-right:6px;"></i> Resource Planning</span>
+      <h1>Primogem Calculator</h1>
+      <p>Project your Primogem income, set wish goals, and visualize pull probability with the pity chart. Every primo counts on the path to your next 5-star.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CALCULATOR
+       ============================================================ -->
+  <section class="section reveal">
+    <div class="section-inner">
+      <div class="calc-grid">
+
+        <!-- ============ LEFT: Current Holdings + Goal ============ -->
+        <div class="calc-card reveal">
+          <h3><i class="fa-solid fa-wallet"></i> Your Primogems &amp; Goal</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Current Primogems</label>
+              <div class="input-wrapper">
+                <input type="number" id="currentPrimos" value="0" min="0" step="1" placeholder="0">
+                <span class="input-suffix">Primos</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Intertwined Fates</label>
+              <div class="input-wrapper">
+                <input type="number" id="currentFates" value="0" min="0" step="1" placeholder="0">
+                <span class="input-suffix">Fates</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:0.5rem;">
+            <label>Wish Goal</label>
+            <div class="goal-selector" id="goalSelector">
+              <button class="goal-chip active" data-wishes="90" data-label="C0 Character">
+                C0
+                <span class="goal-sub">~90 wishes</span>
+              </button>
+              <button class="goal-chip" data-wishes="180" data-label="C1 Character">
+                C1
+                <span class="goal-sub">~180 wishes</span>
+              </button>
+              <button class="goal-chip" data-wishes="270" data-label="C2 Character">
+                C2
+                <span class="goal-sub">~270 wishes</span>
+              </button>
+              <button class="goal-chip" data-wishes="630" data-label="C6 Character">
+                C6
+                <span class="goal-sub">~630 wishes</span>
+              </button>
+              <button class="goal-chip" data-wishes="210" data-label="R1 Weapon">
+                R1
+                <span class="goal-sub">~210 wishes</span>
+              </button>
+              <button class="goal-chip" data-wishes="0" data-label="Custom" id="goalCustomChip">
+                Custom
+                <span class="goal-sub">Set your own</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="custom-goal-row" id="customGoalRow" style="display:none;">
+            <input type="number" id="customGoalWishes" value="180" min="1" max="99999" step="1" placeholder="Wishes">
+            <span>wishes</span>
+            <button class="btn btn-outline btn-sm" id="applyCustomGoal">Apply</button>
+          </div>
+
+          <p style="font-size:0.78rem;color:var(--text-muted);margin-top:1rem;">
+            <i class="fa-solid fa-circle-info" style="color:var(--gold-dim);margin-right:4px;"></i>
+            Wish estimates use average consolidated probability (~1.6% for characters, ~1.85% for weapons). Your actual luck will vary.
+          </p>
+        </div>
+
+        <!-- ============ RIGHT: Results ============ -->
+        <div>
+          <div class="results-panel reveal" id="resultsPanel">
+            <h3 style="font-family:'Cinzel',serif;font-size:1.15rem;font-weight:700;margin-bottom:1rem;position:relative;z-index:1;">
+              <i class="fa-solid fa-chart-pie" style="color:var(--gold);"></i> Your Projection
+            </h3>
+
+            <div class="result-row" style="position:relative;z-index:1;">
+              <span class="result-label"><i class="fa-solid fa-gem"></i> Current Total Wishes</span>
+              <span class="result-value" id="resTotalWishes">0</span>
+            </div>
+            <div class="result-row" style="position:relative;z-index:1;">
+              <span class="result-label"><i class="fa-solid fa-bullseye"></i> Goal Wishes</span>
+              <span class="result-value" id="resGoalWishes">0</span>
+            </div>
+            <div class="result-row" style="position:relative;z-index:1;">
+              <span class="result-label"><i class="fa-solid fa-circle-minus"></i> Wishes Still Needed</span>
+              <span class="result-value" id="resWishesNeeded">0</span>
+            </div>
+            <div class="result-row" style="border-bottom:2px solid var(--border-gold);position:relative;z-index:1;">
+              <span class="result-label"><i class="fa-solid fa-coins"></i> Primos Still Needed</span>
+              <span class="result-value highlight" id="resPrimosNeeded">0</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="goal-progress" style="position:relative;z-index:1;">
+              <div class="goal-progress-header">
+                <span>Progress to Goal</span>
+                <span id="progressPercent">0%</span>
+              </div>
+              <div class="progress-bar-custom">
+                <div class="progress-fill-custom" id="progressFill" style="width:0%;"></div>
+              </div>
+              <div class="progress-milestones">
+                <span>0 wishes</span>
+                <span id="progressMilestone">Goal: 0 wishes</span>
+              </div>
+            </div>
+
+            <!-- Time Estimates -->
+            <div class="time-estimates" style="position:relative;z-index:1;">
+              <div class="time-card" id="timeCardF2P">
+                <div class="time-card-label">Free to Play</div>
+                <div class="time-card-value" id="timeF2P">--</div>
+                <div class="time-card-sub">~8,000 primos/mo</div>
+              </div>
+              <div class="time-card featured" id="timeCardWelkin">
+                <div class="time-card-label">Welkin Moon</div>
+                <div class="time-card-value" id="timeWelkin">--</div>
+                <div class="time-card-sub">~11,000 primos/mo</div>
+              </div>
+              <div class="time-card" id="timeCardBP">
+                <div class="time-card-label">Welkin + BP</div>
+                <div class="time-card-value" id="timeBP">--</div>
+                <div class="time-card-sub">~12,500 primos/mo</div>
+              </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="quick-stats" style="position:relative;z-index:1;">
+              <div class="quick-stat">
+                <div class="quick-stat-label">10-Pulls</div>
+                <div class="quick-stat-value" id="statTenPulls">0</div>
+              </div>
+              <div class="quick-stat">
+                <div class="quick-stat-label">Est. Cost (USD)</div>
+                <div class="quick-stat-value" id="statCost">$0</div>
+              </div>
+              <div class="quick-stat">
+                <div class="quick-stat-label">Patches Needed</div>
+                <div class="quick-stat-value" id="statPatches">0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ FULL WIDTH: Income Estimator ============ -->
+        <div class="calc-full">
+          <div class="calc-card reveal">
+            <h3><i class="fa-solid fa-calendar-check"></i> Monthly Income Estimator</h3>
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">
+              Check the sources that apply to you. Totals reflect realistic monthly averages based on Genshin Impact 5.x data.
+            </p>
+
+            <div class="calc-grid" style="margin-top:0;">
+              <!-- Income Checklist -->
+              <div>
+                <div class="income-list" id="incomeList">
+                  <!-- Rendered by JS -->
+                </div>
+              </div>
+
+              <!-- Summary Column -->
+              <div>
+                <div class="income-tiers" id="incomeTiers">
+                  <div class="income-tier" id="tierF2P">
+                    <div class="income-tier-label">Free to Play</div>
+                    <div class="income-tier-primos">~8,000</div>
+                    <div class="income-tier-wishes">~50 wishes/mo</div>
+                  </div>
+                  <div class="income-tier" id="tierWelkin">
+                    <div class="income-tier-label">Welkin</div>
+                    <div class="income-tier-primos">~11,000</div>
+                    <div class="income-tier-wishes">~69 wishes/mo</div>
+                  </div>
+                  <div class="income-tier" id="tierBP">
+                    <div class="income-tier-label">Welkin + BP</div>
+                    <div class="income-tier-primos">~12,500</div>
+                    <div class="income-tier-wishes">~78 wishes/mo</div>
+                  </div>
+                </div>
+
+                <div class="income-summary">
+                  <div class="summary-stats">
+                    <div class="summary-row">
+                      <span class="summary-label"><i class="fa-solid fa-calculator"></i> Your Monthly Total</span>
+                      <span class="summary-value" id="incomeTotalPrimos" style="color:var(--gold-light);font-size:1.05rem;">0 primos</span>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-label"><i class="fa-solid fa-ticket"></i> Monthly Wishes</span>
+                      <span class="summary-value" id="incomeMonthlyWishes">0 wishes</span>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-label"><i class="fa-solid fa-layer-group"></i> Per Patch (6 weeks)</span>
+                      <span class="summary-value" id="incomePerPatch">0 primos</span>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-label"><i class="fa-solid fa-calendar"></i> Per Year</span>
+                      <span class="summary-value" id="incomePerYear">0 primos</span>
+                    </div>
+                    <div class="summary-row">
+                      <span class="summary-label"><i class="fa-solid fa-clock"></i> Time to Guarantee 5&#9733;</span>
+                      <span class="summary-value" id="incomeGuaranteeTime">--</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="calc-disclaimer" style="margin-top:1.25rem;">
+                  <i class="fa-solid fa-circle-info"></i>
+                  <strong>Assumptions:</strong> 36&#9733; Abyss clears. Event primos vary per patch (1,000-2,500). New-region patches grant significantly more exploration primos. Welkin + BP totals include 5 Intertwined Fates + 680 primos from the paid Gnostic Hymn track. Figures based on community tracking across Genshin Impact 5.x.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ FULL WIDTH: Pity Probability Chart ============ -->
+        <div class="calc-full">
+          <div class="calc-card reveal">
+            <h3><i class="fa-solid fa-chart-line"></i> Pull Planner — Pity Probability Chart</h3>
+            <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem;">
+              Cumulative probability of pulling at least one 5&#9733; by pull number. Uses the standard soft-pity model: 0.6% base rate for characters, steep ramp starting at pull 74. Weapon banner shown for comparison.
+            </p>
+
+            <div class="chart-wrapper">
+              <canvas id="pityChart" width="900" height="420"></canvas>
+            </div>
+
+            <div class="chart-legend">
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:var(--gold-light);"></div>
+                Character Banner (0.6% base)
+              </div>
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:var(--electro);"></div>
+                Weapon Banner (0.7% base)
+              </div>
+              <div class="chart-legend-item">
+                <div class="chart-legend-dot" style="background:rgba(255,255,255,0.25);"></div>
+                Soft Pity Threshold
+              </div>
+            </div>
+
+            <div class="chart-prob-row">
+              <div class="chart-prob-input">
+                <label for="chartPullCount">Check probability at pull #</label>
+                <input type="number" id="chartPullCount" value="75" min="1" max="90" step="1">
+                <span style="color:var(--text-muted);">(1-90)</span>
+              </div>
+              <div class="chart-prob-result" id="chartProbResult">
+                Pull 75: ~33.4% cumulative
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
+  <script>
+  /* =================================================================
+     STARFIELD CANVAS ANIMATION
+     ================================================================= */
+  (function() {
+    const canvas = document.getElementById('starfield');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    const STAR_COUNT = 200;
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = document.documentElement.scrollHeight;
+    }
+
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.6 + 0.3,
+          baseAlpha: Math.random() * 0.6 + 0.2,
+          alpha: 0,
+          twinkleSpeed: Math.random() * 0.02 + 0.004,
+          twinkleOffset: Math.random() * Math.PI * 2,
+          hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+        });
+      }
+    }
+
+    function draw(timestamp) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const s of stars) {
+        s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+        s.alpha = Math.max(0.04, Math.min(1, s.alpha));
+        const fill = s.hue > 0
+          ? 'hsla(' + s.hue + ', 60%, 70%, ' + s.alpha + ')'
+          : 'rgba(200,200,220,' + s.alpha + ')';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', function() { resize(); initStars(); });
+    resize();
+    initStars();
+    requestAnimationFrame(draw);
+  })();
+
+  /* =================================================================
+     SCROLL REVEAL
+     ================================================================= */
+  (function() {
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+  })();
+
+  /* =================================================================
+     NAVIGATION SCROLL EFFECT
+     ================================================================= */
+  (function() {
+    const nav = document.getElementById('navbar');
+    if (!nav) return;
+    window.addEventListener('scroll', function() {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    });
+  })();
+
+  /* =================================================================
+     MOBILE NAV TOGGLE
+     ================================================================= */
+  (function() {
+    const toggle = document.getElementById('navToggle');
+    const links = document.getElementById('navLinks');
+    if (!toggle || !links) return;
+    toggle.addEventListener('click', function() {
+      links.classList.toggle('open');
+      const icon = toggle.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-xmark');
+      }
+    });
+  })();
+
+  /* =================================================================
+     PRIMOGEM CALCULATOR ENGINE
+     ================================================================= */
+
+  // --- Constants ---
+  var PRIMOS_PER_FATE = 160;
+
+  // --- Income Sources ---
+  var incomeSources = [
+    { id: 'commissions',  name: 'Daily Commissions',        detail: '60 primos/day',                                    value: 1800, defaultChecked: true,  icon: 'fa-list-check' },
+    { id: 'abyss',        name: 'Spiral Abyss 36★',         detail: '600 primos per reset, 2 resets/month',             value: 1200, defaultChecked: true,  icon: 'fa-layer-group' },
+    { id: 'bargains',     name: "Paimon's Bargains",        detail: '5 Intertwined Fates/month = 800 primos equivalent', value: 800,  defaultChecked: true,  icon: 'fa-shop' },
+    { id: 'bpPaid',       name: 'Battle Pass (Paid)',       detail: 'Gnostic Hymn: 5 Intertwined Fates + 680 primos',   value: 1480, defaultChecked: false, icon: 'fa-scroll' },
+    { id: 'welkin',       name: 'Blessing of the Welkin Moon', detail: '90 primos/day + 300 Genesis Crystals',            value: 3000, defaultChecked: false, icon: 'fa-moon' },
+    { id: 'events',       name: 'Limited Events (est.)',    detail: 'Flagship (~1,000) + minor events (~500)',         value: 1500, defaultChecked: true,  icon: 'fa-calendar-star' },
+    { id: 'livestream',   name: 'Livestream Codes',         detail: '300 primos per Special Program (per patch)',        value: 300,  defaultChecked: true,  icon: 'fa-tv' },
+    { id: 'maintenance',  name: 'Maintenance Compensation', detail: '300-600 primos per version update',                value: 500,  defaultChecked: true,  icon: 'fa-wrench' },
+    { id: 'exploration',  name: 'New Area Exploration',     detail: '~1,000-2,000 primos (averaged monthly across patches)', value: 1500, defaultChecked: true, icon: 'fa-compass' },
+    { id: 'achievements', name: 'Achievements & Quests',    detail: 'Incremental gains from achievements, teapot, quests', value: 500, defaultChecked: true, icon: 'fa-trophy' }
+  ];
+
+  // --- State ---
+  var state = {
+    currentPrimos: 0,
+    currentFates: 0,
+    goalWishes: 90,
+    goalLabel: 'C0 Character',
+    incomeSelections: {}
+  };
+
+  // Initialize income selections
+  incomeSources.forEach(function(src) {
+    state.incomeSelections[src.id] = src.defaultChecked;
+  });
+
+  // --- Formatting Helpers ---
+  function fmtNum(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return Math.floor(n).toLocaleString();
+  }
+
+  function formatTime(months) {
+    if (months === null || months === undefined) return '--';
+    if (!isFinite(months)) return '--';
+    if (months <= 0 || months < 0.001) return 'Ready now!';
+    if (months < 1) {
+      var days = Math.round(months * 30);
+      if (days <= 1) return '~1 day';
+      return '~' + days + ' days';
+    }
+    if (months < 12) {
+      var m = Math.floor(months);
+      var d = Math.round((months - m) * 30);
+      if (d === 0) return m === 1 ? '1 month' : m + ' months';
+      if (d === 30) return (m + 1) + ' months';
+      return (m === 1 ? '1 month, ' : m + ' months, ') + d + 'd';
+    }
+    var years = Math.floor(months / 12);
+    var rem = Math.round(months % 12);
+    if (rem === 0) return years === 1 ? '1 year' : years + ' years';
+    return (years === 1 ? '1 yr, ' : years + ' yrs, ') + rem + ' mo';
+  }
+
+  // --- Get total monthly income based on selections ---
+  function getMonthlyIncome() {
+    var total = 0;
+    incomeSources.forEach(function(src) {
+      if (state.incomeSelections[src.id]) total += src.value;
+    });
+    return total;
+  }
+
+  // --- Calculate ---
+  function calculate() {
+    var currentWishes = state.currentFates + Math.floor(state.currentPrimos / PRIMOS_PER_FATE);
+    var goalWishes = state.goalWishes;
+    var wishesNeeded = Math.max(0, goalWishes - currentWishes);
+    var primosNeeded = wishesNeeded * PRIMOS_PER_FATE;
+
+    var progressPercent = goalWishes > 0
+      ? Math.min(100, Math.round((currentWishes / goalWishes) * 100))
+      : 100;
+
+    var monthlyIncome = getMonthlyIncome();
+
+    // F2P monthly income (all default-checked items)
+    var f2pMonthly = 0;
+    incomeSources.forEach(function(src) {
+      if (src.id !== 'welkin' && src.id !== 'bpPaid') f2pMonthly += src.value;
+    });
+    // Actually let's compute it directly for accuracy
+    f2pMonthly = 1800 + 1200 + 800 + 1500 + 300 + 500 + 1500 + 500; // 8100, but we say ~8000
+
+    var welkinMonthly = f2pMonthly + 3000; // ~11100
+    var bpMonthly = welkinMonthly + 1480; // ~12580
+
+    var timeF2P = primosNeeded > 0 ? primosNeeded / f2pMonthly : null;
+    var timeWelkin = primosNeeded > 0 ? primosNeeded / welkinMonthly : null;
+    var timeBP = primosNeeded > 0 ? primosNeeded / bpMonthly : null;
+
+    // If user has Welkin checked, use that as featured
+    var hasWelkin = state.incomeSelections['welkin'];
+    var hasBP = state.incomeSelections['bpPaid'];
+    var userMonthly = monthlyIncome;
+    var timeUser = primosNeeded > 0 ? primosNeeded / userMonthly : null;
+
+    // If user has enough already
+    if (wishesNeeded <= 0) {
+      timeF2P = null;
+      timeWelkin = null;
+      timeBP = null;
+      timeUser = null;
+    }
+
+    var tenPulls = Math.ceil(goalWishes / 10);
+    var usdCost = Math.round(wishesNeeded * 2.0); // ~$2 per wish with first-time bonus average
+    var patchesNeeded = userMonthly > 0 ? Math.ceil(primosNeeded / (userMonthly * 1.5)) : '--';
+
+    return {
+      currentWishes: currentWishes,
+      goalWishes: goalWishes,
+      wishesNeeded: wishesNeeded,
+      primosNeeded: primosNeeded,
+      progressPercent: progressPercent,
+      monthlyIncome: monthlyIncome,
+      f2pMonthly: f2pMonthly,
+      welkinMonthly: welkinMonthly,
+      bpMonthly: bpMonthly,
+      userMonthly: userMonthly,
+      timeF2P: timeF2P,
+      timeWelkin: timeWelkin,
+      timeBP: timeBP,
+      timeUser: timeUser,
+      hasWelkin: hasWelkin,
+      hasBP: hasBP,
+      tenPulls: tenPulls,
+      usdCost: usdCost,
+      patchesNeeded: patchesNeeded
+    };
+  }
+
+  // --- Render ---
+  function render() {
+    var c = calculate();
+
+    // Results Panel
+    document.getElementById('resTotalWishes').textContent = c.currentWishes.toLocaleString() + ' wishes';
+    document.getElementById('resGoalWishes').textContent = c.goalWishes.toLocaleString() + ' wishes';
+    document.getElementById('resWishesNeeded').textContent = c.wishesNeeded.toLocaleString() + ' wishes';
+    document.getElementById('resPrimosNeeded').textContent = fmtNum(c.primosNeeded) + ' primos';
+
+    // Progress Bar
+    document.getElementById('progressPercent').textContent = c.progressPercent + '%';
+    var fill = document.getElementById('progressFill');
+    fill.style.width = Math.min(100, c.progressPercent) + '%';
+    if (c.progressPercent >= 100) {
+      fill.classList.add('complete');
+    } else {
+      fill.classList.remove('complete');
+    }
+    document.getElementById('progressMilestone').textContent = 'Goal: ' + c.goalWishes.toLocaleString() + ' wishes';
+
+    // Time Estimates
+    if (c.wishesNeeded <= 0) {
+      document.getElementById('timeF2P').textContent = 'Ready!';
+      document.getElementById('timeWelkin').textContent = 'Ready!';
+      document.getElementById('timeBP').textContent = 'Ready!';
+      document.getElementById('timeCardWelkin').classList.remove('featured');
+      if (c.hasBP) document.getElementById('timeCardBP').classList.add('featured');
+      if (c.hasWelkin && !c.hasBP) document.getElementById('timeCardWelkin').classList.add('featured');
+    } else {
+      document.getElementById('timeF2P').textContent = formatTime(c.timeF2P);
+      document.getElementById('timeWelkin').textContent = formatTime(c.timeWelkin);
+      document.getElementById('timeBP').textContent = formatTime(c.timeBP);
+
+      // Highlight active tier
+      document.getElementById('timeCardF2P').classList.remove('featured');
+      document.getElementById('timeCardWelkin').classList.remove('featured');
+      document.getElementById('timeCardBP').classList.remove('featured');
+      if (c.hasBP) {
+        document.getElementById('timeCardBP').classList.add('featured');
+      } else if (c.hasWelkin) {
+        document.getElementById('timeCardWelkin').classList.add('featured');
+      } else {
+        document.getElementById('timeCardF2P').classList.add('featured');
+      }
+    }
+
+    // Quick Stats
+    document.getElementById('statTenPulls').textContent = c.tenPulls.toLocaleString();
+    document.getElementById('statCost').textContent = '$' + c.usdCost.toLocaleString();
+    document.getElementById('statPatches').textContent = c.patchesNeeded;
+
+    // Income Summary
+    document.getElementById('incomeTotalPrimos').textContent = fmtNum(c.monthlyIncome) + ' primos';
+    document.getElementById('incomeMonthlyWishes').textContent = '~' + Math.floor(c.monthlyIncome / PRIMOS_PER_FATE) + ' wishes';
+    document.getElementById('incomePerPatch').textContent = fmtNum(Math.round(c.monthlyIncome * 1.5)) + ' primos';
+    document.getElementById('incomePerYear').textContent = fmtNum(c.monthlyIncome * 12) + ' primos';
+
+    // Time to guarantee a 5-star (90 pulls = 14400 primos)
+    if (c.monthlyIncome > 0) {
+      var monthsForGuarantee = (90 * PRIMOS_PER_FATE) / c.monthlyIncome;
+      if (monthsForGuarantee < 1) {
+        document.getElementById('incomeGuaranteeTime').textContent = '~' + Math.round(monthsForGuarantee * 30) + ' days';
+      } else {
+        document.getElementById('incomeGuaranteeTime').textContent = '~' + monthsForGuarantee.toFixed(1) + ' months';
+      }
+    } else {
+      document.getElementById('incomeGuaranteeTime').textContent = '--';
+    }
+
+    // Highlight Tier
+    document.getElementById('tierF2P').classList.remove('active-tier');
+    document.getElementById('tierWelkin').classList.remove('active-tier');
+    document.getElementById('tierBP').classList.remove('active-tier');
+    if (c.hasBP) {
+      document.getElementById('tierBP').classList.add('active-tier');
+    } else if (c.hasWelkin) {
+      document.getElementById('tierWelkin').classList.add('active-tier');
+    } else {
+      document.getElementById('tierF2P').classList.add('active-tier');
+    }
+  }
+
+  // --- Render Income Checklist ---
+  function renderIncomeList() {
+    var container = document.getElementById('incomeList');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    incomeSources.forEach(function(src) {
+      var item = document.createElement('div');
+      item.className = 'income-item' + (state.incomeSelections[src.id] ? ' checked' : '');
+      item.setAttribute('data-id', src.id);
+      item.innerHTML =
+        '<div class="income-checkbox"><i class="fa-solid fa-check"></i></div>' +
+        '<div class="income-info">' +
+          '<div class="income-name">' +
+            '<i class="fa-solid ' + src.icon + '" style="color:var(--gold-dim);margin-right:6px;font-size:0.7rem;"></i>' +
+            src.name +
+          '</div>' +
+          '<div class="income-detail">' + src.detail + '</div>' +
+        '</div>' +
+        '<div class="income-value">' + (src.value > 0 ? '+' + src.value.toLocaleString() : '+0') + '</div>';
+
+      item.addEventListener('click', function() {
+        state.incomeSelections[src.id] = !state.incomeSelections[src.id];
+        item.classList.toggle('checked', state.incomeSelections[src.id]);
+        render();
+        drawPityChart();
+      });
+
+      container.appendChild(item);
+    });
+  }
+
+  // =====================================================================
+  // PITY PROBABILITY CHART
+  // =====================================================================
+
+  /**
+   * Single-pull probability at pull number N for character banner.
+   * Standard model: 0.6% flat until pull 73, then linear ramp from ~6.6% at 74 to 100% at 90.
+   */
+  function charProbAtPull(n) {
+    if (n < 1 || n > 90) return 0;
+    if (n <= 73) return 0.006;
+    if (n >= 90) return 1.0;
+    // Linear ramp: at n=74 -> 0.066, at n=89 -> ~0.966
+    // slope = (1.0 - 0.006) / (90 - 73) = 0.994/17 ≈ 0.05847 per pull
+    // P(74) = 0.006 + 0.05847 = 0.06447, but community model uses steeper ramp
+    // More accurate: P(n) = 0.006 + (n - 73) * (1.0 - 0.006) / (90 - 73)
+    // = 0.006 + (n - 73) * 0.05847
+    return 0.006 + (n - 73) * (1.0 - 0.006) / (90 - 73);
+  }
+
+  /**
+   * Single-pull probability at pull number N for weapon banner.
+   * 0.7% base, soft pity at 63, hard pity at 80.
+   */
+  function weaponProbAtPull(n) {
+    if (n < 1 || n > 80) return 0;
+    if (n <= 62) return 0.007;
+    if (n >= 80) return 1.0;
+    // Linear ramp from 63 to 79
+    return 0.007 + (n - 62) * (1.0 - 0.007) / (80 - 62);
+  }
+
+  /**
+   * Cumulative probability of AT LEAST one 5-star by pull N.
+   * C(N) = 1 - product_{i=1}^{N} (1 - P(i))
+   */
+  function cumulativeProb(maxPull, probFn) {
+    var cum = 0;
+    var probNoFiveStar = 1.0;
+    var results = [];
+    for (var i = 1; i <= maxPull; i++) {
+      var p = probFn(i);
+      probNoFiveStar *= (1 - p);
+      cum = 1 - probNoFiveStar;
+      results.push(cum);
+    }
+    return results;
+  }
+
+  function drawPityChart() {
+    var canvas = document.getElementById('pityChart');
+    if (!canvas) return;
+
+    // High-DPI support
+    var dpr = window.devicePixelRatio || 1;
+    var rect = canvas.parentElement.getBoundingClientRect();
+    var displayWidth = Math.min(900, rect.width - 40);
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = (displayWidth * 0.467) + 'px';
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayWidth * 0.467 * dpr;
+
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    var W = displayWidth;
+    var H = displayWidth * 0.467;
+
+    // Padding
+    var padLeft = 56;
+    var padRight = 24;
+    var padTop = 28;
+    var padBottom = 40;
+    var chartW = W - padLeft - padRight;
+    var chartH = H - padTop - padBottom;
+
+    // Clear
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    ctx.fillStyle = '#0d0d20';
+    ctx.beginPath();
+    ctx.roundRect(0, 0, W, H, 8);
+    ctx.fill();
+
+    // ---- Grid lines ----
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 1;
+    // Horizontal grid (every 10%)
+    for (var pct = 0; pct <= 100; pct += 10) {
+      var gy = padTop + chartH - (pct / 100) * chartH;
+      ctx.beginPath();
+      ctx.moveTo(padLeft, gy);
+      ctx.lineTo(W - padRight, gy);
+      ctx.stroke();
+
+      // Y-axis label
+      ctx.fillStyle = '#6a6880';
+      ctx.font = '11px "DM Sans", sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(pct + '%', padLeft - 8, gy + 4);
+    }
+
+    // Vertical grid (every 10 pulls)
+    for (var pull = 0; pull <= 90; pull += 10) {
+      var gx = padLeft + (pull / 90) * chartW;
+      ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+      ctx.beginPath();
+      ctx.moveTo(gx, padTop);
+      ctx.lineTo(gx, padTop + chartH);
+      ctx.stroke();
+
+      ctx.fillStyle = '#6a6880';
+      ctx.textAlign = 'center';
+      ctx.fillText(pull, gx, padTop + chartH + 16);
+    }
+
+    // X-axis label
+    ctx.fillStyle = '#6a6880';
+    ctx.font = '12px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Pull Number', W / 2, H - 6);
+
+    // ---- Soft pity threshold line ----
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 4]);
+    var softX = padLeft + (74 / 90) * chartW;
+    ctx.beginPath();
+    ctx.moveTo(softX, padTop);
+    ctx.lineTo(softX, padTop + chartH);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Soft pity label
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '10px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Soft Pity (74)', softX, padTop - 6);
+
+    // ---- Data: Character Banner ----
+    var charCumulative = cumulativeProb(90, charProbAtPull);
+
+    // Draw character banner curve
+    ctx.strokeStyle = '#c9a96e';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    var firstDone = false;
+    for (var i = 1; i <= 90; i++) {
+      var cx = padLeft + (i / 90) * chartW;
+      var cy = padTop + chartH - (charCumulative[i - 1] * chartH);
+      if (!firstDone) { ctx.moveTo(cx, cy); firstDone = true; }
+      else { ctx.lineTo(cx, cy); }
+    }
+    ctx.stroke();
+
+    // Fill area under character curve
+    ctx.lineTo(padLeft + (90 / 90) * chartW, padTop + chartH);
+    ctx.lineTo(padLeft + (1 / 90) * chartW, padTop + chartH);
+    ctx.closePath();
+    var charGrad = ctx.createLinearGradient(0, padTop, 0, padTop + chartH);
+    charGrad.addColorStop(0, 'rgba(201,169,110,0.2)');
+    charGrad.addColorStop(1, 'rgba(201,169,110,0.02)');
+    ctx.fillStyle = charGrad;
+    ctx.fill();
+
+    // ---- Data: Weapon Banner ----
+    var weaponCumulative = cumulativeProb(80, weaponProbAtPull);
+
+    // Draw weapon banner curve
+    ctx.strokeStyle = '#af8fd1';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    firstDone = false;
+    for (var j = 1; j <= 80; j++) {
+      var wx = padLeft + (j / 90) * chartW;
+      var wy = padTop + chartH - (weaponCumulative[j - 1] * chartH);
+      if (!firstDone) { ctx.moveTo(wx, wy); firstDone = true; }
+      else { ctx.lineTo(wx, wy); }
+    }
+    ctx.stroke();
+
+    // Fill area under weapon curve
+    ctx.lineTo(padLeft + (80 / 90) * chartW, padTop + chartH);
+    ctx.lineTo(padLeft + (1 / 90) * chartW, padTop + chartH);
+    ctx.closePath();
+    var weapGrad = ctx.createLinearGradient(0, padTop, 0, padTop + chartH);
+    weapGrad.addColorStop(0, 'rgba(175,143,209,0.16)');
+    weapGrad.addColorStop(1, 'rgba(175,143,209,0.02)');
+    ctx.fillStyle = weapGrad;
+    ctx.fill();
+
+    // ---- Update Probability Lookup ----
+    updateProbLookup(charCumulative, weaponCumulative);
+  }
+
+  function updateProbLookup(charCumulative, weaponCumulative) {
+    var pullInput = document.getElementById('chartPullCount');
+    var pull = parseInt(pullInput.value) || 1;
+    pull = Math.max(1, Math.min(90, pull));
+
+    var charProb = pull <= 90 ? charCumulative[pull - 1] : 1;
+    var weaponPull = Math.min(pull, 80);
+    var weaponProb = weaponCumulative[weaponPull - 1];
+
+    document.getElementById('chartProbResult').innerHTML =
+      '<strong>Pull ' + pull + ':</strong> Character ~' + (charProb * 100).toFixed(1) +
+      '% cumulative | Weapon ~' + (weaponProb * 100).toFixed(1) + '% cumulative';
+  }
+
+  // =====================================================================
+  // EVENT BINDINGS
+  // =====================================================================
+
+  function bindEvents() {
+    // Primo & Fate inputs
+    document.getElementById('currentPrimos').addEventListener('input', function() {
+      state.currentPrimos = parseInt(this.value) || 0;
+      render();
+    });
+
+    document.getElementById('currentFates').addEventListener('input', function() {
+      state.currentFates = parseInt(this.value) || 0;
+      render();
+    });
+
+    // Goal Chips
+    document.querySelectorAll('#goalSelector .goal-chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        document.querySelectorAll('#goalSelector .goal-chip').forEach(function(c) { c.classList.remove('active'); });
+        this.classList.add('active');
+
+        var wishes = parseInt(this.getAttribute('data-wishes'));
+        var customRow = document.getElementById('customGoalRow');
+
+        if (wishes === 0) {
+          // Custom mode
+          customRow.style.display = 'flex';
+          state.goalLabel = 'Custom';
+          // Don't update goalWishes yet — wait for Apply
+        } else {
+          customRow.style.display = 'none';
+          state.goalWishes = wishes;
+          state.goalLabel = this.getAttribute('data-label');
+        }
+        render();
+      });
+    });
+
+    // Custom Goal Apply
+    document.getElementById('applyCustomGoal').addEventListener('click', function() {
+      var customWishes = parseInt(document.getElementById('customGoalWishes').value) || 180;
+      customWishes = Math.max(1, Math.min(99999, customWishes));
+      state.goalWishes = customWishes;
+      state.goalLabel = customWishes + ' wishes';
+      document.getElementById('customGoalWishes').value = customWishes;
+      render();
+    });
+
+    // Custom Goal input Enter key
+    document.getElementById('customGoalWishes').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('applyCustomGoal').click();
+      }
+    });
+
+    // Chart pull count lookup
+    document.getElementById('chartPullCount').addEventListener('input', function() {
+      var pull = parseInt(this.value) || 1;
+      pull = Math.max(1, Math.min(90, pull));
+      this.value = pull;
+      drawPityChart();
+    });
+  }
+
+  // =====================================================================
+  // INITIALIZATION
+  // =====================================================================
+
+  function init() {
+    renderIncomeList();
+    bindEvents();
+    render();
+    drawPityChart();
+
+    // Redraw chart on resize
+    var resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(function() { drawPityChart(); }, 250);
+    });
+  }
+
+  init();
+  </script>
+
+</body>
+</html>

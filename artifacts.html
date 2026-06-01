@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Teyvat Guide — Complete artifact database with set bonuses, domains, and best character matches">
+  <title>Artifacts — Teyvat Guide</title>
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ---- Artifact Card ---- */
+    .artifact-card {
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .artifact-card-top {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .artifact-name {
+      font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700;
+      color: var(--text-primary); letter-spacing: 0.3px; line-height: 1.3;
+    }
+    .artifact-stars {
+      font-size: 0.68rem; letter-spacing: 1px; white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .artifact-stars .star-filled { color: var(--star5); }
+    .artifact-stars .star-empty  { color: var(--text-muted); opacity: 0.4; }
+
+    .artifact-domain {
+      font-size: 0.78rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .artifact-domain i { color: var(--gold-dim); font-size: 0.7rem; width: 14px; text-align: center; }
+
+    .artifact-bonuses {
+      display: flex; flex-direction: column; gap: 5px;
+      padding: 0.5rem 0;
+      border-top: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .bonus-line {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 0.83rem; color: var(--text-secondary); line-height: 1.45;
+    }
+    .bonus-label {
+      flex-shrink: 0; font-weight: 700; font-size: 0.68rem;
+      padding: 2px 8px; border-radius: var(--radius-sm);
+      background: rgba(201,169,110,0.12); color: var(--gold);
+      letter-spacing: 0.5px; min-width: 40px; text-align: center;
+    }
+    .best-for-row {
+      display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+      margin-top: auto; padding-top: 0.35rem;
+    }
+    .best-for-row .best-label {
+      font-size: 0.66rem; color: var(--text-muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;
+    }
+    .best-tag {
+      display: inline-block; padding: 3px 10px; border-radius: var(--radius-full);
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3px;
+      background: rgba(201,169,110,0.09); color: var(--gold-light);
+      border: 1px solid rgba(201,169,110,0.18);
+    }
+
+    /* ---- No Results ---- */
+    .no-results {
+      text-align: center; padding: 3rem 1rem; grid-column: 1 / -1;
+      color: var(--text-muted);
+    }
+    .no-results i { font-size: 2rem; display: block; margin-bottom: 0.75rem; opacity: 0.5; }
+    .no-results p { font-size: 0.95rem; }
+
+    /* ---- Result Count ---- */
+    .result-count {
+      font-size: 0.76rem; color: var(--text-muted); margin-left: 4px; white-space: nowrap;
+    }
+
+    /* ---- Efficiency Table ---- */
+    .eff-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .eff-table th, .eff-table td {
+      padding: 13px 16px; text-align: left; border-bottom: 1px solid var(--border-subtle);
+    }
+    .eff-table th {
+      color: var(--text-muted); font-weight: 600; text-transform: uppercase;
+      font-size: 0.72rem; letter-spacing: 1px;
+    }
+    .eff-table thead th {
+      background: rgba(201,169,110,0.05);
+      position: sticky; top: 0;
+    }
+    .eff-table tbody tr { transition: background 0.2s; }
+    .eff-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    .tier-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 50%;
+      font-size: 0.72rem; font-weight: 900; color: #111;
+      letter-spacing: 0.5px;
+    }
+    .tier-s { background: var(--star5); box-shadow: 0 0 10px rgba(255,177,59,0.35); }
+    .tier-a { background: var(--gold); box-shadow: 0 0 8px rgba(201,169,110,0.3); }
+    .tier-b { background: var(--star4); box-shadow: 0 0 6px rgba(182,135,200,0.25); }
+
+    .domain-name-col { font-weight: 700; color: var(--text-primary); }
+    .region-col { font-size: 0.8rem; color: var(--text-muted); }
+    .set-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .set-chip {
+      display: inline-block; padding: 3px 10px; border-radius: var(--radius-full);
+      font-size: 0.7rem; font-weight: 500;
+      background: rgba(201,169,110,0.08); color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    .eff-why {
+      font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; max-width: 340px;
+    }
+    .char-count-badge {
+      display: inline-block; padding: 3px 10px; border-radius: var(--radius-full);
+      font-size: 0.7rem; font-weight: 600;
+      background: rgba(255,255,255,0.04); color: var(--text-muted);
+    }
+
+    /* ---- Responsive table ---- */
+    @media (max-width: 768px) {
+      .eff-table { font-size: 0.78rem; }
+      .eff-table th, .eff-table td { padding: 10px 8px; }
+      .eff-why { max-width: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield" aria-hidden="true"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html" class="active">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero" style="min-height:36vh;padding-bottom:2rem;">
+    <div class="hero-content">
+      <span class="hero-badge">✦ Artifact Database</span>
+      <h1>Artifact Sets</h1>
+      <p>Complete artifact database with set bonuses, domains, and best character matches.</p>
+    </div>
+  </section>
+
+  <!-- ── Filter Bar ── -->
+  <section class="section" style="padding-top:0;">
+    <div class="section-inner">
+      <div class="filter-bar" id="filterBar">
+        <input type="text" id="searchInput" placeholder="Search artifact sets..." aria-label="Search artifacts">
+        <button class="filter-chip active" data-rarity="all">All</button>
+        <button class="filter-chip" data-rarity="5">5★</button>
+        <button class="filter-chip" data-rarity="4">4★</button>
+        <span class="result-count" id="resultCount"></span>
+      </div>
+
+      <!-- Artifact Grid -->
+      <div class="grid-2" id="artifactGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Resin Efficiency Tier List ── -->
+  <section class="section" style="background:rgba(10,10,28,0.35);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Farming Strategy</span>
+        <h2>Resin Efficiency Tier List</h2>
+        <p>Domains ranked by farming efficiency — how many top-tier characters benefit from each domain's artifact sets. Farm smarter, not harder.</p>
+      </div>
+      <div class="tool-panel" style="overflow-x:auto;">
+        <table class="eff-table">
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Domain</th>
+              <th>Region</th>
+              <th>Artifact Sets</th>
+              <th>Why Farm</th>
+              <th>Users</th>
+            </tr>
+          </thead>
+          <tbody id="efficiencyBody">
+            <!-- Rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <!-- ── Scripts ── -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+  <script>
+    /* ============================================================
+       Starfield Background
+       ============================================================ */
+    (function() {
+      const canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      let animId;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      function initStars() {
+        const count = Math.floor((canvas.width * canvas.height) / 3500);
+        stars = [];
+        for (let i = 0; i < count; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.4 + 0.3,
+            a: Math.random(),
+            da: (Math.random() - 0.5) * 0.012,
+            maxA: Math.random() * 0.5 + 0.4
+          });
+        }
+      }
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.a += s.da;
+          if (s.a > s.maxA || s.a < 0.1) s.da *= -1;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(200,200,220,${s.a.toFixed(2)})`;
+          ctx.fill();
+        }
+        animId = requestAnimationFrame(draw);
+      }
+      resize();
+      initStars();
+      draw();
+      window.addEventListener('resize', () => { resize(); initStars(); });
+    })();
+
+    /* ============================================================
+       Navigation — scroll & hamburger
+       ============================================================ */
+    (function() {
+      const nav = document.getElementById('navbar');
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+
+      window.addEventListener('scroll', () => {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+
+      if (toggle && links) {
+        toggle.addEventListener('click', () => {
+          const expanded = links.classList.toggle('open');
+          const icon = toggle.querySelector('i');
+          if (icon) {
+            icon.classList.toggle('fa-bars', !expanded);
+            icon.classList.toggle('fa-xmark', expanded);
+          }
+        });
+      }
+    })();
+
+    /* ============================================================
+       Artifact Filter & Render
+       Data fields from data.js ARTIFACTS array:
+         .name   — set name
+         .max    — max rarity (5)
+         .dom    — domain string e.g. "Denouement of Sin (Fontaine)"
+         .two    — 2-piece bonus text
+         .four   — 4-piece bonus text
+         .for    — array of character names
+       ============================================================ */
+    (function() {
+      const grid = document.getElementById('artifactGrid');
+      const searchInput = document.getElementById('searchInput');
+      const filterChips = document.querySelectorAll('#filterBar .filter-chip');
+      const resultCount = document.getElementById('resultCount');
+
+      let currentRarity = 'all';
+
+      function starsHTML(maxRarity) {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+          if (i <= maxRarity) {
+            html += `<span class="star-filled">&#9733;</span>`;
+          } else {
+            html += `<span class="star-empty">&#9733;</span>`;
+          }
+        }
+        return html;
+      }
+
+      function renderCard(a) {
+        const tags = a.for.map(c =>
+          `<span class="best-tag">${c}</span>`
+        ).join('');
+
+        return `
+          <div class="card artifact-card" data-rarity="${a.max}">
+            <div style="display:flex;align-items:flex-start;gap:1rem;">
+              <div style="width:56px;height:56px;border-radius:var(--radius);overflow:hidden;flex-shrink:0;background:var(--bg-surface);position:relative;">
+                ${artifactImgHTML(a.name)}
+                <i class="fa-solid fa-gem" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:var(--gold-dim);font-size:1.2rem;z-index:0;"></i>
+              </div>
+              <div style="flex:1;">
+            <div class="artifact-card-top">
+              <span class="artifact-name">${a.name}</span>
+              <span class="artifact-stars">${starsHTML(a.max)}</span>
+            </div>
+            <div class="artifact-domain">
+              <i class="fa-solid fa-map-pin"></i> ${a.dom}
+            </div>
+              </div>
+            </div>
+            <div class="artifact-bonuses">
+              <div class="bonus-line">
+                <span class="bonus-label">2-PC</span>
+                <span>${a.two}</span>
+              </div>
+              <div class="bonus-line">
+                <span class="bonus-label">4-PC</span>
+                <span>${a.four}</span>
+              </div>
+            </div>
+            <div class="best-for-row">
+              <span class="best-label">Best for:</span>
+              ${tags}
+            </div>
+          </div>`;
+      }
+
+      function getFiltered() {
+        let results = ARTIFACTS;
+        if (currentRarity !== 'all') {
+          results = results.filter(a => a.max === parseInt(currentRarity));
+        }
+        const q = searchInput.value.trim().toLowerCase();
+        if (q) {
+          results = results.filter(a =>
+            a.name.toLowerCase().includes(q) ||
+            a.dom.toLowerCase().includes(q) ||
+            a.two.toLowerCase().includes(q) ||
+            a.four.toLowerCase().includes(q) ||
+            a.for.some(c => c.toLowerCase().includes(q))
+          );
+        }
+        return results;
+      }
+
+      function render() {
+        const filtered = getFiltered();
+        if (filtered.length === 0) {
+          grid.innerHTML = `
+            <div class="no-results">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <p>No artifact sets match your filters.</p>
+              <p style="font-size:0.82rem;margin-top:0.4rem;">Try adjusting your search or filter criteria.</p>
+            </div>`;
+        } else {
+          grid.innerHTML = filtered.map(renderCard).join('');
+        }
+        resultCount.textContent = `${filtered.length} set${filtered.length !== 1 ? 's' : ''}`;
+      }
+
+      searchInput.addEventListener('input', render);
+
+      filterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          filterChips.forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          currentRarity = chip.dataset.rarity;
+          render();
+        });
+      });
+
+      render();
+    })();
+
+    /* ============================================================
+       Resin Efficiency Tier List
+       Groups artifacts by domain, assigns S/A/B tiers based on
+       domain farming efficiency, and renders the table.
+       ============================================================ */
+    (function() {
+      const tbody = document.getElementById('efficiencyBody');
+
+      // Hardcoded tier assignments based on community consensus
+      const DOMAIN_TIERS = {
+        'Momiji-Dyed Court':            'S',
+        'Spire of Solitary Enlightenment': 'S',
+        'Denouement of Sin':            'S',
+        'Peak of Vindagnyr':            'A',
+        'Ridge Watch':                  'A',
+        'Valley of Remembrance':        'A',
+        'Faded Theater':                'A',
+        'Slumbering Court':             'A',
+        'Hidden Palace of Zhou':        'A',
+        'Clear Pool and Mountain Cavern': 'B',
+        'City of Gold':                 'B',
+        'Lost Valley':                  'B',
+        'Molten Iron Fortress':         'B',
+        'Waterfall Wen':                'B',
+        'Midsummer Courtyard':          'B'
+      };
+
+      const DOMAIN_WHY = {
+        'Momiji-Dyed Court': 'Most universal domain. Emblem is BiS for 10+ characters. Shimenawa 2pc is a solid ATK% filler. Farm this heavily.',
+        'Spire of Solitary Enlightenment': 'Essential for all Dendro teams. Deepwood is mandatory on Dendro supports. Gilded is BiS for many reaction DPS.',
+        'Denouement of Sin': 'Fontaine meta powerhouse. Golden Troupe for off-field DPS. Marechaussee for any HP-changing main DPS.',
+        'Peak of Vindagnyr': 'Must-farm for Cryo (Blizzard) and Hydro (HoD) DPS. Both sets are strong in their niches.',
+        'Ridge Watch': 'Tenacity is the universal HP-support set. Pale Flame for Physical DPS. Two solid sets covering different roles.',
+        'Valley of Remembrance': 'VV is MANDATORY for all Anemo supports — the 40% RES shred is irreplaceable. Maiden is outdated but VV alone makes it worth it.',
+        'Faded Theater': 'For Arlecchino, Clorinde, and Burning teams. Specialized but high-value if you own these characters.',
+        'Slumbering Court': 'For Geo DEF-scaling characters (Itto, Noelle, Albedo) and healers (Kokomi, Qiqi). Rifthounds require a healer.',
+        'Hidden Palace of Zhou': 'Crimson Witch is the classic Pyro DPS set. Still strong on Hu Tao, Diluc, Klee. Available via Strongbox as alternative.',
+        'Clear Pool and Mountain Cavern': 'Noblesse is the universal support set but is available via Strongbox. Bloodstained is very niche. Use Strongbox, don\'t farm.',
+        'City of Gold': 'Desert Pavilion for Wanderer/Xiao. Flower of Paradise Lost for Hyperbloom/Burgeon triggers. Niche but powerful.',
+        'Lost Valley': 'Vermillion for Xiao (BiS but resin-inefficient). Echoes for Ayato (RNG-dependent). Use Strongbox instead.',
+        'Molten Iron Fortress': 'Very specialized — Vourukasha for Dehya, Nymph\'s Dream for Tartaglia. Only farm if you main these characters.',
+        'Waterfall Wen': 'Nighttime Whispers for Navia/Ningguang. Song of Days Past for healers. Niche domain — farm only if needed.',
+        'Midsummer Courtyard': 'Thundering Fury for Electro DPS. Good for Keqing and Cyno. Available via Strongbox as an alternative farming path.'
+      };
+
+      // Group artifacts by domain
+      const domainMap = {};
+
+      ARTIFACTS.forEach(a => {
+        // Extract domain name and region from dom string like "Denouement of Sin (Fontaine)"
+        const match = a.dom.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+        const domainName = match ? match[1].trim() : a.dom;
+        const region = match ? match[2].trim() : '';
+
+        if (!domainMap[domainName]) {
+          domainMap[domainName] = {
+            domain: domainName,
+            region: region,
+            sets: [],
+            characters: new Set()
+          };
+        }
+        domainMap[domainName].sets.push(a.name);
+        a.for.forEach(c => domainMap[domainName].characters.add(c));
+      });
+
+      const domains = Object.values(domainMap);
+
+      // Assign tiers
+      domains.forEach(d => {
+        d.tier = DOMAIN_TIERS[d.domain] || 'B';
+        d.why = DOMAIN_WHY[d.domain] || '';
+        d.charCount = d.characters.size;
+      });
+
+      // Sort: S first, then A, then B; within each tier by character count desc
+      const tierOrder = { 'S': 0, 'A': 1, 'B': 2 };
+      domains.sort((a, b) => {
+        if (tierOrder[a.tier] !== tierOrder[b.tier]) return tierOrder[a.tier] - tierOrder[b.tier];
+        return b.charCount - a.charCount;
+      });
+
+      function renderRow(d) {
+        const tierClass = 'tier-' + d.tier.toLowerCase();
+        const setChips = d.sets.map(s => `<span class="set-chip">${s}</span>`).join('');
+        const charNames = [...d.characters].sort().join(', ');
+
+        return `
+          <tr>
+            <td><span class="tier-badge ${tierClass}">${d.tier}</span></td>
+            <td><span class="domain-name-col">${d.domain}</span></td>
+            <td><span class="region-col">${d.region}</span></td>
+            <td><div class="set-chips">${setChips}</div></td>
+            <td><div class="eff-why">${d.why}</div></td>
+            <td>
+              <span class="char-count-badge">${d.charCount} character${d.charCount !== 1 ? 's' : ''}</span>
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;">${charNames}</div>
+            </td>
+          </tr>`;
+      }
+
+      tbody.innerHTML = domains.map(renderRow).join('');
+    })();
+  </script>
+
+</body>
+</html>

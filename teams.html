@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Compositions — Teyvat Guide</title>
+  <meta name="description" content="Meta-proven Genshin Impact team builds for Spiral Abyss and all content. Hyperbloom, National, Neuvillette Hypercarry, and more.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Grid-1 (full-width card vertical stack) ── */
+    .grid-1 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    /* ── Team Card ── */
+    .team-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.8rem;
+      transition: all 0.35s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+    .team-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-3px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.35);
+    }
+    .team-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+    .team-card.tier-S::before { background: linear-gradient(90deg, var(--gold), #e0a030, transparent); }
+    .team-card.tier-A::before { background: linear-gradient(90deg, #b687c8, #8a5c9e, transparent); }
+
+    /* ── Team Card Header ── */
+    .team-card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 1.2rem;
+    }
+    .team-card-top h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.5px;
+    }
+    .tier-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+    .tier-badge.tier-S {
+      background: linear-gradient(135deg, #c9a96e, #b8943a);
+      color: #1a1200;
+      box-shadow: 0 0 16px rgba(201,169,110,0.3);
+    }
+    .tier-badge.tier-A {
+      background: linear-gradient(135deg, #b687c8, #9a60b5);
+      color: #1a0a20;
+      box-shadow: 0 0 16px rgba(182,135,200,0.3);
+    }
+
+    /* ── Character Slots ── */
+    .team-slots {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .char-slot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px 6px 6px;
+      border-radius: var(--radius-full);
+      background: var(--bg-card-hover);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.25s var(--ease-out);
+    }
+    .char-slot:hover {
+      transform: translateY(-2px);
+    }
+    .char-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .char-circle.pyro   { background: var(--pyro);   box-shadow: 0 0 14px var(--pyro-glow); }
+    .char-circle.hydro  { background: var(--hydro);  box-shadow: 0 0 14px var(--hydro-glow); }
+    .char-circle.anemo  { background: var(--anemo);  box-shadow: 0 0 14px var(--anemo-glow); }
+    .char-circle.electro{ background: var(--electro);box-shadow: 0 0 14px var(--electro-glow); }
+    .char-circle.dendro { background: var(--dendro); box-shadow: 0 0 14px var(--dendro-glow); }
+    .char-circle.cryo   { background: var(--cryo);   box-shadow: 0 0 14px var(--cryo-glow); }
+    .char-circle.geo    { background: var(--geo);    box-shadow: 0 0 14px var(--geo-glow); }
+    .char-circle.flex   { background: #444;          box-shadow: 0 0 10px rgba(255,255,255,0.1); color: #aaa; }
+    .char-circle img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: none;
+      z-index: 2;
+    }
+    .char-circle img.loaded {
+      display: block;
+    }
+    .char-circle .char-initials {
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .char-circle img.loaded + .char-initials,
+    .char-circle img.loaded ~ .char-initials {
+      display: none;
+    }
+    .char-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* ── Team Card Body Sections ── */
+    .team-card-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .team-card-section {
+      margin-bottom: 0.75rem;
+    }
+    .team-card-section:last-child {
+      margin-bottom: 0;
+    }
+    .team-section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+    .team-section-label i {
+      font-size: 0.7rem;
+    }
+    .rotation-text {
+      font-size: 0.84rem;
+      color: var(--text-primary);
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      line-height: 1.55;
+      font-family: 'DM Sans', monospace;
+      letter-spacing: 0.2px;
+    }
+    .variant-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .variant-tag {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.76rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: rgba(201,169,110,0.06);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* ── Elemental Synergies Section ── */
+    .synergy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .synergy-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.2rem;
+      transition: all 0.3s var(--ease-out);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .synergy-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .synergy-elements {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .synergy-elem {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #fff;
+      border: 2px solid rgba(255,255,255,0.12);
+    }
+    .synergy-plus {
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      margin: 0 4px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .synergy-info h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+    .synergy-info .synergy-multiplier {
+      font-size: 0.72rem;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .synergy-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .team-card {
+        padding: 1.2rem;
+      }
+      .team-card-top {
+        flex-wrap: wrap;
+      }
+      .team-slots {
+        gap: 6px;
+      }
+      .char-slot {
+        padding: 4px 10px 4px 4px;
+      }
+      .char-circle {
+        width: 36px;
+        height: 36px;
+        font-size: 0.72rem;
+      }
+      .char-name {
+        font-size: 0.75rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .synergy-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html" class="active">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero" style="min-height:40vh;padding-top:5rem;">
+    <div class="hero-content">
+      <span class="hero-badge">&#9733; Optimized Teams</span>
+      <h1>Team Compositions</h1>
+      <p>Meta-proven team builds for Spiral Abyss and all endgame content.</p>
+    </div>
+  </section>
+
+  <!-- ── Team Filters ── -->
+  <section class="section reveal" style="padding-bottom:0;">
+    <div class="section-inner">
+      <div class="filter-bar" id="teamFilters">
+        <input type="text" id="teamSearch" placeholder="Search by team name or character...">
+        <button class="filter-chip active" data-tier="all">All</button>
+        <button class="filter-chip" data-tier="S">S-Tier</button>
+        <button class="filter-chip" data-tier="A">A-Tier</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Team Grid ── -->
+  <section class="section reveal">
+    <div class="section-inner">
+      <div class="grid-1" id="teamGrid">
+        <!-- Rendered by JS -->
+      </div>
+      <div id="teamEmpty" style="display:none;text-align:center;padding:3rem 0;color:var(--text-muted);">
+        <i class="fa-solid fa-magnifying-glass" style="font-size:2rem;display:block;margin-bottom:1rem;opacity:0.4;"></i>
+        <p>No teams match your filters. Try a different search or tier.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Elemental Synergies ── -->
+  <section class="section reveal" style="background:rgba(255,255,255,0.01);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Elemental Reactions</span>
+        <h2>Elemental Synergy Quick Reference</h2>
+        <div class="section-divider" style="width:80px;height:2px;margin:0 auto 1.5rem;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);"></div>
+        <p>Which elements combine to create powerful reactions in team compositions.</p>
+      </div>
+      <div class="synergy-grid" id="synergyGrid">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+    </p>
+  </footer>
+
+  <!-- ── Shared data ── -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+
+  <!-- ── Page Scripts ── -->
+  <script>
+    /* ===== Starfield Canvas Animation ===== */
+    (function() {
+      const canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      const STAR_COUNT = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function initStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const s of stars) {
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          const hsl = s.hue > 0
+            ? 'hsla(' + s.hue + ', 60%, 70%, ' + s.alpha + ')'
+            : 'rgba(200,200,220,' + s.alpha + ')';
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', function() { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ===== Scroll Reveal ===== */
+    (function() {
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+    })();
+
+    /* ===== Navigation Scroll Effect ===== */
+    (function() {
+      const nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', function() {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+    })();
+
+    /* ===== Mobile Nav Toggle ===== */
+    (function() {
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        links.classList.toggle('open');
+        const icon = toggle.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-bars');
+          icon.classList.toggle('fa-xmark');
+        }
+      });
+    })();
+
+    /* ===== Character-to-Element Lookup ===== */
+    function buildCharElementMap() {
+      const map = {};
+      if (typeof CHARACTERS !== 'undefined') {
+        CHARACTERS.forEach(function(ch) {
+          map[ch.name.toLowerCase()] = ch.el;
+        });
+      }
+      // Aliases and alternate names
+      map['flex'] = 'flex';
+      map['dendro flex'] = 'dendro';
+      map['baizhu'] = 'dendro';
+      map['charlotte'] = 'cryo';
+      map['shenhe'] = 'cryo';
+      map['kokomi'] = 'hydro';
+      map['itto'] = 'geo';
+      map['albedo'] = 'geo';
+      map['layla'] = 'cryo';
+      map['rosaria'] = 'cryo';
+      map['chevreuse'] = 'pyro';
+      map['dendro mc'] = 'dendro';
+      map['collei'] = 'dendro';
+      map['ororon'] = 'electro';
+      return map;
+    }
+    const charElementMap = buildCharElementMap();
+
+    /* ===== Character Image URL Builder ===== */
+    function getCharImageUrl(name) {
+      // Use Enka CDN side icons (portrait icons great for circles)
+      return 'https://enka.network/ui/UI_AvatarIcon_Side_' + name.replace(/\s+/g, '_') + '.png';
+    }
+
+    /* ===== Extract primary character name (handle "A/B" and "(C6)" patterns) ===== */
+    function getPrimaryName(raw) {
+      if (!raw) return '';
+      // Remove constellation notes like "(C6)"
+      let cleaned = raw.replace(/\s*\(.*?\)\s*/g, '').trim();
+      // Take first name if there's a slash
+      if (cleaned.indexOf('/') !== -1) {
+        cleaned = cleaned.split('/')[0].trim();
+      }
+      return cleaned;
+    }
+
+    function getInitials(name) {
+      if (!name) return '?';
+      const lower = name.toLowerCase();
+      if (lower === 'flex') return '?';
+      if (lower === 'dendro flex') return 'DF';
+      const parts = name.split(' ');
+      if (parts.length >= 2) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    }
+
+    function getCharElement(name) {
+      if (!name) return 'flex';
+      const primary = getPrimaryName(name).toLowerCase();
+      if (primary === 'flex') return 'flex';
+      if (primary === 'dendro flex') return 'dendro';
+      const result = charElementMap[primary] || charElementMap[name.toLowerCase()] || 'flex';
+      return result;
+    }
+
+    /* ===== Team Rotations ===== */
+    const teamRotations = {
+      'Hyperbloom': 'Nahida E Q &rarr; Yelan Q E &rarr; Kuki Shinobu E Q &rarr; Flex NA/driver &rarr; Repeat',
+      'Neuvillette Hypercarry': 'Furina E Q &rarr; Kazuha E Q &rarr; Baizhu/Charlotte E Q &rarr; Neuvillette E Q CA CA CA &rarr; Repeat',
+      'National (Rational)': 'Bennett Q E &rarr; Xiangling Q E &rarr; Xingqiu Q E E &rarr; Flex &rarr; Battery Xiangling &rarr; Repeat',
+      'Arlecchino Vape': 'Arlecchino E &rarr; Yelan Q E &rarr; Bennett Q E &rarr; Kazuha/Sucrose E Q &rarr; Arlecchino CA NA-spam &rarr; Repeat',
+      'Freeze (Ayaka Premium)': 'Shenhe E Q &rarr; Kazuha E Q &rarr; Kokomi E &rarr; Ayaka Dash E Q NA2 CA &rarr; Repeat',
+      'Mono Geo': 'Zhongli hold-E &rarr; Gorou E Q &rarr; Albedo E Q &rarr; Itto Q E NA-spam CA-finisher &rarr; Repeat',
+      'Nilou Super Bloom': 'Nilou E E E E (Sword Dance) &rarr; Nahida E Q &rarr; Kokomi E &rarr; Dendro Flex skills &rarr; Kokomi Burst refresh',
+      'Xiao Hypercarry': 'Faruzan E Q &rarr; Zhongli hold-E &rarr; Bennett Q E &rarr; Xiao E E Q Plunge-spam &rarr; Repeat',
+      'Alhaitham Spread': 'Nahida E Q &rarr; Kuki E &rarr; Flex &rarr; Alhaitham Q E NA-string &rarr; Repeat',
+      'Hu Tao Vape': 'Zhongli E &rarr; Yelan E Q &rarr; Xingqiu E Q &rarr; Hu Tao E CA-jump-cancel &rarr; Repeat',
+      'Clorinde Aggravate': 'Nahida E Q &rarr; Fischl E &rarr; Kazuha E Q &rarr; Clorinde E pistols &rarr; Repeat',
+      'Chasca Rainbow Carry': 'Furina E Q &rarr; Bennett Q &rarr; Flex &rarr; Chasca E CA-spam &rarr; Repeat'
+    };
+
+    /* ===== Build a Character Circle Element ===== */
+    function buildCharCircle(charsEntry) {
+      const primaryName = getPrimaryName(charsEntry);
+      const element = getCharElement(charsEntry);
+      const displayName = charsEntry;
+      const isFlex = primaryName.toLowerCase() === 'flex' || primaryName.toLowerCase() === 'dendro flex';
+      const initials = getInitials(primaryName);
+
+      // Determine the class name for the circle
+      const elClass = isFlex ? 'flex' : element;
+
+      // Build the HTML for the circle
+      let circleHTML = '<div class="char-circle ' + elClass + '">';
+
+      if (!isFlex) {
+        // Try to load character portrait
+        const imgUrl = getCharImageUrl(primaryName);
+        circleHTML += '<img src="' + imgUrl + '" alt="' + primaryName + '" loading="lazy"';
+        circleHTML += ' onload="this.classList.add(\'loaded\')"';
+        circleHTML += ' onerror="this.remove()">';
+      }
+
+      circleHTML += '<span class="char-initials">' + initials + '</span>';
+      circleHTML += '</div>';
+
+      return circleHTML;
+    }
+
+    /* ===== Render Team Cards ===== */
+    function renderTeams(filterTier, searchQuery) {
+      const grid = document.getElementById('teamGrid');
+      const empty = document.getElementById('teamEmpty');
+      if (!grid) return;
+
+      grid.innerHTML = '';
+
+      if (typeof TEAMS === 'undefined') {
+        grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:3rem;">Team data not loaded. Please ensure data.js is available.</p>';
+        return;
+      }
+
+      let filtered = TEAMS.slice();
+
+      if (filterTier && filterTier !== 'all') {
+        filtered = filtered.filter(function(t) { return t.tier === filterTier; });
+      }
+
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(function(t) {
+          if (t.name.toLowerCase().indexOf(q) !== -1) return true;
+          if (t.desc.toLowerCase().indexOf(q) !== -1) return true;
+          for (var i = 0; i < t.chars.length; i++) {
+            if (t.chars[i].toLowerCase().indexOf(q) !== -1) return true;
+          }
+          if (t.vars) {
+            for (var j = 0; j < t.vars.length; j++) {
+              if (t.vars[j].toLowerCase().indexOf(q) !== -1) return true;
+            }
+          }
+          return false;
+        });
+      }
+
+      if (filtered.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      grid.style.display = '';
+      empty.style.display = 'none';
+
+      filtered.forEach(function(team) {
+        const card = document.createElement('div');
+        card.className = 'team-card tier-' + team.tier;
+
+        // Build character slots with images
+        var slotsHTML = '';
+        team.chars.forEach(function(charEntry) {
+          const primaryName = getPrimaryName(charEntry);
+          const circleHTML = buildCharCircle(charEntry);
+          slotsHTML +=
+            '<div class="char-slot">' +
+              circleHTML +
+              '<span class="char-name">' + charEntry + '</span>' +
+            '</div>';
+        });
+
+        // Build variants
+        var variantsHTML = '';
+        if (team.vars && team.vars.length > 0) {
+          var variantTags = '';
+          team.vars.forEach(function(v) {
+            variantTags += '<span class="variant-tag">' + v + '</span>';
+          });
+          variantsHTML =
+            '<div class="team-card-section">' +
+              '<div class="team-section-label"><i class="fa-solid fa-shuffle"></i> Alternative Variants</div>' +
+              '<div class="variant-list">' + variantTags + '</div>' +
+            '</div>';
+        }
+
+        var rotation = teamRotations[team.name] || team.rot || 'See full guide for detailed rotation.';
+        var description = team.desc || team.description || '';
+
+        card.innerHTML =
+          '<div class="team-card-top">' +
+            '<span class="tier-badge tier-' + team.tier + '">' + team.tier + '</span>' +
+            '<h3>' + team.name + '</h3>' +
+          '</div>' +
+          '<div class="team-slots">' + slotsHTML + '</div>' +
+          '<div class="team-card-desc">' + description + '</div>' +
+          '<div class="team-card-section">' +
+            '<div class="team-section-label"><i class="fa-solid fa-rotate"></i> Rotation Sequence</div>' +
+            '<div class="rotation-text">' + rotation + '</div>' +
+          '</div>' +
+          variantsHTML;
+
+        grid.appendChild(card);
+      });
+    }
+
+    /* ===== Render Elemental Synergies ===== */
+    function renderSynergies() {
+      const grid = document.getElementById('synergyGrid');
+      if (!grid) return;
+
+      if (typeof REACTIONS === 'undefined') {
+        grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);grid-column:1/-1;">Reaction data not loaded.</p>';
+        return;
+      }
+
+      const elementIcons = {
+        pyro: 'fa-fire', hydro: 'fa-droplet', anemo: 'fa-wind',
+        electro: 'fa-bolt', dendro: 'fa-leaf', cryo: 'fa-snowflake', geo: 'fa-mountain'
+      };
+      const elementColors = {
+        pyro: '#ef7938', hydro: '#4cc2f1', anemo: '#74c2a8', electro: '#af8fd1',
+        dendro: '#a5d63e', cryo: '#9fd6e3', geo: '#fab72e'
+      };
+
+      REACTIONS.forEach(function(rxn) {
+        const card = document.createElement('div');
+        card.className = 'synergy-card';
+
+        var elemsHTML = '';
+        var elements;
+        if (rxn.elements) {
+          elements = rxn.elements;
+        } else if (rxn.els) {
+          elements = rxn.els;
+        } else {
+          elements = [];
+        }
+
+        elements.forEach(function(elName, idx) {
+          var elKey = elName.toLowerCase();
+          var color = elementColors[elKey] || '#555';
+          var icon = elementIcons[elKey] || 'fa-star';
+          elemsHTML += '<div class="synergy-elem" style="background:radial-gradient(circle at 40% 40%,' + color + 'dd,' + color + '55);box-shadow:0 0 12px ' + color + '44;"><i class="fa-solid ' + icon + '"></i></div>';
+          if (idx < elements.length - 1) {
+            elemsHTML += '<span class="synergy-plus">+</span>';
+          }
+        });
+
+        var multiplier = rxn.mul || rxn.multiplier || '';
+
+        card.innerHTML =
+          '<div class="synergy-elements">' + elemsHTML + '</div>' +
+          '<div class="synergy-info">' +
+            '<h4>' + rxn.name + '</h4>' +
+            '<div class="synergy-multiplier">' + multiplier + '</div>' +
+            '<p>' + rxn.desc + '</p>' +
+          '</div>';
+
+        grid.appendChild(card);
+      });
+    }
+
+    /* ===== Filter Handlers ===== */
+    (function() {
+      var currentTier = 'all';
+
+      const searchInput = document.getElementById('teamSearch');
+      const filterChips = document.querySelectorAll('#teamFilters .filter-chip');
+
+      function updateFilters() {
+        var query = searchInput ? searchInput.value.trim() : '';
+        renderTeams(currentTier, query);
+      }
+
+      if (searchInput) {
+        searchInput.addEventListener('input', updateFilters);
+      }
+
+      filterChips.forEach(function(chip) {
+        chip.addEventListener('click', function() {
+          filterChips.forEach(function(c) { c.classList.remove('active'); });
+          chip.classList.add('active');
+          currentTier = chip.getAttribute('data-tier');
+          updateFilters();
+        });
+      });
+    })();
+
+    /* ===== Initial Render ===== */
+    (function() {
+      function init() {
+        if (typeof TEAMS !== 'undefined' && typeof REACTIONS !== 'undefined') {
+          renderTeams('all', '');
+          renderSynergies();
+        } else {
+          setTimeout(init, 100);
+        }
+      }
+      init();
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spiral Abyss — Teyvat Guide</title>
+  <meta name="description" content="Spiral Abyss strategy guide for Genshin Impact: floor-by-floor breakdown, recommended teams, enemy info, tips, character usage rates, and Floor 12 strategies.">
+
+  <!-- Font Awesome 6.5.1 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    /* ── Spiral Abyss Page Styles ── */
+
+    /* Hero overrides */
+    .abyss-hero {
+      min-height: 55vh;
+      padding-top: 5rem;
+    }
+    .abyss-hero .hero-subtitle {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin: 0.5rem auto 0;
+      line-height: 1.6;
+    }
+    .abyss-cycle-badge {
+      display: inline-block;
+      padding: 5px 16px;
+      border-radius: var(--radius-full);
+      background: rgba(76,175,80,0.12);
+      border: 1px solid rgba(76,175,80,0.3);
+      color: var(--success);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Blessing Card ── */
+    .blessing-card {
+      background: linear-gradient(135deg, rgba(201,169,110,0.08), rgba(201,169,110,0.02));
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .blessing-card::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      left: -80px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(201,169,110,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .blessing-card-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(201,169,110,0.12);
+      border: 1px solid var(--border-gold);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .blessing-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.5rem;
+      color: var(--gold-light);
+    }
+    .blessing-card .blessing-text {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .blessing-card .blessing-detail {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+    }
+
+    /* ── Accordion ── */
+    .accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .accordion-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: all 0.3s var(--ease-out);
+    }
+    .accordion-item:hover {
+      border-color: var(--border-active);
+    }
+    .accordion-item.open {
+      border-color: var(--border-gold);
+      box-shadow: 0 0 0 1px rgba(201,169,110,0.08);
+    }
+    .accordion-trigger {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      background: none;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+      text-align: left;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .accordion-trigger:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .accordion-floor-num {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--gold);
+      min-width: 50px;
+      text-align: center;
+    }
+    .accordion-floor-info {
+      flex: 1;
+    }
+    .accordion-floor-info .floor-enemies {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .accordion-chevron {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      transition: transform 0.3s var(--ease-out);
+    }
+    .accordion-item.open .accordion-chevron {
+      transform: rotate(180deg);
+      color: var(--gold);
+    }
+    .accordion-panel {
+      display: none;
+      padding: 0 1.5rem 1.5rem 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .accordion-item.open .accordion-panel {
+      display: block;
+      animation: fadeInUp 0.4s var(--ease-out);
+    }
+    .accordion-panel-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      padding-top: 1.25rem;
+    }
+    .accordion-panel-grid .panel-col h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .accordion-panel-grid .panel-col p,
+    .accordion-panel-grid .panel-col li {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+    .accordion-panel-grid .panel-col ul {
+      list-style: none;
+      padding: 0;
+    }
+    .accordion-panel-grid .panel-col ul li {
+      position: relative;
+      padding-left: 16px;
+      margin-bottom: 5px;
+    }
+    .accordion-panel-grid .panel-col ul li::before {
+      content: '\2022';
+      position: absolute;
+      left: 0;
+      color: var(--gold-dim);
+    }
+    .chamber-label {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      background: rgba(201,169,110,0.1);
+      color: var(--gold-light);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.4rem;
+      margin-top: 0.75rem;
+    }
+    .chamber-label:first-of-type {
+      margin-top: 0;
+    }
+    .element-tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .element-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    /* ── Usage Rate Table ── */
+    .usage-table-wrap {
+      overflow-x: auto;
+      margin-top: 1rem;
+    }
+    .usage-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 500px;
+    }
+    .usage-table th,
+    .usage-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+    }
+    .usage-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .usage-table tr:hover td {
+      background: rgba(255,255,255,0.02);
+    }
+    .usage-rank {
+      font-family: 'Cinzel', serif;
+      font-weight: 900;
+      color: var(--gold);
+      font-size: 1.1rem;
+    }
+    .usage-bar-bg {
+      height: 6px;
+      background: var(--border-subtle);
+      border-radius: 3px;
+      margin-top: 4px;
+      overflow: hidden;
+      min-width: 80px;
+    }
+    .usage-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+      transition: width 0.6s var(--ease-out);
+    }
+    .owner-chip {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 600;
+      background: rgba(201,169,110,0.1);
+      color: var(--gold);
+    }
+
+    /* ── Team Cards ── */
+    .team-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.35s var(--ease-out);
+    }
+    .team-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+    }
+    .team-card h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      letter-spacing: 0.5px;
+    }
+    .team-card .team-tier {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 0.75rem;
+    }
+    .team-card .team-tier.tier-ss {
+      background: rgba(255,177,59,0.15);
+      color: var(--star5);
+      border: 1px solid rgba(255,177,59,0.25);
+    }
+    .team-card .team-tier.tier-s {
+      background: rgba(201,169,110,0.12);
+      color: var(--gold);
+      border: 1px solid rgba(201,169,110,0.2);
+    }
+    .team-card .team-tier.tier-a {
+      background: rgba(182,135,200,0.12);
+      color: var(--star4);
+      border: 1px solid rgba(182,135,200,0.2);
+    }
+    .team-members {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0.75rem 0;
+    }
+    .team-member-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+    }
+    .team-member-chip .member-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .team-card .team-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ── Floor Badge ── */
+    .floor-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .floor-badge.easy {
+      background: rgba(76,175,80,0.12);
+      color: var(--success);
+    }
+    .floor-badge.medium {
+      background: rgba(255,152,0,0.12);
+      color: var(--warning);
+    }
+    .floor-badge.hard {
+      background: rgba(244,67,54,0.12);
+      color: var(--danger);
+    }
+
+    /* ── Summary Stats Row ── */
+    .abyss-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .abyss-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .abyss-stat-card .stat-value {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--gold);
+    }
+    .abyss-stat-card .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    /* ── Tips & Tricks Section ── */
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+    }
+    .tip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      transition: all 0.3s var(--ease-out);
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .tip-card:hover {
+      border-color: var(--border-active);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .tip-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(201,169,110,0.1);
+      border: 1px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .tip-content h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.35rem;
+      color: var(--gold-light);
+    }
+    .tip-content p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .accordion-panel-grid {
+        grid-template-columns: 1fr;
+      }
+      .accordion-trigger {
+        padding: 1rem;
+      }
+      .blessing-card {
+        padding: 1.5rem;
+      }
+      .tips-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .abyss-hero {
+        min-height: 40vh;
+        padding: 2rem 1rem;
+      }
+      .accordion-floor-num {
+        font-size: 1.1rem;
+        min-width: 36px;
+      }
+    }
+  </style>
+<script src="utils.js" defer></script>
+  <script src="data.js" defer></script>
+</head>
+<body>
+
+  <!-- ── Starfield Background ── -->
+  <canvas id="starfield"></canvas>
+
+  <!-- ═══════════════════════════════════════════════
+       NAVIGATION
+       ═══════════════════════════════════════════════ -->
+  <nav class="nav" id="navbar">
+    <a href="index.html" class="nav-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </a>
+    <button class="nav-hamburger" id="navToggle" aria-label="Toggle navigation">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="nav-links" id="navLinks">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="artifacts.html">Artifacts</a>
+      <a href="teams.html">Teams</a>
+      <a href="bosses.html">Bosses</a>
+      <a href="domains.html">Domains</a>
+      <a href="spiral-abyss.html" class="active">Spiral Abyss</a>
+      <div class="nav-dropdown">
+        <a href="#">Tools <i class="fa-solid fa-chevron-down" style="font-size:0.6rem;margin-left:2px;"></i></a>
+        <div class="nav-dropdown-menu">
+          <a href="wish-sim.html"><i class="fa-solid fa-star" style="color:var(--gold);width:16px;"></i> Wish Sim</a>
+          <a href="damage-calc.html"><i class="fa-solid fa-calculator" style="color:var(--gold);width:16px;"></i> Damage Calc</a>
+          <a href="resin-timer.html"><i class="fa-solid fa-hourglass-half" style="color:var(--gold);width:16px;"></i> Resin Timer</a>
+          <a href="primo-calc.html"><i class="fa-solid fa-coins" style="color:var(--gold);width:16px;"></i> Primo Calc</a>
+          <a href="ascension-planner.html"><i class="fa-solid fa-arrow-trend-up" style="color:var(--gold);width:16px;"></i> Ascension Planner</a>
+        </div>
+      </div>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="codes.html">Codes</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════
+       HERO — CURRENT ABYSS CYCLE
+       ═══════════════════════════════════════════════ -->
+  <section class="hero abyss-hero">
+    <div class="hero-content">
+      <span class="abyss-cycle-badge">
+        <i class="fa-solid fa-circle" style="font-size:0.4rem;vertical-align:middle;margin-right:4px;color:var(--success);"></i>Cycle 87 &middot; Live Now
+      </span>
+      <span class="hero-badge">The Abyss Awaits</span>
+      <h1>Spiral Abyss</h1>
+      <p class="hero-subtitle">
+        <strong>Current Cycle:</strong> Version 5.7 Phase 1 &mdash; May 16 &ndash; May 31, 2026<br>
+        <strong>Lunar Blessing:</strong> <em>"Hymn of Surging Vitality"</em> &mdash; When a character's HP changes, gain <strong>+20% ATK</strong> for 8s. Maximum 3 stacks. Each stack is independent.
+      </p>
+      <div class="hero-cta">
+        <a href="#floors" class="btn btn-primary">
+          <i class="fa-solid fa-dungeon"></i> Floor Breakdown
+        </a>
+        <a href="#teams-f12" class="btn btn-outline">
+          <i class="fa-solid fa-people-group"></i> Best Teams for F12
+        </a>
+        <a href="#tips" class="btn btn-outline">
+          <i class="fa-solid fa-lightbulb"></i> Tips &amp; Tricks
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       BLESSING CARD
+       ═══════════════════════════════════════════════ -->
+  <section class="section reveal">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Lunar Blessing</span>
+        <h2>Current Cycle Details</h2>
+      </div>
+      <div class="blessing-card">
+        <div class="blessing-card-icon">
+          <i class="fa-solid fa-moon"></i>
+        </div>
+        <h3>Hymn of Surging Vitality</h3>
+        <p class="blessing-text">
+          When a character's HP increases or decreases, they gain <strong>+20% ATK</strong> for 8 seconds.
+          This effect stacks up to <strong>3 times</strong>, and each stack's duration is tracked independently.
+        </p>
+        <p class="blessing-detail">
+          <i class="fa-solid fa-lightbulb" style="color:var(--gold-dim);margin-right:4px;"></i>
+          <strong>Pro Tip:</strong> This blessing heavily favors characters with HP manipulation mechanics &mdash;
+          Furina, Neuvillette, Hu Tao, Arlecchino, Xiao, Wriothesley, and any team that runs a healer.
+          Fontaine characters and HP-drain DPS units get essentially permanent 60% ATK uptime.
+        </p>
+        <div class="blessing-detail" style="margin-top:0.75rem;">
+          <i class="fa-solid fa-calendar" style="color:var(--text-muted);margin-right:4px;"></i>
+          Blessing rotates with the next cycle &mdash; June 1, 2026. New blessing: <strong>"Hymn of Converging Elements"</strong>
+          (+15% Elemental DMG Bonus for 6s after triggering a reaction, max 4 stacks).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       FLOOR BREAKDOWN ACCORDION
+       ═══════════════════════════════════════════════ -->
+  <section class="section reveal" id="floors" style="background:rgba(255,255,255,0.01);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Floor-by-Floor Guide</span>
+        <h2>Floor Breakdown (9–12)</h2>
+        <p>Enemy compositions, recommended team archetypes, and tactical tips for every chamber.</p>
+      </div>
+
+      <div class="abyss-stats-row" id="abyssStatsRow"></div>
+
+      <div class="accordion" id="abyssAccordion"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       MOST USED CHARACTERS THIS CYCLE
+       ═══════════════════════════════════════════════ -->
+  <section class="section reveal" id="usage-rates">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Cycle 87 Meta Report</span>
+        <h2>Most Used Characters — Floor 12</h2>
+        <p>Usage rate data collected from a sample of ~145,000 players who achieved 36 stars in this cycle. Data represents the percentage of clears that included each character.</p>
+      </div>
+
+      <div class="usage-table-wrap" id="usageTableWrap"></div>
+
+      <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-top:1rem;">
+        <i class="fa-solid fa-circle-info" style="margin-right:4px;"></i>
+        Data sourced from community self-reports. Usage rate = % of 36-star clears that included this character on at least one team.
+        High ownership + high usage usually indicates meta dominance. Low ownership + high usage indicates a specialized but powerful pick.
+      </p>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       RECOMMENDED TEAMS FOR FLOOR 12
+       ═══════════════════════════════════════════════ -->
+  <section class="section reveal" id="teams-f12" style="background:rgba(255,255,255,0.01);">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Team Comps</span>
+        <h2>Recommended Teams for Floor 12</h2>
+        <p>These team compositions are proven performers for the current Abyss cycle. Each team covers specific chamber requirements.</p>
+      </div>
+
+      <div class="grid-2" id="recommendedTeams"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       ABYSS TIPS & TRICKS
+       ═══════════════════════════════════════════════ -->
+  <section class="section reveal" id="tips">
+    <div class="section-inner">
+      <div class="section-header">
+        <span class="section-tag">Pro Strategies</span>
+        <h2>Abyss Tips &amp; Tricks</h2>
+        <p>General strategies, mechanics knowledge, and optimizations that apply to every Spiral Abyss cycle.</p>
+      </div>
+
+      <div class="tips-grid" id="tipsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <i class="fa-solid fa-gem"></i> Teyvat Guide
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="characters.html">Characters</a>
+      <a href="weapons.html">Weapons</a>
+      <a href="teams.html">Teams</a>
+      <a href="guides.html">Guides</a>
+      <a href="events.html">Events</a>
+      <a href="spiral-abyss.html">Spiral Abyss</a>
+    </div>
+    <p class="footer-disclaimer">
+      Teyvat Guide is a fan-made strategy resource and is not affiliated with HoYoverse.
+      Genshin Impact and all related assets are trademarks of HoYoverse / miHoYo Co., Ltd.
+      All game data is sourced from community contributions and is subject to change.
+      Character usage rates are estimates based on community-sourced data and may not reflect official statistics.
+    </p>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════════ -->
+  <script>
+    /* ================================================================
+       INLINE SPIRAL ABYSS DATA — 5.7 Phase 1 (Cycle 87)
+       ================================================================ */
+
+    const ELEMENT_COLORS = {
+      pyro:  '#ef7938',
+      hydro: '#4cc2f1',
+      anemo: '#74c2a8',
+      electro:'#af8fd1',
+      dendro:'#a5d63e',
+      cryo:  '#9fd6e3',
+      geo:   '#fab72e',
+      physical:'#c0c0c0'
+    };
+
+    const ELEMENT_ICONS = {
+      pyro:  'fa-fire',
+      hydro: 'fa-droplet',
+      anemo: 'fa-wind',
+      electro:'fa-bolt',
+      dendro:'fa-leaf',
+      cryo:  'fa-snowflake',
+      geo:   'fa-mountain'
+    };
+
+    const SPIRAL_ABYSS_CYCLE = {
+      version: '5.7',
+      phase: 1,
+      cycle: 87,
+      name: 'Hymn of Surging Vitality',
+      startDate: '2026-05-16',
+      endDate: '2026-05-31',
+      blessing: {
+        name: 'Hymn of Surging Vitality',
+        description: 'When a character\'s HP increases or decreases, they gain +20% ATK for 8s. Maximum 3 stacks. Each stack is tracked independently.',
+        favoredCharacters: ['Furina','Neuvillette','Hu Tao','Arlecchino','Xiao','Wriothesley'],
+        tip: 'Fontaine characters and HP-drain DPS units get essentially permanent 60% ATK uptime. Healers provide the HP recovery side of the trigger.'
+      },
+      nextBlessing: {
+        name: 'Hymn of Converging Elements',
+        description: '+15% Elemental DMG Bonus for 6s after triggering a reaction, max 4 stacks.'
+      },
+      stats: {
+        primogems: 600,
+        floor12TotalHP: '2.8M',
+        clearRate36Star: '~15%',
+        mostOwnedCon: 'C1 Neuvillette'
+      },
+      summaryCharts: {
+        firstHalfElements: ['hydro','pyro','dendro'],
+        secondHalfElements: ['pyro','hydro','electro'],
+        requiredRoles: ['Shielder','Healer','Bow User']
+      },
+      floors: [
+        {
+          id: 9,
+          name: 'Vestibule of Mercy',
+          difficulty: 'easy',
+          difficultyLabel: 'Easy',
+          enemiesSummary: 'Hilichurls, Mitachurls, Samachurls, Ruin Guards',
+          chambers: [
+            {
+              name: '9-1',
+              halves: [
+                { label:'First Half', text:'Waves of Hilichurls, Wooden Shield Mitachurls, Cryo Samachurls.' },
+                { label:'Second Half', text:'Blazing Axe Mitachurls, Hilichurl Shooters.' }
+              ]
+            },
+            {
+              name: '9-2',
+              halves: [
+                { label:'First Half', text:'Ruin Guard + Hilichurl mobs.' },
+                { label:'Second Half', text:'Stonehide Lawachurl + Geo Samachurl.' }
+              ]
+            },
+            {
+              name: '9-3',
+              halves: [
+                { label:'First Half', text:'Fatui Skirmishers — Anemoboxer, Cryogunner, Hydrogunner.' },
+                { label:'Second Half', text:'Ruin Grader + Ruin Cruiser.' }
+              ]
+            }
+          ],
+          strategy: [
+            'Any well-built team can 9-star Floor 9. This is a warm-up floor.',
+            'Bring <strong>Pyro</strong> to deal with Cryo shields (Cryogunner, Cryo Samachurl).',
+            'A grouper (Kazuha, Sucrose, Venti) trivializes the Hilichurl waves.',
+            'Ruin Guards/Graders: attack the eye weak point to stun.',
+            '<strong>Recommended elements:</strong> Pyro, Anemo (grouping), any DPS.'
+          ],
+          recommendedElements: ['pyro','anemo','electro']
+        },
+        {
+          id: 10,
+          name: 'Hall of Peril',
+          difficulty: 'easy',
+          difficultyLabel: 'Easy-Moderate',
+          enemiesSummary: 'Fatui Agents, Cicin Mages, Mirror Maidens, Abyss Heralds',
+          chambers: [
+            {
+              name: '10-1',
+              halves: [
+                { label:'First Half', text:'Fatui Pyro Agent, Electro Cicin Mage, Hydro Gunners.' },
+                { label:'Second Half', text:'Mirror Maiden + Cryo Cicin Mage combo.' }
+              ]
+            },
+            {
+              name: '10-2',
+              halves: [
+                { label:'First Half', text:'Abyss Lector — Violet Lightning.' },
+                { label:'Second Half', text:'Abyss Herald — Wicked Torrents (Hydro shield phase).' }
+              ]
+            },
+            {
+              name: '10-3',
+              halves: [
+                { label:'First Half', text:'Eremite elite squad — Floral Ring-Dancer, Desert Clearwater, Galehunter.' },
+                { label:'Second Half', text:'Consecrated Scorpion + Consecrated Flying Serpent.' }
+              ]
+            }
+          ],
+          strategy: [
+            '<strong>10-2 First Half:</strong> Electro Lector — bring <strong>Cryo or Pyro</strong> to break Electro shield fast. Dendro also works.',
+            '<strong>10-2 Second Half:</strong> Hydro Herald — bring <strong>Dendro or Cryo</strong> for the Hydro shield. Dendro (Nahida) is fastest.',
+            'Mirror Maiden traps can be dodged or i-framed. Kill the Cicin Mage first.',
+            'Consecrated Beasts hit hard — bring a shielder or healer.',
+            '<strong>Recommended teams:</strong> Hyperbloom, National variants, Ayaka Freeze.'
+          ],
+          recommendedElements: ['dendro','cryo','pyro','hydro']
+        },
+        {
+          id: 11,
+          name: 'Suspicious Sanctuary',
+          difficulty: 'medium',
+          difficultyLabel: 'Moderate',
+          enemiesSummary: 'Kairagi, Rifthounds, Specters, Abyss Lectors, Primo Geovishap',
+          chambers: [
+            {
+              name: '11-1',
+              halves: [
+                { label:'Monolith Defense', text:'Waves of Hilichurls, Mitachurls, and Specters. Prioritize ranged enemies and Specters that attack the monolith.' }
+              ]
+            },
+            {
+              name: '11-2',
+              halves: [
+                { label:'First Half', text:'2 Kairagi (Dancing Thunder + Fiery Might) + Nobushi mobs.' },
+                { label:'Second Half', text:'Rifthound Whelps + Rifthounds (Electro and Geo variants).' }
+              ]
+            },
+            {
+              name: '11-3',
+              halves: [
+                { label:'First Half', text:'Primo Geovishap.' },
+                { label:'Second Half', text:'Abyss Lector — Fathomless Flames (Pyro shield) + Abyss Herald — Frost Fall (Cryo shield).' }
+              ]
+            }
+          ],
+          strategy: [
+            '<strong>Monolith defense:</strong> bring grouping (Kazuha/Sucrose/Venti). Aggro enemies away from the monolith. Kill ranged Specters first.',
+            '<strong>Kairagi:</strong> kill both simultaneously. If one dies, the other heals and enters rage mode (immune to CC).',
+            '<strong>Rifthounds:</strong> apply Corrosion (damages whole party through shields). Bring a <strong>healer</strong> — Bennett, Kokomi, Baizhu, or Jean.',
+            '<strong>Primo Geovishap:</strong> bring a shielder (Zhongli). Reflecting its Primordial Shower with a shield deals massive damage back.',
+            '<strong>11-3 Second Half:</strong> Pyro Lector + Cryo Herald. Bring <strong>Hydro</strong> for the Pyro shield and <strong>Pyro</strong> for the Cryo shield. Xiangling double-duty is excellent here.'
+          ],
+          recommendedElements: ['anemo','geo','hydro','pyro']
+        },
+        {
+          id: 12,
+          name: 'Abyssal Descent',
+          difficulty: 'hard',
+          difficultyLabel: 'Very Hard',
+          enemiesSummary: 'Consecrated Beasts, Aeonblight Drake, PMA, Icewind Suite',
+          chambers: [
+            {
+              name: '12-1 — The Final Threshold',
+              halves: [
+                { label:'First Half', text:'Consecrated Red Vulture (Pyro) + Consecrated Scorpion (Electro). Each has ~900K HP. Massive elemental damage, aggressive gap-closers.' },
+                { label:'Second Half', text:'Consecrated Flying Serpent (Anemo) + Consecrated Scorpion (Electro). The Serpent creates wind tunnels that pull your character. ~850K HP each.' }
+              ]
+            },
+            {
+              name: '12-2 — Aeonwake Arena',
+              halves: [
+                { label:'First Half', text:'Aeonblight Drake (~1.2M HP). Starts airborne. Shoot wing weak spots with a bow to ground it. Grounded phase lasts ~15s.' },
+                { label:'Second Half', text:'Perpetual Mechanical Array (~1.4M HP). Summons 4 Ruin Sentinels mid-fight — kill the marked one (golden aura) to stun the boss.' }
+              ]
+            },
+            {
+              name: '12-3 — Frostwind Ballroom',
+              halves: [
+                { label:'First Half', text:'Dirge of Coppelia (Cryo dancer, ~1.3M HP). Rapid spinning blade attacks, Cryo fields, persistent Cryo aura.' },
+                { label:'Second Half', text:'Nemesis of Coppelius (Anemo clockwork, ~1.4M HP). Homing gear projectiles, Anemo vortexes, devastating time-freeze AoE. MUST kill both within ~15s or survivor heals 40% HP and gains +50% ATK.' }
+              ]
+            }
+          ],
+          strategy: [
+            'Consecrated Beasts cannot be CC\'d — bring a strong shielder (Zhongli) or damage reduction (Xingqiu, Dehya).',
+            '<strong>Aeonblight Drake:</strong> a <strong>bow character</strong> is mandatory to shoot wing weak spots. Without one, you waste 20-30s.',
+            '<strong>PMA:</strong> pure DPS check. The stunned phase is your biggest damage window — align your bursts.',
+            '<strong>Coppelia (Cryo):</strong> bring Pyro DPS — Arlecchino, Hu Tao shred through. Avoid getting frozen by staying mobile.',
+            '<strong>Coppelius (Anemo):</strong> 70% Anemo RES — do NOT use Anemo DPS. Geo and Pyro work best.',
+            'Spread damage evenly between Coppelia and Coppelius. When one hits ~15%, switch targets.',
+            '<strong>Best comps overall:</strong> Neuvillette Premium, Arlecchino Vape, Alhaitham Quickbloom, Raiden National.'
+          ],
+          recommendedElements: ['pyro','hydro','dendro','geo']
+        }
+      ],
+      usageRates: [
+        { rank:1,  name:'Furina',        el:'hydro',  st:5, rate:96.2, own:88, trend:'up',   change:1.2 },
+        { rank:2,  name:'Neuvillette',   el:'hydro',  st:5, rate:87.4, own:79, trend:'up',   change:3.1 },
+        { rank:3,  name:'Kazuha',        el:'anemo',  st:5, rate:82.7, own:91, trend:'up',   change:0.5 },
+        { rank:4,  name:'Zhongli',       el:'geo',    st:5, rate:78.9, own:94, trend:'up',   change:2.8 },
+        { rank:5,  name:'Arlecchino',    el:'pyro',   st:5, rate:74.3, own:62, trend:'up',   change:5.2 },
+        { rank:6,  name:'Nahida',        el:'dendro', st:5, rate:71.1, own:86, trend:'down', change:2.1 },
+        { rank:7,  name:'Yelan',         el:'hydro',  st:5, rate:65.8, own:74, trend:'down', change:1.4 },
+        { rank:8,  name:'Bennett',       el:'pyro',   st:4, rate:62.5, own:99, trend:'down', change:3.7 },
+        { rank:9,  name:'Xiangling',     el:'pyro',   st:4, rate:51.3, own:100,trend:'down', change:5.8 },
+        { rank:10, name:'Baizhu',        el:'dendro', st:5, rate:44.2, own:41, trend:'up',   change:8.3 }
+      ],
+      recommendedTeams: [
+        {
+          name: 'Neuvillette Premium',
+          tier: 'SS',
+          tierClass: 'tier-ss',
+          members: [
+            { name:'Neuvillette', el:'hydro' },
+            { name:'Furina',      el:'hydro' },
+            { name:'Kazuha',      el:'anemo' },
+            { name:'Baizhu',      el:'dendro' }
+          ],
+          bestFor: 'Floor 12-1 First Half, 12-2 First Half, 12-3 Any Half',
+          desc: 'The undisputed king of this Abyss cycle. Neuvillette\'s charged attack hits through Consecrated Beast poise. Furina provides permanent ATK from the Lunar Blessing via HP drain. Baizhu gives party-wide heal to stack Fanfare instantly and provides interrupt resistance (if C1 Neuv is unavailable). Kazuha provides VV shred and grouping for the Drake trash phase.'
+        },
+        {
+          name: 'Arlecchino Vaporize',
+          tier: 'SS',
+          tierClass: 'tier-ss',
+          members: [
+            { name:'Arlecchino', el:'pyro' },
+            { name:'Yelan',      el:'hydro' },
+            { name:'Bennett',    el:'pyro' },
+            { name:'Zhongli',    el:'geo' }
+          ],
+          bestFor: 'Floor 12-1 Second Half, 12-3 First Half',
+          desc: 'Arlecchino melts 12-3 Coppelia effortlessly. Her Bond of Life mechanic has perfect synergy with the Lunar Blessing — every heal attempt converts to BoL, triggering ATK stacks. Yelan provides off-field Hydro for Vaporize and a ramping DMG bonus. Zhongli ensures Arlecchino doesn\'t get one-shot while she can\'t be healed. Bennett is used for ATK buff only.'
+        },
+        {
+          name: 'Alhaitham Quickbloom',
+          tier: 'S',
+          tierClass: 'tier-s',
+          members: [
+            { name:'Alhaitham',    el:'dendro' },
+            { name:'Xingqiu',      el:'hydro' },
+            { name:'Kuki Shinobu', el:'electro' },
+            { name:'Nahida',       el:'dendro' }
+          ],
+          bestFor: 'Floor 12-2 Second Half, Floor 12-1 First Half',
+          desc: 'Hyperbloom shreds the Perpetual Mechanical Array — its static hitbox soaks every bloom missile. Kuki\'s constant HP drain/gain from her Skill procs all 3 ATK stacks from the blessing permanently. Xingqiu provides damage reduction + interrupt resistance which is critical against Consecrated Beasts. Budget-friendly — Nahida can be replaced with Dendro MC.'
+        },
+        {
+          name: 'Hu Tao Double Hydro',
+          tier: 'S',
+          tierClass: 'tier-s',
+          members: [
+            { name:'Hu Tao',   el:'pyro' },
+            { name:'Yelan',    el:'hydro' },
+            { name:'Xingqiu',  el:'hydro' },
+            { name:'Zhongli',  el:'geo' }
+          ],
+          bestFor: 'Floor 12-3 Second Half, Floor 12-2 Second Half',
+          desc: 'Hu Tao\'s HP fluctuation activates the blessing constantly. She stays below 50% HP for permanent Pyro DMG bonus. Double Hydro ensures consistent Vaporize on every charged attack. Xingqiu + Zhongli provide near-immortality. Strong against Coppelius (Anemo side of 12-3) since Geo and Pyro bypass its high Anemo resistance.'
+        },
+        {
+          name: 'Raiden National',
+          tier: 'S',
+          tierClass: 'tier-s',
+          members: [
+            { name:'Raiden Shogun', el:'electro' },
+            { name:'Xiangling',     el:'pyro' },
+            { name:'Xingqiu',       el:'hydro' },
+            { name:'Bennett',       el:'pyro' }
+          ],
+          bestFor: 'Floor 12-2 Second Half, Floor 12-1 First Half',
+          desc: 'The eternal top-tier team. Raiden drives Xiangling + Xingqiu reactions while batterying the entire team. Bennett\'s healing procs the blessing while snapshotting Xiangling\'s Pyronado under his ATK buff. Overload knocks Consecrated Beasts around despite their poise. Excellent against PMA\'s stun phase — burst window aligns perfectly. Budget-friendly.'
+        },
+        {
+          name: 'Navia Double Pyro',
+          tier: 'A',
+          tierClass: 'tier-a',
+          members: [
+            { name:'Navia',     el:'geo' },
+            { name:'Xiangling', el:'pyro' },
+            { name:'Bennett',   el:'pyro' },
+            { name:'Zhongli',   el:'geo' }
+          ],
+          bestFor: 'Floor 12-3 Second Half, Floor 12-1 Second Half',
+          desc: 'Navia\'s massive shotgun blasts (200K+ per Skill) chunk bosses. Geo resonance + Zhongli shred provides constant -20% Geo RES on enemies. Double Pyro resonance gives +25% ATK, stacking with the blessing\'s +60% for massive ATK saturation. Coppelius (Anemo) has low Geo RES, making Navia hit even harder on 12-3.'
+        }
+      ],
+      tips: [
+        {
+          icon: 'fa-clock',
+          title: 'Stack Blessing Before Starting',
+          body: 'On Floor 12, bring a healer and let Furina drain/heal your team before engaging enemies. Stacking the blessing\'s +60% ATK before the chamber starts gives you a massive opening DPS window. You can also use Bennett\'s burst to pre-stack.'
+        },
+        {
+          icon: 'fa-shield-halved',
+          title: 'Survivability Over Damage',
+          body: 'A dead DPS deals zero damage. Floor 12 Consecrated Beasts can two-shot squishy characters. If you\'re dying, swap an offensive support (Kazuha) for a shielder (Zhongli) or healer (Baizhu, Jean). The DPS loss from one slot is far less than restarting the chamber.'
+        },
+        {
+          icon: 'fa-arrows-spin',
+          title: 'Chamber Reset Trick',
+          body: 'When retrying a chamber, the game remembers your characters\' HP and energy from the start of the chamber — not from your last attempt. If you messed up 12-3, you can restart from 12-1 with full HP and energy. Use this to fine-tune your clear.'
+        },
+        {
+          icon: 'fa-bolt',
+          title: 'Energy Management Between Chambers',
+          body: 'In 12-2 and 12-3, you can stall by leaving one weak enemy alive while you funnel energy particles to your Burst-dependent characters. Furina, Kazuha, and Xiangling all appreciate going into the next chamber with full energy.'
+        },
+        {
+          icon: 'fa-crosshairs',
+          title: 'Positioning Exploits',
+          body: 'Most enemies have spawn patterns you can exploit. For 12-1 Consecrated Beasts, hug the arena edge — they often dash off the map and teleport back, wasting their own time. For PMA, stand near the edge of the arena during the Sentinel phase; the sentinels spawn closer and group up naturally.'
+        },
+        {
+          icon: 'fa-droplet',
+          title: 'Hydro Is King This Cycle',
+          body: 'Neuvillette, Furina, Yelan, and Xingqiu are all top-10 usage rate characters. Hydro units benefit from the HP-drain blessing, enable the strongest reactions (Vaporize, Hyperbloom), and have the best sustained DPS. If you only have one fully built team, make it Hydro-centric.'
+        },
+        {
+          icon: 'fa-leaf',
+          title: 'Dendro Shield-Breaking Secrets',
+          body: 'Against the Hydro Herald (10-2) and other shielded enemies: Dendro is the fastest Hydro-shield breaker by far. Nahida\'s normal attacks apply 1.5U of Dendro (most catalysts apply 1U). A single Nahida E + NA rotation can shred a Hydro shield in under 5 seconds.'
+        },
+        {
+          icon: 'fa-wind',
+          title: 'Anemo CC and the 20-Second Rule',
+          body: 'Grouping abilities (Kazuha E, Sucrose Q, Venti Q) are most effective in the first 20 seconds before enemies spread out and aggro onto you individually. On chambers with multiple small enemies (9-1, 10-1, 11-1 monolith), use your grouper immediately upon spawn.'
+        },
+        {
+          icon: 'fa-star',
+          title: '4-Stars Are Viable — Even on Floor 12',
+          body: 'Bennett, Xiangling, Xingqiu, and Kuki Shinobu are all 4-star characters that clear Floor 12 every cycle. Sucrose, Fischl, and Chevreuse (at C6) can also pull their weight. Don\'t feel pressured to pull limited 5-stars — good artifacts and correct team synergy matter more.'
+        },
+        {
+          icon: 'fa-hourglass-half',
+          title: 'Timer Awareness',
+          body: 'Each chamber has a 3-minute timer for 3 stars. If you clear 12-1 with 8:15 remaining, you have 1m45s left for 12-2 and 12-3 combined. Keep an eye on the clock — if you\'re over 90 seconds on a chamber, consider resetting and optimizing your rotation.'
+        },
+        {
+          icon: 'fa-burst',
+          title: 'Burst i-Frames Save Runs',
+          body: 'Every character\'s Burst animation grants invincibility frames (~1-2 seconds). You can use this to dodge otherwise-fatal attacks: PMA\'s laser sweep, Coppelia\'s spinning blade combo, and the Drake\'s missile barrage. Save a Burst if you know a big attack is coming.'
+        },
+        {
+          icon: 'fa-people-arrows',
+          title: 'Split Your Best Supports',
+          body: 'If you have only one Kazuha or one Zhongli, put them on the half that needs them most. Consecrated Beasts (12-1) and Coppelia (12-3) demand shielding. Aeonblight Drake (12-2) demands a bow. Plan your two teams together, not separately. The Spiral Abyss is a resource allocation puzzle as much as a combat challenge.'
+        }
+      ]
+    };
+
+    /* ================================================================
+       RENDER FUNCTIONS
+       ================================================================ */
+
+    function elementTag(el) {
+      const color = ELEMENT_COLORS[el] || '#888';
+      const icon = ELEMENT_ICONS[el] || 'fa-question';
+      return '<span class="element-tag" style="background:' + color + ';"><i class="fa-solid ' + icon + '"></i> ' + el.charAt(0).toUpperCase() + el.slice(1) + '</span>';
+    }
+
+    function starString(stars) {
+      var s = '';
+      for (var i = 0; i < stars; i++) s += '★';
+      return '<span class="stars">' + s + '</span>';
+    }
+
+    /* ── Stats Row ── */
+    function renderStatsRow() {
+      var s = SPIRAL_ABYSS_CYCLE.stats;
+      var html = '';
+      html += '<div class="abyss-stat-card reveal"><div class="stat-value"><i class="fa-solid fa-skull" style="font-size:1rem;margin-right:4px;"></i> ' + s.primogems + '</div><div class="stat-label">Primogems from 36 Stars</div></div>';
+      html += '<div class="abyss-stat-card reveal"><div class="stat-value">' + s.floor12TotalHP + '</div><div class="stat-label">Total HP on Floor 12-3</div></div>';
+      html += '<div class="abyss-stat-card reveal"><div class="stat-value">' + s.clearRate36Star + '</div><div class="stat-label">36-Star Clear Rate</div></div>';
+      html += '<div class="abyss-stat-card reveal"><div class="stat-value">' + s.mostOwnedCon + '</div><div class="stat-label">Most Owned Constellation</div></div>';
+      document.getElementById('abyssStatsRow').innerHTML = html;
+    }
+
+    /* ── Floor Accordion ── */
+    function renderFloors() {
+      var floors = SPIRAL_ABYSS_CYCLE.floors;
+      var html = '';
+      for (var i = 0; i < floors.length; i++) {
+        var f = floors[i];
+        var badgeClass = f.difficulty === 'hard' ? 'hard' : (f.difficulty === 'medium' ? 'medium' : 'easy');
+        var floorId = f.id === 12 ? 'F12' : 'F' + f.id;
+
+        html += '<div class="accordion-item">';
+        html += '<button class="accordion-trigger" aria-expanded="false">';
+        html += '<span class="accordion-floor-num">' + floorId + '</span>';
+        html += '<div class="accordion-floor-info">';
+        html += '<strong style="display:flex;align-items:center;gap:8px;">';
+        html += 'Floor ' + f.id + ' — ' + f.name + ' ';
+        html += '<span class="floor-badge ' + badgeClass + '">' + f.difficultyLabel + '</span>';
+        html += '</strong>';
+        html += '<div class="floor-enemies">' + f.enemiesSummary + '</div>';
+        html += '</div>';
+        html += '<i class="fa-solid fa-chevron-down accordion-chevron"></i>';
+        html += '</button>';
+
+        html += '<div class="accordion-panel">';
+        html += '<div class="accordion-panel-grid">';
+
+        // Left column: enemy details
+        html += '<div class="panel-col">';
+        html += '<h4><i class="fa-solid fa-crosshairs"></i> Enemies &amp; Chamber Layout</h4>';
+        for (var c = 0; c < f.chambers.length; c++) {
+          var ch = f.chambers[c];
+          html += '<p><strong>' + ch.name + ':</strong></p>';
+          for (var h = 0; h < ch.halves.length; h++) {
+            html += '<span class="chamber-label">' + ch.halves[h].label + '</span><br>';
+            html += ch.halves[h].text + '<br>';
+          }
+        }
+        html += '</div>';
+
+        // Right column: strategy & recommended elements
+        html += '<div class="panel-col">';
+        html += '<h4><i class="fa-solid fa-shield-halved"></i> Strategy &amp; Teams</h4>';
+        html += '<ul>';
+        for (var s = 0; s < f.strategy.length; s++) {
+          html += '<li>' + f.strategy[s] + '</li>';
+        }
+        html += '</ul>';
+        if (f.recommendedElements && f.recommendedElements.length > 0) {
+          html += '<div class="element-tag-row">';
+          for (var e = 0; e < f.recommendedElements.length; e++) {
+            html += elementTag(f.recommendedElements[e]);
+          }
+          html += '</div>';
+        }
+        html += '</div>';
+
+        html += '</div></div>';
+        html += '</div>';
+      }
+      document.getElementById('abyssAccordion').innerHTML = html;
+    }
+
+    /* ── Usage Rate Table ── */
+    function renderUsageTable() {
+      var data = SPIRAL_ABYSS_CYCLE.usageRates;
+      var html = '<table class="usage-table"><thead><tr>';
+      html += '<th>#</th><th>Character</th><th>Element</th><th>Rarity</th><th>Usage Rate</th><th>Ownership</th><th>Trend</th>';
+      html += '</tr></thead><tbody>';
+
+      for (var i = 0; i < data.length; i++) {
+        var d = data[i];
+        var trendHtml = d.trend === 'up'
+          ? '<span style="color:var(--success);">▲ +' + d.change + '%</span>'
+          : '<span style="color:var(--danger);">▼ -' + d.change + '%</span>';
+
+        html += '<tr>';
+        html += '<td class="usage-rank">' + d.rank + '</td>';
+        html += '<td><strong>' + d.name + '</strong></td>';
+        html += '<td>' + elementTag(d.el) + '</td>';
+        html += '<td>' + starString(d.st) + '</td>';
+        html += '<td><strong>' + d.rate + '%</strong><div class="usage-bar-bg"><div class="usage-bar-fill" style="width:' + d.rate + '%;"></div></div></td>';
+        html += '<td><span class="owner-chip">' + d.own + '% own</span></td>';
+        html += '<td>' + trendHtml + '</td>';
+        html += '</tr>';
+      }
+
+      html += '</tbody></table>';
+      document.getElementById('usageTableWrap').innerHTML = html;
+    }
+
+    /* ── Recommended Teams ── */
+    function renderTeams() {
+      var teams = SPIRAL_ABYSS_CYCLE.recommendedTeams;
+      var html = '';
+
+      for (var i = 0; i < teams.length; i++) {
+        var t = teams[i];
+        html += '<div class="team-card reveal">';
+        html += '<span class="team-tier ' + t.tierClass + '">' + t.tier + ' Tier</span>';
+        html += '<h3>' + t.name + '</h3>';
+        html += '<div class="team-members">';
+        for (var m = 0; m < t.members.length; m++) {
+          var mem = t.members[m];
+          var dotColor = ELEMENT_COLORS[mem.el] || '#888';
+          html += '<span class="team-member-chip"><span class="member-dot" style="background:' + dotColor + ';"></span> ' + mem.name + '</span>';
+        }
+        html += '</div>';
+        html += '<p class="team-desc"><strong>Best for:</strong> ' + t.bestFor + '.<br>' + t.desc + '</p>';
+        html += '</div>';
+      }
+
+      document.getElementById('recommendedTeams').innerHTML = html;
+    }
+
+    /* ── Tips & Tricks ── */
+    function renderTips() {
+      var tips = SPIRAL_ABYSS_CYCLE.tips;
+      var html = '';
+
+      for (var i = 0; i < tips.length; i++) {
+        var tip = tips[i];
+        html += '<div class="tip-card reveal">';
+        html += '<div class="tip-icon"><i class="fa-solid ' + tip.icon + '"></i></div>';
+        html += '<div class="tip-content">';
+        html += '<h4>' + tip.title + '</h4>';
+        html += '<p>' + tip.body + '</p>';
+        html += '</div>';
+        html += '</div>';
+      }
+
+      document.getElementById('tipsGrid').innerHTML = html;
+    }
+
+    /* ── Boot ── */
+    renderStatsRow();
+    renderFloors();
+    renderUsageTable();
+    renderTeams();
+    renderTips();
+
+    /* ================================================================
+       STARFIELD CANVAS
+       ================================================================ */
+    (function() {
+      var canvas = document.getElementById('starfield');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var stars = [];
+      var STAR_COUNT = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      function initStars() {
+        stars = [];
+        for (var i = 0; i < STAR_COUNT; i++) {
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.6 + 0.4,
+            baseAlpha: Math.random() * 0.6 + 0.2,
+            alpha: 0,
+            twinkleSpeed: Math.random() * 0.02 + 0.005,
+            twinkleOffset: Math.random() * Math.PI * 2,
+            hue: Math.random() < 0.15 ? 42 + Math.random() * 8 : 0
+          });
+        }
+      }
+
+      function draw(timestamp) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < stars.length; i++) {
+          var s = stars[i];
+          s.alpha = s.baseAlpha + Math.sin(timestamp * s.twinkleSpeed + s.twinkleOffset) * 0.25;
+          s.alpha = Math.max(0.05, Math.min(1, s.alpha));
+          var hsl = s.hue > 0
+            ? 'hsla(' + s.hue + ', 60%, 70%, ' + s.alpha + ')'
+            : 'rgba(200,200,220,' + s.alpha + ')';
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = hsl;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+
+      window.addEventListener('resize', function() { resize(); initStars(); });
+      resize();
+      initStars();
+      requestAnimationFrame(draw);
+    })();
+
+    /* ================================================================
+       SCROLL REVEAL
+       ================================================================ */
+    (function() {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+    })();
+
+    /* ================================================================
+       NAV SCROLL EFFECT
+       ================================================================ */
+    (function() {
+      var nav = document.getElementById('navbar');
+      if (!nav) return;
+      window.addEventListener('scroll', function() {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+    })();
+
+    /* ================================================================
+       MOBILE NAV TOGGLE
+       ================================================================ */
+    (function() {
+      var toggle = document.getElementById('navToggle');
+      var links = document.getElementById('navLinks');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function() {
+        links.classList.toggle('open');
+        var icon = toggle.querySelector('i');
+        if (icon) {
+          icon.classList.toggle('fa-bars');
+          icon.classList.toggle('fa-xmark');
+        }
+      });
+    })();
+
+    /* ================================================================
+       ACCORDION LOGIC
+       ================================================================ */
+    (function() {
+      var accordion = document.getElementById('abyssAccordion');
+      if (!accordion) return;
+
+      accordion.addEventListener('click', function(e) {
+        var trigger = e.target.closest('.accordion-trigger');
+        if (!trigger) return;
+
+        var item = trigger.closest('.accordion-item');
+        if (!item) return;
+
+        var allItems = accordion.querySelectorAll('.accordion-item');
+        allItems.forEach(function(other) {
+          if (other !== item) {
+            other.classList.remove('open');
+            var otherTrigger = other.querySelector('.accordion-trigger');
+            if (otherTrigger) otherTrigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        var isOpen = item.classList.toggle('open');
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+    })();
+
+    /* ================================================================
+       RE-OBSERVE DYNAMICALLY RENDERED REVEAL ELEMENTS
+       ================================================================ */
+    (function() {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+      // Wait for DOM render, then observe all .reveal elements
+      setTimeout(function() {
+        document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+      }, 100);
+    })();
+  </script>
+
+</body>
+</html>
