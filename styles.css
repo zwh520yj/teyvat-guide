@@ -46,14 +46,11 @@ body {
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
   padding-top:var(--nav-height);
-  /* 背景：深色底 + 固定原神官方插画 + 暗色叠加 */
+  /* 背景：深色底 + 暗色叠加（各页面通过 page-specific 样式设置角色背景） */
   background:
-    linear-gradient(180deg, rgba(4,4,13,0.65) 0%, rgba(4,4,13,0.55) 50%, rgba(4,4,13,0.70) 100%),
-    url('https://upload-bbs.miyoushe.com/upload/2022/11/28/17949827/f95fec5ff14e02ebd6d43be667cb2987_1125525301198023278.jpg?x-oss-process=image/resize,s_600/quality,q_80/auto-orient,0/interlace,1/format,jpg');
+    linear-gradient(180deg, rgba(4,4,13,0.78) 0%, rgba(4,4,13,0.60) 50%, rgba(4,4,13,0.82) 100%);
   background-attachment: fixed;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: var(--bg-deep);
 }
 a { color:var(--gold-light); text-decoration:none; }
 img { max-width:100%; display:block; }
@@ -332,10 +329,19 @@ h1,h2,h3,h4 { font-family:'Cinzel',serif; }
   font-size:4rem;font-weight:900;color:#fff;
   transition:filter 0.4s;
 }
+/* Ensure image containers have positioning for absolute children */
+.char-card-img,
+.tier-chip-avatar,
+.banner-char-avatar,
+.home-team-slot-avatar,
+.build-img-wrap,
+.wpn-img-side { position:relative; overflow:hidden; }
 .char-card:hover .char-card-img { filter:brightness(1.08); }
 .char-card-img img {
-  position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:none;
+  position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;
 }
+img.img-ok { /* loaded successfully */ }
+img.img-fail { opacity:0 !important; visibility:hidden !important; }
 .char-card-body { padding:1rem; }
 .char-card-body h3 { font-size:1rem;font-weight:700; }
 .char-card-detail { display:none;padding:0 1rem 1rem;border-top:1px solid var(--border-subtle);margin-top:0.75rem;animation:fadeInUp 0.35s var(--ease-out); }

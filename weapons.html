@@ -18,6 +18,17 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
 <style>
+  /* ── Page Background: Kamisato Ayaka ── */
+  body {
+    background:
+      linear-gradient(180deg, rgba(4,4,13,0.72) 0%, rgba(4,4,13,0.50) 50%, rgba(4,4,13,0.78) 100%),
+      url('https://genshin-impact.fandom.com/wiki/Special:FilePath/Kamisato_Ayaka_Card.png');
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-color: var(--bg-deep);
+  }
   .hero-mini { position:relative;z-index:1;text-align:center;padding:3rem 2rem 2rem; }
   .hero-mini::before { content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(201,169,110,0.06) 0%,transparent 70%);pointer-events:none; }
   .hero-mini-content { position:relative;z-index:2;max-width:650px;margin:0 auto; }

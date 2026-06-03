@@ -21,6 +21,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
   <style>
+    /* ── Page Background: Kaedehara Kazuha ── */
+    body {
+      background:
+        linear-gradient(180deg, rgba(4,4,13,0.72) 0%, rgba(4,4,13,0.50) 50%, rgba(4,4,13,0.78) 100%),
+        url('https://genshin-impact.fandom.com/wiki/Special:FilePath/Kaedehara_Kazuha_Card.png');
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      background-color: var(--bg-deep);
+    }
     /* ===== CHARACTERS PAGE SPECIFIC ===== */
 
     /* Hero */
@@ -450,11 +461,6 @@
         return el ? el.name : elKey;
       }
 
-      function getImageUrl(name) {
-        // Replace spaces with underscores for Enka CDN
-        return 'https://enka.network/ui/UI_AvatarIcon_Side_' + name.replace(/\s+/g, '_') + '.png';
-      }
-
       function buildStars(count) {
         return '★'.repeat(count);
       }
@@ -467,9 +473,6 @@
         const elColor = getElementColor(el);
         const elIcon = getElementIcon(el);
         const elName = getElementName(el);
-        const imgUrl = getImageUrl(ch.name);
-        const initial = ch.name.charAt(0).toUpperCase();
-
         // Talent priority as string
         const talentsStr = (ch.tal && Array.isArray(ch.tal)) ? ch.tal.join(' → ') : '';
 

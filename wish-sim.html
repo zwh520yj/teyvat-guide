@@ -13,6 +13,17 @@
   <link rel="stylesheet" href="styles.css">
 
   <style>
+    /* ── Page Background: Furina ── */
+    body {
+      background:
+        linear-gradient(180deg, rgba(4,4,13,0.72) 0%, rgba(4,4,13,0.50) 50%, rgba(4,4,13,0.78) 100%),
+        url('https://genshin-impact.fandom.com/wiki/Special:FilePath/Furina_Card.png');
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      background-color: var(--bg-deep);
+    }
     /* ============================================================
        WISH SIMULATOR — Page Styles
        ============================================================ */
@@ -859,19 +870,36 @@
     // Alternate: 'https://api.ambr.top/assets/UI/'
 
     function getCharIconName(name) {
+      // Use global charIconName from utils.js (has correct Enka naming + mapping)
+      if (typeof charIconName === 'function') return charIconName(name);
+      // Fallback if utils.js didn't load
       if (CHAR_ICON_MAP[name]) return CHAR_ICON_MAP[name];
-      // Fallback: remove spaces, special chars
-      return name.replace(/[^a-zA-Z]/g, '');
+      return name.replace(/\s+/g, '_').replace(/[']/g, '').replace(/[()]/g, '');
     }
 
     function getCharImageUrl(name) {
+      // Use global charImgUrl (genshin.jmp.blue primary) if available
+      if (typeof charImgUrl === 'function') return charImgUrl(name);
       const iconName = getCharIconName(name);
-      // Try Side portrait first (better aspect for circles)
       return IMG_CDN_BASE + 'UI_AvatarIcon_Side_' + iconName + '.png';
     }
 
     function tryLoadCharImage(imgEl, charName, fallbackFn) {
       if (!charName) { if (fallbackFn) fallbackFn(); return; }
+      // Use global multi-CDN charUrls for comprehensive retry
+      if (typeof charUrls === 'function') {
+        var urls = charUrls(charName);
+        var idx = 0;
+        imgEl.src = urls[0];
+        imgEl.onload = function() { imgEl.classList.add('loaded'); };
+        imgEl.onerror = function() {
+          idx++;
+          if (idx < urls.length) { imgEl.src = urls[idx]; }
+          else { if (fallbackFn) fallbackFn(); }
+        };
+        return;
+      }
+      // Fallback to original logic
       const url = getCharImageUrl(charName);
       imgEl.src = url;
       imgEl.onload = function() {
